@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(816, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9709 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9928 $"):sub(12, -3))
 mod:SetCreatureID(69078, 69132, 69134, 69131)--69078 Sul the Sandcrawler, 69132 High Prestess Mar'li, 69131 Frost King Malakk, 69134 Kazra'jin --Adds: 69548 Shadowed Loa Spirit,
 mod:SetQuestID(32746)
 mod:SetZone()
@@ -197,6 +197,8 @@ function mod:SPELL_CAST_START(args)
 		warnTwistedFate:Show()
 		specWarnTwistedFate:Show()
 		timerTwistedFateCD:Start()
+	elseif args.spellId == 136990 then
+		timerFrostBiteCD:Schedule(1.5)
 	end
 end
 
@@ -292,7 +294,6 @@ function mod:SPELL_AURA_APPLIED(args)
 		if self.Options.SetIconOnFrostBite then
 			self:SetIcon(args.destName, 6)--Square
 		end
-		timerFrostBiteCD:Start()
 		if args:IsPlayer() then
 			specWarnFrostBite:Show()
 			timerFrostBite:Start()
