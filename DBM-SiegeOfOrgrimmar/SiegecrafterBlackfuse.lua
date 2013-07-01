@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(865, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9930 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9936 $"):sub(12, -3))
 mod:SetCreatureID(71504)--71591 Automated Shredder
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -142,7 +142,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 	elseif args.spellId == 143642 then--Missile Launching
 		missileCount = missileCount + 1
 		warnShockwaveMissile:Show(missileCount)
-		if MissileCount <= 9 then--TODO< verify this
+		if missileCount <= 9 then--TODO< verify this
 			timerShockwaveMissileCD:Start()
 		end
 	elseif args.spellId == 144040 then

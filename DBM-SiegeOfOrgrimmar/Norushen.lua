@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9892 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9939 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -84,8 +84,10 @@ function mod:SPELL_CAST_START(args)
 		specWarnTearReality:Show()
 --		timerTearRealityCD:Start()
 	elseif args.spellId == 144479 then
-		warnExpelCorruption:Show()
-		specWarnExpelCorruption:Show()
+		print("DBM DEBUG: Expel corruption cast. Tell dbm guy if you're dps, tank or healer")
+--		warnExpelCorruption:Show()
+--		specWarnExpelCorruption:Show()
+
 --		timerTearExpelCorruptionCD:Start()
 	elseif args.spellId == 144654 then
 		warnBurstOfCorruption:Show()

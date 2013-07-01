@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9929 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9937 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -222,6 +222,6 @@ function mod:SPELL_AURA_REMOVED(args)
 	if args.spellId == 144089 and self.Options.SetIconOnToxicMists then
 		self:SetIcon(args.destName, 0)
 	elseif args.spellId == 144215 then
-		timerFroststormStrike:Cancel(args.destName)
+		timerFroststormStrikeCD:Cancel(args.destName)
 	end
 end

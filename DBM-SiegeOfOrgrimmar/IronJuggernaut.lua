@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9932 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9937 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -66,7 +66,7 @@ function mod:MortarBarrageTarget(targetname, uId)
 			end
 			local inRange = DBM.RangeCheck:GetDistance("player", x, y)
 			if inRange and inRange < 9 then
-				specWarnMortarBarrageNear:Show(args.destName)
+				specWarnMortarBarrageNear:Show(targetname)
 			end
 		end
 	end
