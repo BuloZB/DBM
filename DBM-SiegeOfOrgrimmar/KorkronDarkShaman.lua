@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9893 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9929 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -113,7 +113,10 @@ do
 end
 
 function mod:FoulStreamTarget(targetname, uId)
-	if not targetname then return end
+	if not targetname then
+		print("DBM DEBUG: FoulStreamTarget Scan failed")
+		return
+	end
 	if self:IsTanking(uId) then--Never target tanks, so if target is tank, that means scanning failed.
 		scanFailed = true
 		specWarnFoulStream:Show()

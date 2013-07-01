@@ -40,7 +40,7 @@
 
 
 
-local revision =("$Revision: 9917 $"):sub(12, -3)
+local revision =("$Revision: 9931 $"):sub(12, -3)
 local FrameTitle = "DBM_GUI_Option_"	-- all GUI frames get automatically a name FrameTitle..ID
 
 local PanelPrototype = {}
@@ -2466,7 +2466,7 @@ do
 					top3header:SetText(PLAYER_DIFFICULTY3)
 					bottom1header:SetText(PLAYER_DIFFICULTY2)
 					bottom2header:SetText(PLAYER_DIFFICULTY2)
-					bottom3header:SetText("Flex")--Change to global in 5.4
+					bottom3header:SetText(PLAYER_DIFFICULTY4 or "Flexible")--Remove extra string in 5.4 live
 					area.frame:SetHeight( area.frame:GetHeight() + L.FontHeight*10 )
 				end
 
