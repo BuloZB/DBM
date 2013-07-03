@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9947 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9951 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -181,6 +181,7 @@ local function CheckBosses(GUID)
 	for i = 1, 5 do
 		local vulnerable = false
 		if UnitExists("boss"..i) and not activeBossGUIDS[UnitGUID("boss"..i)] then--Check if new units exist we haven't detected and added yet.
+			activeBossGUIDS[UnitGUID("boss"..i)] = true
 			activatedTargets[#activatedTargets + 1] = UnitName("boss"..i)
 			--Activation Controller
 			local cid = mod:GetCIDFromGUID(UnitGUID("boss"..i))
