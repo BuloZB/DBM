@@ -131,6 +131,7 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
+	bloodRageEnds	= "subsides!"
 })
 
 ------------------------
@@ -173,6 +174,9 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
+	mineTarget	= "A Crawler Mine has targeted you!",
+	newWeapons	= "Unfinished weapons begin to roll out on the assembly line.",
+	newShredder	= "An Automated Shredder draws near!"
 })
 
 ----------------------------
@@ -181,14 +185,17 @@ L:SetMiscLocalization({
 L= DBM:GetModLocalization(853)
 
 L:SetWarningLocalization({
-	specWarnActivatedVulnerable		= "Вы уязвимы к %s - Избегайте!"
+	specWarnActivatedVulnerable		= "Вы уязвимы к %s - Избегайте!",
+	specWarnCriteriaLinked			= "Вы слинкованы с %s!"
 })
 
 L:SetOptionLocalization({
-	specWarnActivatedVulnerable		= "Спец-предупреждение когда активируется идеал, к которому вы уязвимы"
+	specWarnActivatedVulnerable		= "Спец-предупреждение когда идеал, к которому вы уязвимы активирует идеалов",
+	specWarnCriteriaLinked			= "Спец-предупреждение когда вы слинкованы с $spell:144095"
 })
 
 L:SetMiscLocalization({
+	calculatedTarget	= "calculating eye!"
 })
 
 ------------------------
