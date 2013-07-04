@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(832, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9894 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9956 $"):sub(12, -3))
 mod:SetCreatureID(68397)--Diffusion Chain Conduit 68696, Static Shock Conduit 68398, Bouncing Bolt conduit 68698, Overcharge conduit 68697
 mod:SetQuestID(32756)
 mod:SetZone()
@@ -527,9 +527,9 @@ local function LoopIntermission()
 			specWarnBouncingBolt:Schedule(9)
 			timerBouncingBoltCD:Start(9)
 		elseif mod:IsDifficulty("heroic10", "heroic25") then
-			warnBouncingBolt:Schedule(16)--Delayed by second helm of command i believe
-			specWarnBouncingBolt:Schedule(16)
-			timerBouncingBoltCD:Start(16)
+			warnBouncingBolt:Schedule(15.5)--Delayed by second helm of command i believe
+			specWarnBouncingBolt:Schedule(15.5)
+			timerBouncingBoltCD:Start(15.5)
 		else
 			warnBouncingBolt:Schedule(14)
 			specWarnBouncingBolt:Schedule(14)
