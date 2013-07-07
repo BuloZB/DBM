@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9939 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9971 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -62,10 +62,14 @@ local timerDespairActive				= mod:NewBuffFadesTimer(60, 144728)
 
 local countdownDespair					= mod:NewCountdownFades(59, 144728)--Needed? do you die if you don't complete task like garajal?
 
-local berserkTimer						= mod:NewBerserkTimer(600)--EJ says fight has a 10 min berserk (how convinient). Should still verify it though.
+local berserkTimer						= mod:NewBerserkTimer(420)--EJ says fight has a 7 min berserk (how convinient). Should still verify it though.
 
 function mod:OnCombatStart(delay)
-	berserkTimer:Start(-delay)
+	if self:IsDifficulty("heroic10", "heroic25") then
+		berserkTimer:Start(240-delay)
+	else
+		berserkTimer:Start(-delay)
+	end
 end
 
 function mod:OnCombatEnd()
