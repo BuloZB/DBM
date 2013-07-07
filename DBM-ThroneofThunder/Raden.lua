@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(831, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9955 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 9967 $"):sub(12, -3))
 mod:SetCreatureID(69473)--69888
 mod:SetQuestID(32753)
 mod:SetZone()
@@ -111,7 +111,7 @@ local function infoFrameChanged(players)
 		if players[1] == playerName then
 			specWarnVitaSoaker:Show()
 		end
-		if self.Options.AnnounceVitaSoaker and DBM:GetRaidRank() > 1 then
+		if mod.Options.AnnounceVitaSoaker and DBM:GetRaidRank() > 1 then
 			SendChatMessage(L.VitaChatMessage:format(players[1]), "RAID_WARNING")
 		end
 	elseif players[2] == playerName and playerName ~= lastPlayerTwo then
