@@ -2136,14 +2136,13 @@ local function CreateOptionsMenu()
 	do
 		local hpPanel = DBM_GUI_Frame:CreateNewPanel(L.Panel_HPFrame, "option")
 		local hpArea = hpPanel:CreateArea(L.Area_HPFrame, nil, 150, true)
-		hpArea:CreateCheckButton(L.HP_Enabled, true, nil, "AlwaysShowHealthFrame")
+		local alwaysbttn = hpArea:CreateCheckButton(L.HP_Enabled, true, nil, "AlwaysShowHealthFrame")
 		local growbttn = hpArea:CreateCheckButton(L.HP_GrowUpwards, true)
 		growbttn:SetScript("OnShow",  function(self) self:SetChecked(DBM.Options.HealthFrameGrowUp) end)
 		growbttn:SetScript("OnClick", function(self)
 				DBM.Options.HealthFrameGrowUp = not not self:GetChecked()
 				DBM.BossHealth:UpdateSettings()
 		end)
-
 
 		local BarWidthSlider = hpArea:CreateSlider(L.BarWidth, 150, 275, 1)
 		BarWidthSlider:SetPoint("TOPLEFT", hpArea.frame, "TOPLEFT", 20, -75)
@@ -2161,8 +2160,10 @@ local function CreateOptionsMenu()
 				DBM.Options.HPFramePoint = DBM.DefaultOptions.HPFramePoint
 				DBM.Options.HPFrameX = DBM.DefaultOptions.HPFrameX
 				DBM.Options.HPFrameY = DBM.DefaultOptions.HPFrameY
+				DBM.Options.AlwaysShowHealthFrame = DBM.DefaultOptions.AlwaysShowHealthFrame
 				DBM.Options.HealthFrameGrowUp = DBM.DefaultOptions.HealthFrameGrowUp
 				DBM.Options.HealthFrameWidth = DBM.DefaultOptions.HealthFrameWidth
+				alwaysbttn:SetChecked(DBM.Options.AlwaysShowHealthFrame)
 				growbttn:SetChecked(DBM.Options.HealthFrameGrowUp)
 				BarWidthSlider:SetValue(DBM.Options.HealthFrameWidth)
 				DBM.BossHealth:UpdateSettings()
