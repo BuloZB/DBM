@@ -43,7 +43,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 9991 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 9994 $"):sub(12, -3)),
 	DisplayVersion = "5.3.5 alpha", -- the string that is shown as version
 	ReleaseRevision = 9947 -- the revision of the latest stable version that is available
 }
@@ -1980,7 +1980,7 @@ do
 	function DBM:LOADING_SCREEN_DISABLED()
 		local _, instanceType, _, _, _, _, _, mapID = GetInstanceInfo()
 		LastInstanceMapID = mapID
-		if instanceType == "none" and (mapID ~= 369) and (mapID ~= 1043) then return end -- instance type of brawlers guild is none ("Shlae'gararena none 0  5 0 false 1043")
+		if instanceType == "none" and (mapID ~= 369) and (mapID ~= 1043) and (mapID ~= 974) then return end -- instance type of brawlers guild and DMF are none
 		self:LoadModsOnDemand("mapId", mapID)
 		if instanceType == "scenario" and self:GetModByName("d511") then--mod already loaded
 			DBM:InstanceCheck()
@@ -2156,6 +2156,7 @@ do
 		if not DBM.Options.DontShowPTCountdownText then
 			TimerTracker_OnEvent(TimerTracker, "PLAYER_ENTERING_WORLD")--easiest way to nil out timers on TimerTracker frame. This frame just has no actual star/stop functions :\
 		end
+		dummyMod.text:Cancel()
 		if timer == 0 then return end--"/dbm pull 0" will strictly be used to cancel the pull timer (which is why we let above part of code run but not below)
 		if not DBM.Options.DontShowPT then
 			DBM.Bars:CreateBar(timer, DBM_CORE_TIMER_PULL, "Interface\\Icons\\Spell_Holy_BorrowedTime")
