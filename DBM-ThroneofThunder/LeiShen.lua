@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(832, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9956 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10015 $"):sub(12, -3))
 mod:SetCreatureID(68397)--Diffusion Chain Conduit 68696, Static Shock Conduit 68398, Bouncing Bolt conduit 68698, Overcharge conduit 68697
 mod:SetQuestID(32756)
 mod:SetZone()
@@ -52,7 +52,7 @@ local specWarnOverchargedNear			= mod:NewSpecialWarningClose(136295)
 local specWarnBouncingBoltSoon			= mod:NewSpecialWarningPreWarn(136361, nil, 4)
 local specWarnBouncingBolt				= mod:NewSpecialWarningSpell(136361)
 --Phase 1
-local specWarnDecapitate				= mod:NewSpecialWarningRun(134912, mod:IsTank())
+local specWarnDecapitate				= mod:NewSpecialWarningRun(134912, mod:IsTank(), nil, nil, 3)
 local specWarnDecapitateOther			= mod:NewSpecialWarningTarget(134912, mod:IsTank())
 local specWarnThunderstruck				= mod:NewSpecialWarningCount(135095, nil, nil, nil, 2)
 local specWarnCrashingThunder			= mod:NewSpecialWarningMove(135150)
@@ -220,8 +220,9 @@ function mod:SPELL_CAST_START(args)
 		end
 	elseif args.spellId == 136478 then
 		warnFusionSlash:Show()
-		specWarnFusionSlash:Show()
 		timerFussionSlashCD:Start()
+		if self:IsDifficulty("lfr25") then return end
+		specWarnFusionSlash:Show()
 	end
 end
 
@@ -229,6 +230,7 @@ function mod:SPELL_AURA_APPLIED(args)
 	if args:IsSpellID(135000, 134912) then--Is 135000 still used on 10 man?
 		warnDecapitate:Show(args.destName)
 		timerDecapitateCD:Start()
+		if self:IsDifficulty("lfr25") then return end
 		if args:IsPlayer() then
 			specWarnDecapitate:Show()
 			soundDecapitate:Play()

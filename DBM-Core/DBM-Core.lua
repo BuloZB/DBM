@@ -43,7 +43,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10000 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10018 $"):sub(12, -3)),
 	DisplayVersion = "5.3.5 alpha", -- the string that is shown as version
 	ReleaseRevision = 9947 -- the revision of the latest stable version that is available
 }
@@ -138,15 +138,15 @@ DBM.DefaultOptions = {
 	SpecialWarningFont = STANDARD_TEXT_FONT,
 	SpecialWarningFontSize = 50,
 	SpecialWarningFontColor = {0.0, 0.0, 1.0},
-	SpecialWarningFlashColor1 = {1.0, 1.0, 0.0},--Yellow
-	SpecialWarningFlashColor2 = {1.0, 0.5, 0.0},--Orange
-	SpecialWarningFlashColor3 = {1.0, 0.0, 0.0},--Red
-	SpecialWarningFlashDur1 = 1,
-	SpecialWarningFlashDur2 = 1.5,
-	SpecialWarningFlashDur3 = 2,
-	SpecialWarningFlashAlpha1 = 0.5,
-	SpecialWarningFlashAlpha2 = 0.5,
-	SpecialWarningFlashAlpha3 = 0.5,
+	SpecialWarningFlashCol1 = {1.0, 1.0, 0.0},--Yellow
+	SpecialWarningFlashCol2 = {1.0, 0.5, 0.0},--Orange
+	SpecialWarningFlashCol3 = {1.0, 0.0, 0.0},--Red
+	SpecialWarningFlashDura1 = 0.4,
+	SpecialWarningFlashDura2 = 0.4,
+	SpecialWarningFlashDura3 = 1,
+	SpecialWarningFlashAlph1 = 0.3,
+	SpecialWarningFlashAlph2 = 0.3,
+	SpecialWarningFlashAlph3 = 0.4,
 	HealthFrameGrowUp = false,
 	HealthFrameLocked = false,
 	HealthFrameWidth = 200,
@@ -1985,6 +1985,9 @@ do
 	--Faster and more accurate loading for instances, but useless outside of them
 	function DBM:LOADING_SCREEN_DISABLED()
 		local _, instanceType, _, _, _, _, _, mapID = GetInstanceInfo()
+		if UnitName("player") == "Cellista" and GetRealmName() == "Khadgar" then
+			print("DBM Debug: ", mapID)
+		end
 		LastInstanceMapID = mapID
 		if instanceType == "none" and (mapID ~= 369) and (mapID ~= 1043) and (mapID ~= 974) then return end -- instance type of brawlers guild and DMF are none
 		self:LoadModsOnDemand("mapId", mapID)
@@ -1994,6 +1997,9 @@ do
 	end
 
 	function DBM:LoadModsOnDemand(checkTable, checkValue)
+		if UnitName("player") == "Cellista" and GetRealmName() == "Khadgar" then
+			print("DBM Debug: Attempting to load mod for: ", checkValue)
+		end
 		for i, v in ipairs(DBM.AddOns) do
 			local modTable = v[checkTable]
 			if not IsAddOnLoaded(v.modId) and modTable and checkEntry(modTable, checkValue) then
@@ -5017,11 +5023,11 @@ do
 			font:SetText(msg)
 			if not UnitIsDeadOrGhost("player") and DBM.Options.ShowFlashFrame then
 				if self.flash == 1 then
-					DBM.Flash:Show(DBM.Options.SpecialWarningFlashColor1[1],DBM.Options.SpecialWarningFlashColor1[2], DBM.Options.SpecialWarningFlashColor1[3], DBM.Options.SpecialWarningFlashDur1, DBM.Options.SpecialWarningFlashAlpha1)
+					DBM.Flash:Show(DBM.Options.SpecialWarningFlashCol1[1],DBM.Options.SpecialWarningFlashCol1[2], DBM.Options.SpecialWarningFlashCol1[3], DBM.Options.SpecialWarningFlashDura1, DBM.Options.SpecialWarningFlashAlph1)
 				elseif self.flash == 2 then
-					DBM.Flash:Show(DBM.Options.SpecialWarningFlashColor2[1],DBM.Options.SpecialWarningFlashColor2[2], DBM.Options.SpecialWarningFlashColor2[3], DBM.Options.SpecialWarningFlashDur2, DBM.Options.SpecialWarningFlashAlpha2)
+					DBM.Flash:Show(DBM.Options.SpecialWarningFlashCol2[1],DBM.Options.SpecialWarningFlashCol2[2], DBM.Options.SpecialWarningFlashCol2[3], DBM.Options.SpecialWarningFlashDura2, DBM.Options.SpecialWarningFlashAlph2)
 				elseif self.flash == 3 then
-					DBM.Flash:Show(DBM.Options.SpecialWarningFlashColor3[1],DBM.Options.SpecialWarningFlashColor3[2], DBM.Options.SpecialWarningFlashColor3[3], DBM.Options.SpecialWarningFlashDur3, DBM.Options.SpecialWarningFlashAlpha3)
+					DBM.Flash:Show(DBM.Options.SpecialWarningFlashCol3[1],DBM.Options.SpecialWarningFlashCol3[2], DBM.Options.SpecialWarningFlashCol3[3], DBM.Options.SpecialWarningFlashDura3, DBM.Options.SpecialWarningFlashAlph3)
 				end
 			end
 			frame:Show()
@@ -5299,11 +5305,11 @@ do
 		DBM:PlaySpecialWarningSound(number)
 		if DBM.Options.ShowFlashFrame then
 			if number == 1 then
-				DBM.Flash:Show(DBM.Options.SpecialWarningFlashColor1[1],DBM.Options.SpecialWarningFlashColor1[2], DBM.Options.SpecialWarningFlashColor1[3], DBM.Options.SpecialWarningFlashDur1, DBM.Options.SpecialWarningFlashAlpha1)
+				DBM.Flash:Show(DBM.Options.SpecialWarningFlashCol1[1],DBM.Options.SpecialWarningFlashCol1[2], DBM.Options.SpecialWarningFlashCol1[3], DBM.Options.SpecialWarningFlashDura1, DBM.Options.SpecialWarningFlashAlph1)
 			elseif number == 2 then
-				DBM.Flash:Show(DBM.Options.SpecialWarningFlashColor2[1],DBM.Options.SpecialWarningFlashColor2[2], DBM.Options.SpecialWarningFlashColor2[3], DBM.Options.SpecialWarningFlashDur2, DBM.Options.SpecialWarningFlashAlpha2)
+				DBM.Flash:Show(DBM.Options.SpecialWarningFlashCol2[1],DBM.Options.SpecialWarningFlashCol2[2], DBM.Options.SpecialWarningFlashCol2[3], DBM.Options.SpecialWarningFlashDura2, DBM.Options.SpecialWarningFlashAlph2)
 			elseif number == 3 then
-				DBM.Flash:Show(DBM.Options.SpecialWarningFlashColor3[1],DBM.Options.SpecialWarningFlashColor3[2], DBM.Options.SpecialWarningFlashColor3[3], DBM.Options.SpecialWarningFlashDur3, DBM.Options.SpecialWarningFlashAlpha3)
+				DBM.Flash:Show(DBM.Options.SpecialWarningFlashCol3[1],DBM.Options.SpecialWarningFlashCol3[2], DBM.Options.SpecialWarningFlashCol3[3], DBM.Options.SpecialWarningFlashDura3, DBM.Options.SpecialWarningFlashAlph3)
 			end
 		end
 	end

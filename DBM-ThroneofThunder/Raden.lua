@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(831, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9978 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10017 $"):sub(12, -3))
 mod:SetCreatureID(69473)--69888
 mod:SetQuestID(32753)
 mod:SetZone()
@@ -46,7 +46,7 @@ local yellUnstableAnima			= mod:NewYell(138288, nil, false)
 local specWarnFatalStrike		= mod:NewSpecialWarningSpell(138334, mod:IsTank(), nil, nil, 3)
 local specWarnCracklingStalker	= mod:NewSpecialWarningSwitch(138339, mod:IsRangedDps() or mod:IsTank())
 local specWarnVitaSensitive		= mod:NewSpecialWarningYou(138372)
-local specWarnVitaSoaker		= mod:NewSpecialWarning("specWarnVitaSoaker")
+local specWarnVitaSoaker		= mod:NewSpecialWarning("specWarnVitaSoaker", nil, nil, nil, 3)
 local specWarnUnstablVita		= mod:NewSpecialWarningYou(138297, nil, nil, nil, 3)
 local specWarnUnstablVitaJump	= mod:NewSpecialWarningYou(138308, nil, nil, nil, 1)
 local yellUnstableVita			= mod:NewYell(138297, nil, false)
