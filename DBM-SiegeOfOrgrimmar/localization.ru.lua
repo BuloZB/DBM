@@ -16,6 +16,10 @@ L= DBM:GetModLocalization(849)
 ---------------------------
 L= DBM:GetModLocalization(866)
 
+L:SetOptionLocalization({
+	InfoFrame			= "Информационное окно для $journal:8252"
+})
+
 ------------------
 -- Sha of Pride --
 ------------------
