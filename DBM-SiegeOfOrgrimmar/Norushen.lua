@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10027 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10034 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -33,7 +33,7 @@ local warnPiercingCorruption			= mod:NewSpellAnnounce(144657, 3)
 --Amalgam of Corruption
 local specWarnUnleashedAnger			= mod:NewSpecialWarningSpell(145216, mod:IsTank())
 local specWarnBlindHatred				= mod:NewSpecialWarningSpell(145226, nil, nil, nil, 2)
-local specWarnManifestation				= mod:NewSpecialWarningSwitch("ej8232")--Unleashed Manifestation of Corruption
+local specWarnManifestation				= mod:NewSpecialWarningSwitch("ej8232", not mod:IsHealer())--Unleashed Manifestation of Corruption
 --All tests
 --Test of Serenity (DPS)
 local specWarnTearReality				= mod:NewSpecialWarningMove(144482)
