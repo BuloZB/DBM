@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10003 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10047 $"):sub(12, -3))
 mod:SetCreatureID(71529)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -10,7 +10,7 @@ mod:SetUsedIcons(8)
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_START",
+--	"SPELL_CAST_START",
 	"SPELL_CAST_SUCCESS",
 	"SPELL_AURA_APPLIED",
 	"SPELL_AURA_APPLIED_DOSE",
@@ -109,12 +109,13 @@ function mod:OnCombatEnd()
 
 end
 
+--[[
 function mod:SPELL_CAST_START(args)
 	if args.spellId == 137399 then
 		self:BossTargetScanner(69465, "FocusedLightningTarget", 0.025, 12)
 		timerFocusedLightningCD:Start()
 	end
-end
+end--]]
 
 function mod:SPELL_CAST_SUCCESS(args)
 	if args.spellId == 143428 then
@@ -196,7 +197,7 @@ mod.SPELL_AURA_APPLIED_DOSE = mod.SPELL_AURA_APPLIED
 
 function mod:SPELL_AURA_REMOVED(args)
 	if args.spellId == 143766  then
-		timerFearsomeRoar:Cancel(ags.destName)
+		timerFearsomeRoar:Cancel(args.destName)
 	elseif args.spellId == 143343  then
 		timerBloodFrenzyCD:Cancel()
 	elseif args.spellId == 143445 then
