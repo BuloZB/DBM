@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9971 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10049 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -125,12 +125,12 @@ local yellAim						= mod:NewYell(142948)
 local specWarnAimOther				= mod:NewSpecialWarningTarget(142948)
 
 --Kil'ruk the Wind-Reaver
-local timerGouge					= mod:NewTargetTimer(10, 143939, mod:IsTank())
+local timerGouge					= mod:NewTargetTimer(10, 143939, nil, mod:IsTank())
 --Xaril the Poisoned-Mind
 local timerToxicCatalystCD			= mod:NewCDTimer(33, "ej8036")
 --Korven the Prime
-local timerShieldBash				= mod:NewTargetTimer(6, 143974, mod:IsTank())
-local timerShieldBashCD				= mod:NewCDTimer(17, 143974, mod:IsTank())
+local timerShieldBash				= mod:NewTargetTimer(6, 143974, nil, mod:IsTank())
+local timerShieldBashCD				= mod:NewCDTimer(17, 143974, nil, mod:IsTank())
 local timerEncaseInAmber			= mod:NewTargetTimer(10, 142564)
 --Iyyokuk the Lucid
 local timerCalculated				= mod:NewBuffFadesTimer(6, 144095)

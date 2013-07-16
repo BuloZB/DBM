@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10047 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10049 $"):sub(12, -3))
 mod:SetCreatureID(71529)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -53,7 +53,7 @@ local specWarnBurningBloodMove	= mod:NewSpecialWarningMove(143784)
 local yellBurningBlood			= mod:NewYell(143783)
 
 --Stage 1: A Cry in the Darkness
-local timerFearsomeRoar			= mod:NewTargetTimer(30, 143766, mod:IsTank() or mod:IsHealer())
+local timerFearsomeRoar			= mod:NewTargetTimer(30, 143766, nil, mod:IsTank() or mod:IsHealer())
 --local timerFearsomeRoarCD		= mod:NewCDTimer(10, 143766, mod:IsTank())
 --local timerDeafeningScreechCD	= mod:NewNextCountTimer(25, 143343)-- (143345 base power regen, 4 per second)
 --Stage 2: Frenzy for Blood!

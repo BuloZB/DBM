@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(850, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9889 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10049 $"):sub(12, -3))
 mod:SetCreatureID(71515)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -63,9 +63,9 @@ local specWarnHealingTideTotem		= mod:NewSpecialWarningSwitch(143474, false)--No
 
 --Nazgrim Core Abilities
 local timerAddsCD					= mod:NewNextCountTimer(45, "ej7920")
-local timerSunder					= mod:NewTargetTimer(60, 143494, mod:IsTank() or mod:IsHealer())
-local timerSunderCD					= mod:NewCDTimer(10, 143494, mod:IsTank())
-local timerBoneCD					= mod:NewCDTimer(30, 143638, mod:IsHealer())
+local timerSunder					= mod:NewTargetTimer(60, 143494, nil, mod:IsTank() or mod:IsHealer())
+local timerSunderCD					= mod:NewCDTimer(10, 143494, nil, mod:IsTank())
+local timerBoneCD					= mod:NewCDTimer(30, 143638, nil, mod:IsHealer())
 local timerDefensiveStance			= mod:NewBuffActiveTimer(60, 143593)
 --Nazgrim Rage Abilities
 local timerCoolingOff				= mod:NewBuffFadesTimer(15, 143484)
