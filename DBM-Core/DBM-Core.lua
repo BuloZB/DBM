@@ -43,7 +43,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10049 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10050 $"):sub(12, -3)),
 	DisplayVersion = "5.3.5 alpha", -- the string that is shown as version
 	ReleaseRevision = 9947 -- the revision of the latest stable version that is available
 }
@@ -4004,7 +4004,11 @@ do
 			obj.localization.general.name = string.split(",", t or name)
 		elseif name:match("d%d+") then
 			local t = GetDungeonInfo(string.sub(name, 2))
-			obj.localization.general.name = string.split(",", t or name)
+			if modId == "DBM-ProvingGrounds-MoP" then
+				obj.localization.general.name = select(2, string.split(":", t or name))
+			else
+				obj.localization.general.name = string.split(",", t or name)
+			end
 		end
 		table.insert(self.Mods, obj)
 		modsById[name] = obj
