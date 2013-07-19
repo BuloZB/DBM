@@ -74,7 +74,6 @@ local lastStacks = {}
 -- Local Globals --
 -------------------
 --Entire InfoFrame is a looping onupdate function. All of these globals get used several times a second
-local IsInGroup = IsInGroup
 local GetRaidTargetIndex = GetRaidTargetIndex
 local UnitName = UnitName
 local UnitHealth = UnitHealth
@@ -86,7 +85,8 @@ local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local GetSpellInfo = GetSpellInfo
 local UnitThreatSituation = UnitThreatSituation
 local GetRaidRosterInfo = GetRaidRosterInfo
-local GetRealZoneText = GetRealZoneText
+local GetCurrentMapAreaID = GetCurrentMapAreaID
+local GetMapNameByID = GetMapNameByID
 local GetPartyAssignment = GetPartyAssignment
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 
@@ -207,24 +207,19 @@ end
 
 local function updateIcons()
 	table.wipe(icons)
-	if IsInGroup() then
-		for uId in DBM:GetGroupMembers() do
-			local icon = GetRaidTargetIndex(uId)
-			if icon then
-				icons[UnitName(uId)] = ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_%d:0|t"):format(icon)
-			end
+	for uId in DBM:GetGroupMembers() do
+		local icon = GetRaidTargetIndex(uId)
+		if icon then
+			icons[UnitName(uId)] = ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_%d:0|t"):format(icon)
 		end
 	end
 end
 
 local function updateHealth()
 	table.wipe(lines)
-	if IsInGroup() then
-		for uId in DBM:GetGroupMembers() do
-			local icon = GetRaidTargetIndex(uId)
-			if UnitHealth(uId) < infoFrameThreshold and not UnitIsDeadOrGhost(uId) then
-				lines[UnitName(uId)] = UnitHealth(uId) - infoFrameThreshold
-			end
+	for uId in DBM:GetGroupMembers() do
+		if UnitHealth(uId) < infoFrameThreshold and not UnitIsDeadOrGhost(uId) then
+			lines[UnitName(uId)] = UnitHealth(uId) - infoFrameThreshold
 		end
 	end
 	updateLines()
@@ -233,12 +228,10 @@ end
 
 local function updatePlayerPower()
 	table.wipe(lines)
-	if IsInGroup() then
-		for uId in DBM:GetGroupMembers() do
-			local maxPower = UnitPowerMax(uId, pIndex)
-			if maxPower ~= 0 and not UnitIsDeadOrGhost(uId) and UnitPower(uId, pIndex) / maxPower * 100 >= infoFrameThreshold then
-				lines[UnitName(uId)] = UnitPower(uId, pIndex)
-			end
+	for uId in DBM:GetGroupMembers() do
+		local maxPower = UnitPowerMax(uId, pIndex)
+		if maxPower ~= 0 and not UnitIsDeadOrGhost(uId) and UnitPower(uId, pIndex) / maxPower * 100 >= infoFrameThreshold then
+			lines[UnitName(uId)] = UnitPower(uId, pIndex)
 		end
 	end
 	if DBM.Options.InfoFrameShowSelf and not lines[UnitName("player")] and UnitPower("player", pIndex) > 0 then
@@ -266,11 +259,9 @@ end
 --Buffs that are good to have, therefor bad not to have them.
 local function updatePlayerBuffs()
 	table.wipe(lines)
-	if IsInGroup() then
-		for uId in DBM:GetGroupMembers() do
-			if not UnitBuff(uId, GetSpellInfo(infoFrameThreshold)) and not UnitIsDeadOrGhost(uId) then
-				lines[UnitName(uId)] = ""
-			end
+	for uId in DBM:GetGroupMembers() do
+		if not UnitBuff(uId, GetSpellInfo(infoFrameThreshold)) and not UnitIsDeadOrGhost(uId) then
+			lines[UnitName(uId)] = ""
 		end
 	end
 	updateLines()
@@ -280,12 +271,10 @@ end
 --Debuffs that are good to have, therefor it's bad NOT to have them.
 local function updateGoodPlayerDebuffs()
 	table.wipe(lines)
-	if IsInGroup() then
-		for uId in DBM:GetGroupMembers() do
-			if tankIgnored and (UnitGroupRolesAssigned(uId) == "TANK" or GetPartyAssignment("MAINTANK", uId, 1)) then break end
-			if not UnitDebuff(uId, GetSpellInfo(infoFrameThreshold)) and not UnitIsDeadOrGhost(uId) then
-				lines[UnitName(uId)] = ""
-			end
+	for uId in DBM:GetGroupMembers() do
+		if tankIgnored and (UnitGroupRolesAssigned(uId) == "TANK" or GetPartyAssignment("MAINTANK", uId, 1)) then break end
+		if not UnitDebuff(uId, GetSpellInfo(infoFrameThreshold)) and not UnitIsDeadOrGhost(uId) then
+			lines[UnitName(uId)] = ""
 		end
 	end
 	updateLines()
@@ -295,12 +284,10 @@ end
 --Debuffs that are bad to have, therefor it is bad to have them.
 local function updateBadPlayerDebuffs()
 	table.wipe(lines)
-	if IsInGroup() then
-		for uId, i in DBM:GetGroupMembers() do
-			if tankIgnored and (UnitGroupRolesAssigned(uId) == "TANK" or GetPartyAssignment("MAINTANK", uId, 1)) then break end
-			if UnitDebuff(uId, GetSpellInfo(infoFrameThreshold)) and not UnitIsDeadOrGhost(uId) then
-				lines[UnitName(uId)] = ""
-			end
+	for uId, i in DBM:GetGroupMembers() do
+		if tankIgnored and (UnitGroupRolesAssigned(uId) == "TANK" or GetPartyAssignment("MAINTANK", uId, 1)) then break end
+		if UnitDebuff(uId, GetSpellInfo(infoFrameThreshold)) and not UnitIsDeadOrGhost(uId) then
+			lines[UnitName(uId)] = ""
 		end
 	end
 	updateLines()
@@ -310,12 +297,10 @@ end
 --Debuffs that are bad to have, but we want to show players who do NOT have them
 local function updateReverseBadPlayerDebuffs()
 	table.wipe(lines)
-	if IsInGroup() then
-		for uId, i in DBM:GetGroupMembers() do
-			if tankIgnored and (UnitGroupRolesAssigned(uId) == "TANK" or GetPartyAssignment("MAINTANK", uId, 1)) then break end
-			if not UnitDebuff(uId, GetSpellInfo(infoFrameThreshold)) and not UnitIsDeadOrGhost(uId) then
-				lines[UnitName(uId)] = i
-			end
+	for uId, i in DBM:GetGroupMembers() do
+		if tankIgnored and (UnitGroupRolesAssigned(uId) == "TANK" or GetPartyAssignment("MAINTANK", uId, 1)) then break end
+		if not UnitDebuff(uId, GetSpellInfo(infoFrameThreshold)) and not UnitIsDeadOrGhost(uId) then
+			lines[UnitName(uId)] = i
 		end
 	end
 	updateLines()
@@ -325,15 +310,13 @@ end
 local function updatePlayerBuffStacks()
 	table.wipe(lines)
 	updateIcons()	-- update Icons first in case of an "icon modifier"
-	if IsInGroup() then
-		for uId in DBM:GetGroupMembers() do
-			if UnitBuff(uId, GetSpellInfo(infoFrameThreshold)) then
-				lines[UnitName(uId)] = select(4, UnitBuff(uId, GetSpellInfo(infoFrameThreshold)))
-			elseif UnitBuff(uId, GetSpellInfo(pIndex)) then
-				lines[UnitName(uId)] = lastStacks[UnitName(uId)] or 0			-- is always 0 ?
-				if iconModifier then
-					icons[UnitName(uId)] = ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_%d:0|t"):format(iconModifier)
-				end
+	for uId in DBM:GetGroupMembers() do
+		if UnitBuff(uId, GetSpellInfo(infoFrameThreshold)) then
+			lines[UnitName(uId)] = select(4, UnitBuff(uId, GetSpellInfo(infoFrameThreshold)))
+		elseif UnitBuff(uId, GetSpellInfo(pIndex)) then
+			lines[UnitName(uId)] = lastStacks[UnitName(uId)] or 0			-- is always 0 ?
+			if iconModifier then
+				icons[UnitName(uId)] = ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_%d:0|t"):format(iconModifier)
 			end
 		end
 	end
@@ -349,11 +332,9 @@ end
 local function updatePlayerDebuffStacks()
 	table.wipe(lines)
 	local spell = GetSpellInfo(infoFrameThreshold)
-	if IsInGroup() then
-		for uId in DBM:GetGroupMembers() do
-			if UnitDebuff(uId, spell) then
-				lines[UnitName(uId)] = select(4, UnitDebuff(uId, spell))
-			end
+	for uId in DBM:GetGroupMembers() do
+		if UnitDebuff(uId, spell) then
+			lines[UnitName(uId)] = select(4, UnitDebuff(uId, spell))
 		end
 	end
 	updateIcons()
@@ -362,11 +343,9 @@ end
 
 local function updatePlayerAggro()
 	table.wipe(lines)
-	if IsInGroup() then
-		for uId in DBM:GetGroupMembers() do
-			if UnitThreatSituation(uId) == infoFrameThreshold then
-				lines[UnitName(uId)] = ""
-			end
+	for uId in DBM:GetGroupMembers() do
+		if UnitThreatSituation(uId) == infoFrameThreshold then
+			lines[UnitName(uId)] = ""
 		end
 	end
 	updateLines()
@@ -379,11 +358,9 @@ local function getUnitCreatureId(uId)
 end
 local function updatePlayerTargets()
 	table.wipe(lines)
-	if IsInGroup() then
-		for uId, i in DBM:GetGroupMembers() do
-			if getUnitCreatureId(uId.."target") ~= infoFrameThreshold and (UnitGroupRolesAssigned(uId) == "DAMAGER" or UnitGroupRolesAssigned(uId) == "NONE") then
-				lines[UnitName(uId)] = i
-			end
+	for uId, i in DBM:GetGroupMembers() do
+		if getUnitCreatureId(uId.."target") ~= infoFrameThreshold and (UnitGroupRolesAssigned(uId) == "DAMAGER" or UnitGroupRolesAssigned(uId) == "NONE") then
+			lines[UnitName(uId)] = i
 		end
 	end
 	updateLines()
@@ -424,7 +401,8 @@ function onUpdate(self, elapsed)
 		updatePlayerTargets()
 	end
 --	updateIcons()
-	local playerZone = GetRealZoneText()
+	local currentMapId = GetCurrentMapAreaID()
+	local currentMapName = GetMapNameByID(currentMapId)
 	local linesShown = 0
 	for i = 1, #sortedLines do
 		if linesShown >= maxlines then
@@ -434,7 +412,7 @@ function onUpdate(self, elapsed)
 		-- filter players who are not in the current zone (i.e. just idling/watching while being in the raid)
 		local unitId = DBM:GetRaidUnitId(DBM:GetFullNameByShortName(name))
 		local raidId = unitId and unitId:sub(0, 4) == "raid" and (tonumber(unitId:sub(5) or 0) or 0)
-		if not raidId or select(7, GetRaidRosterInfo(raidId)) == playerZone then
+		if not raidId or select(7, GetRaidRosterInfo(raidId)) == currentMapName then
 			linesShown = linesShown + 1
 			local power = lines[name]
 			local icon = icons[name]
