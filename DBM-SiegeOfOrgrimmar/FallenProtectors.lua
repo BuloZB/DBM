@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9892 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10060 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -139,7 +139,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		local source = args.sourceName
 		if source == UnitName("target") or source == UnitName("focus") then--Only warn if your target or focus, period, because if you aren't actually dpsing her, you just stay out of melee range and ignore this
 			warnShaShear:Show()
-			specWarnShaShear:show(source)
+			specWarnShaShear:Show(source)
 		end
 	end
 end
