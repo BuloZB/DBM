@@ -7,7 +7,6 @@ move-folders:
     DBM-Core/DBM-TerraceofEndlessSpring: DBM-TerraceofEndlessSpring
     DBM-Core/DBM-GUI: DBM-GUI
     DBM-Core/DBM-Party-MoP: DBM-Party-MoP
-    DBM-Core/DBM-PvP: DBM-PvP
     DBM-Core/DBM-WorldEvents: DBM-WorldEvents
     DBM-Core/DBM-Scenario-MoP: DBM-Scenario-MoP
     DBM-Core/DBM-Brawlers: DBM-Brawlers
