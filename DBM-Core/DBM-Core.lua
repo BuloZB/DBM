@@ -43,7 +43,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10061 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10064 $"):sub(12, -3)),
 	DisplayVersion = "5.3.6 alpha", -- the string that is shown as version
 	ReleaseRevision = 10055 -- the revision of the latest stable version that is available
 }
@@ -252,6 +252,7 @@ local UnitExists = UnitExists
 local UnitIsDead = UnitIsDead
 local GetSpellInfo = GetSpellInfo
 local EJ_GetSectionInfo = EJ_GetSectionInfo
+local GetInstanceInfo = GetInstanceInfo
 local GetCurrentMapDungeonLevel = GetCurrentMapDungeonLevel
 local GetMapInfo = GetMapInfo
 local GetCurrentMapZone = GetCurrentMapZone
@@ -260,6 +261,9 @@ local GetSpecialization = GetSpecialization
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 local GetPartyAssignment = GetPartyAssignment
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
+local LoadAddOn = LoadAddOn
+local IsEncounterInProgress = IsEncounterInProgress
+local InCombatLockdown = InCombatLockdown
 
 -- for Phanx' Class Colors
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
@@ -2044,12 +2048,14 @@ function DBM:InstanceCheck()
 	end
 end
 
-function DBM:LoadMod(mod)
-	if type(mod) ~= "table" then return false end
 	--In combat and it's not a raid boss. We'll just delay mod load until we leave combat to avoid "script ran to long errors"
 	--This should avoid most load problems (especially in LFR) When zoning in while in combat which causes the mod to fail to load/work correctly
 	--IF we are fighting a boss, we don't have much of a choice but to try and load anyways since script ran too long isn't actually a guarentee.
-	--it's mainly for slower computers that fail to load mods in combat. Most can load in combat if we delay the garbage collect
+	--The main place we should force a mod load in combat is for IsEncounterInProgress because i'm pretty sure blizzard waves "script ran too long" function for a small amount of time after a DC
+	--Now that there are 9 world bosses, that mod is generating "script ran too long" more often on slow computers. Trying some micro optimizes to see if that eliminates
+	--If i still get many reports of world boss mod load failing, I will remove them from load delay since a failed mod load is even less useful than no mod load.
+function DBM:LoadMod(mod)
+	if type(mod) ~= "table" then return false end
 	if InCombatLockdown() and IsInInstance() and not IsEncounterInProgress() then
 		self:AddMsg(DBM_CORE_LOAD_MOD_COMBAT:format(tostring(mod.name)))
 		if loadDelay and loadDelay ~= mod then--Check if load delay exists, but make sure this isn't a loop of same mod before making a second load delay
@@ -2241,9 +2247,11 @@ do
 			if version > tonumber(DBM.Version) then -- Update reminder
 				if not showedUpdateReminder then
 					local found = false
+					local other = nil
 					for i, v in pairs(raid) do
 						if v.version == version and v ~= raid[sender] then
 							found = true
+							other = i
 							break
 						end
 					end
@@ -2256,6 +2264,7 @@ do
 							DBM:AddMsg(DBM_CORE_UPDATEREMINDER_HEADER:match("\n(.*)"):format(displayVersion, version))
 							DBM:AddMsg(("|HDBM:update:%s:%s|h|cff3588ff[http://www.deadlybossmods.com]"):format(displayVersion, version))
 						end
+						print(("DBM Debug: Showing update notification because %s and %s are running version %d which is > than our version %d"):format(sender, other, version, DBM.Version))
 	--					if revDifference > 400 then--WTF? Sorry but your DBM is being turned off until you update. Grossly out of date mods cause fps loss, freezes, lua error spam, or just very bad information, if mod is not up to date with latest changes. All around undesirable experience to put yourself or other raid mates through
 	--						DBM:AddMsg(DBM_CORE_UPDATEREMINDER_DISABLE:format(revDifference))
 	--						DBM:Disable(true)

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(829, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9816 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10063 $"):sub(12, -3))
 mod:SetCreatureID(68905, 68904)--Lu'lin 68905, Suen 68904
 mod:SetQuestID(32755)
 mod:SetZone()
@@ -204,6 +204,7 @@ function mod:UNIT_DIED(args)
 	if cid == 68905 then--Lu'lin
 		timerCosmicBarrageCD:Cancel()
 		timerTidalForceCD:Cancel()
+		timerBeastOfNightmaresCD:Cancel()
 		timerDayCD:Cancel()
 		timerDuskCD:Cancel()
 		timerNuclearInfernoCD:Cancel()
