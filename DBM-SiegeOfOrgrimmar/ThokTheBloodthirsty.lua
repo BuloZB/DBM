@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10060 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10065 $"):sub(12, -3))
 mod:SetCreatureID(71529)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -280,7 +280,7 @@ mod.SPELL_PERIODIC_MISSED = mod.SPELL_PERIODIC_DAMAGE
 --"<84.2 19:14:26> [CLEU] SPELL_AURA_APPLIED#false#0xF151176900000D94#Thok the Bloodthirsty#68168#0#0xF151176900000D94#Thok the Bloodthirsty#68168#0#143440#Blood Frenzy#1#BUFF", -- [6851]
 function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg)
 	if msg:find("spell:143440") then
-		--Unlock bloods, breaths do cancel in frenzy phase
+		--Unlike bloods, breaths do cancel in frenzy phase
 		timerFearsomeRoarCD:Cancel()
 		timerAcidBreathCD:Cancel()
 		timerFrostBreathCD:Cancel()
