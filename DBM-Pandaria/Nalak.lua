@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(814, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9995 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10079 $"):sub(12, -3))
 mod:SetCreatureID(69099)
 mod:SetQuestID(32518)
 mod:SetZone()
@@ -14,11 +14,11 @@ mod:RegisterEventsInCombat(
 	"SPELL_AURA_REMOVED"
 )
 
---[[
+
 mod:RegisterEvents(
 	"CHAT_MSG_MONSTER_YELL"
 )
---]]
+
 
 local warnStormcloud				= mod:NewTargetAnnounce(136340, 3)
 local warnLightningTether			= mod:NewTargetAnnounce(136339, 3)
@@ -36,7 +36,7 @@ local timerArcNovaCD				= mod:NewNextTimer(42, 136338)
 local soundArcNova					= mod:NewSound(136338, nil, mod:IsMelee())
 
 mod:AddBoolOption("RangeFrame")--For Stormcloud, might tweek to not show all the time with actual better logs than me facepulling it and dying with 20 seconds
---mod:AddBoolOption("ReadyCheck", false)
+mod:AddBoolOption("ReadyCheck", false)
 
 local stormcloudTargets = {}
 local tetherTargets = {}
@@ -106,15 +106,13 @@ function mod:SPELL_AURA_APPLIED(args)
 	end
 end
 
---[[Need pull yell first
 function mod:CHAT_MSG_MONSTER_YELL(msg)
 	if msg == L.Pull and not self:IsInCombat() then
 		if self:GetCIDFromGUID(UnitGUID("target")) == 69099 or self:GetCIDFromGUID(UnitGUID("targettarget")) == 69099 then--Whole zone gets yell, so lets not engage combat off yell unless he is our target (or the target of our target for healers)
 			yellTriggered = true
 			DBM:StartCombat(self, 0)
-		elseif self.Options.ReadyCheck then
+		elseif self.Options.ReadyCheck and not IsQuestFlaggedCompleted(32518) then
 			PlaySoundFile("Sound\\interface\\levelup2.ogg", "Master")
 		end
 	end
 end
---]]
