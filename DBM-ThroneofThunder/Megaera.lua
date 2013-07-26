@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(821, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10088 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10089 $"):sub(12, -3))
 mod:SetCreatureID(68065, 70235, 70247)--Frozen 70235, Venomous 70247 (only 2 heads that ever start in front, so no need to look for combat with arcane or fire for combat detection)
 mod:SetMainBossID(68065)
 mod:SetQuestID(32748)
@@ -146,8 +146,8 @@ local function findTorrent()
 end
 
 local function CheckHeads(GUID)
+	local megaeraFound = false
 	for i = 1, 5 do
-		local megaeraFound = false
 		if UnitExists("boss"..i) then--Check if new units exist we haven't detected and added yet.
 			if not activeHeadGUIDS[UnitGUID("boss"..i)] then
 				activeHeadGUIDS[UnitGUID("boss"..i)] = true
