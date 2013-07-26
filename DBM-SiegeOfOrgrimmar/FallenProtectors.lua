@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10084 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10086 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -84,9 +84,6 @@ local timerGarroteCD				= mod:NewCDTimer(30, 143198, nil, mod:IsHealer())--30-36
 --Sun Tenderheart
 local timerBaneCD					= mod:NewCDTimer(25, 143446, nil, mod:IsHealer())--25-30 (heroic 13-20)
 local timerCalamityCD				= mod:NewCDTimer(39, 143491)--39-43
-
---local countdownLightningStorm		= mod:NewCountdown(42, 118077, false)
---local countdownExpelCorruption		= mod:NewCountdown(38.5, 117975)
 
 --local berserkTimer					= mod:NewBerserkTimer(490)
 
