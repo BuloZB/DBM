@@ -2,7 +2,7 @@ if GetBuildInfo() ~= "5.4.0" then return end
 local mod	= DBM:NewMod(860, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9886 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10093 $"):sub(12, -3))
 mod:SetCreatureID(71953)
 --mod:SetQuestID(32519)
 mod:SetZone()
@@ -16,10 +16,9 @@ mod:RegisterEventsInCombat(
 	"SPELL_AURA_REMOVED"
 )
 
---[[
 mod:RegisterEvents(
 	"CHAT_MSG_MONSTER_YELL"
-)--]]
+)
 
 local warnSpectralSwipe				= mod:NewStackAnnounce(144638, 2, nil, mod:IsTank() or mod:IsHealer())
 local warnAgility					= mod:NewTargetAnnounce(144631, 3)
@@ -99,13 +98,13 @@ function mod:SPELL_AURA_REMOVED(args)
 	end
 end
 
---[[
 function mod:CHAT_MSG_MONSTER_YELL(msg)
-	if msg == L.Pull and not self:IsInCombat() then
+	if (msg == L.Victory or msg:find(L.Victory)) and self:IsInCombat() then
+		DBM:EndCombat(self)
+	--[[elseif msg == L.Pull and not self:IsInCombat() then
 		if self:GetCIDFromGUID(UnitGUID("target")) == 71953 or self:GetCIDFromGUID(UnitGUID("targettarget")) == 71953 then
 			yellTriggered = true
 			DBM:StartCombat(self, 0)
-		end
+		end--]]
 	end
 end
---]]
