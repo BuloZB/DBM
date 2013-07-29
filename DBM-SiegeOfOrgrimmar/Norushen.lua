@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10049 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10097 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 --mod:SetQuestID(32744)
 mod:SetZone()
@@ -61,7 +61,7 @@ local timerTitanicSmashCD				= mod:NewCDTimer(14.5, 144628)--14-17sec variation
 local timerPiercingCorruptionCD			= mod:NewCDTimer(14, 144657)--14-17sec variation
 local timerHurlCorruptionCD				= mod:NewNextTimer(20, 144649)
 
-local berserkTimer						= mod:NewBerserkTimer(420)
+local berserkTimer						= mod:NewBerserkTimer(353)
 
 local countdownLookWithin				= mod:NewCountdownFades(59, "ej8220")
 local countdownLingeringCorruption		= mod:NewCountdown(15.5, 144514, mod:IsHealer(), nil, nil, nil, true)
@@ -74,7 +74,11 @@ local unleashedAngerCast = 0
 
 function mod:OnCombatStart(delay)
 	timerBlindHatredCD:Start(25-delay)
-	berserkTimer:Start(-delay)
+	if self:IsDifficulty("lfr25") then
+		berserkTimer:Start(413-delay)--Still true?
+	else
+		berserkTimer:Start(-delay)
+	end
 	if self.Options.InfoFrame then
 		DBM.InfoFrame:SetHeader(corruptionLevel)
 		DBM.InfoFrame:Show(5, "playerpower", 5, ALTERNATE_POWER_INDEX)
@@ -179,6 +183,7 @@ end
 function mod:OnSync(msg)
 	if msg == "BlindHatred" then
 		warnBlindHatred:Show()
+		specWarnBlindHatred:Show()
 		timerBlindHatred:Start()
 	elseif msg == "BlindHatredEnded" then
 		timerBlindHatredCD:Start()
