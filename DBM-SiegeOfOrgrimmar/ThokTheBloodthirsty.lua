@@ -1,9 +1,8 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10074 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10106 $"):sub(12, -3))
 mod:SetCreatureID(71529)
---mod:SetQuestID(32744)
 mod:SetZone()
 mod:SetUsedIcons(8)
 

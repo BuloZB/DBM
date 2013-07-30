@@ -1,9 +1,8 @@
 local mod	= DBM:NewMod(831, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10101 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10106 $"):sub(12, -3))
 mod:SetCreatureID(69473)--69888
-mod:SetQuestID(32753)
 mod:SetZone()
 mod:SetUsedIcons(2, 1)
 
@@ -259,6 +258,8 @@ function mod:SPELL_AURA_APPLIED(args)
 				countdownUnstableVita:Start()
 			end
 		end
+	elseif args.spellId == 27827 and self.Options.InfoFrame and DBM.InfoFrame:IsShown() then
+		DBM.InfoFrame:Update("reverseplayerbaddebuff")--Force update for holy priest deaths so we can remove them soon as they gain spirit of redemption
 	end
 end
 

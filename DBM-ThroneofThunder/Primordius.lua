@@ -1,9 +1,8 @@
 local mod	= DBM:NewMod(820, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9923 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10106 $"):sub(12, -3))
 mod:SetCreatureID(69017)--69070 Viscous Horror, 69069 good ooze, 70579 bad ooze (patched out of game, :\)
-mod:SetQuestID(32751)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--Although if you have 8 viscous horrors up, you are probably doing fight wrong.
 
