@@ -300,9 +300,12 @@ end
 local function updateReverseBadPlayerDebuffs()
 	table.wipe(lines)
 	for uId, i in DBM:GetGroupMembers() do
-		if tankIgnored and (UnitGroupRolesAssigned(uId) == "TANK" or GetPartyAssignment("MAINTANK", uId, 1)) then break end
-		if not UnitDebuff(uId, infoFrameSpellName) and not UnitIsDeadOrGhost(uId) and not UnitDebuff(uId, GetSpellInfo(27827)) then--27827 Spirit of Redemption. This particular info frame wants to ignore this
-			lines[UnitName(uId)] = i
+		if tankIgnored and (UnitGroupRolesAssigned(uId) == "TANK" or GetPartyAssignment("MAINTANK", uId, 1)) then
+
+		else
+			if not UnitDebuff(uId, infoFrameSpellName) and not UnitIsDeadOrGhost(uId) and not UnitDebuff(uId, GetSpellInfo(27827)) then--27827 Spirit of Redemption. This particular info frame wants to ignore this
+				lines[UnitName(uId)] = i
+			end
 		end
 	end
 	updateLines()
@@ -434,8 +437,6 @@ function onUpdate(self, elapsed)
 			else--It's not player, do nothing special with it. Ordinary white text.
 				self:AddDoubleLine(name, power, color.R, color.G, color.B, 255, 255, 255)	-- (leftText, rightText, left.R, left.G, left.B, right.R, right.G, right.B)
 			end
-		else
-			print("InfoFrame: not raidid or other map for " .. name .. "!")
 		end
 	end					 						-- Add a method to color the power value?
 	if not addedSelf and DBM.Options.InfoFrameShowSelf and currentEvent == "playerpower" then 	-- Don't show self on health/enemypower/playerdebuff/playeraggro
