@@ -12,12 +12,16 @@
 --    * enGB/enUS: Tandanu				http://www.deadlybossmods.com
 --    * deDE: Tandanu					http://www.deadlybossmods.com
 --    * zhCN: Diablohu					http://www.dreamgen.cn | diablohudream@gmail.com
---    * ruRU: BootWin					bootwin@gmail.com
---    * ruRU: Vampik					admin@vampik.ru
+--    * ruRU: Swix						stalker.kgv@gmail.com
+--    * ruRU: TOM_RUS
 --    * zhTW: Hman						herman_c1@hotmail.com
 --    * zhTW: Azael/kc10577				paul.poon.kw@gmail.com
 --    * koKR: nBlueWiz					everfinale@gmail.com
 --    * esES: Snamor/1nn7erpLaY      	romanscat@hotmail.com
+--
+-- The ex-translators:
+--    * ruRU: BootWin					bootwin@gmail.com
+--    * ruRU: Vampik					admin@vampik.ru
 --
 -- Special thanks to:
 --    * Arta
@@ -40,7 +44,7 @@
 
 
 
-local revision =("$Revision: 10106 $"):sub(12, -3)
+local revision =("$Revision: 10125 $"):sub(12, -3)
 local FrameTitle = "DBM_GUI_Option_"	-- all GUI frames get automatically a name FrameTitle..ID
 
 local PanelPrototype = {}
