@@ -43,7 +43,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10121 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10124 $"):sub(12, -3)),
 	DisplayVersion = "5.3.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10055 -- the revision of the latest stable version that is available
@@ -2256,12 +2256,12 @@ do
 			raid[sender].locale = locale
 			local revDifference = revision - tonumber(DBM.Revision)
 			if version > tonumber(DBM.Version) then -- Update reminder
-				--Bigwigs version faking breaks version update notification because they send alpha revision as release revision with their faking code
+				--Old version of Bigwigs version faking breaks version update notification because they send alpha revision as release revision with their faking code
 				--Bigwigs sniffs highest REVISION it finds in raid, (not highest ReleaseRevision) and then passes it as ReleaseRevision arg when sending sync back
 				--As a result, we'll get a valid DisplayVersion but the highest alpha Revision bigwigs saw in raid roster as a sync.
 				--For example, we might get 5.3.5 revision 10066 which is IMPOSSIBLE, anything above 10055 would be 5.3.6 alpha.
-				--So below we fix these problems so our users don't get spammed with invalid update notifications do to BW sending bad  version information
-				if displayVersion == DBM.DisplayVersion or displayVersion == DBM.DisplayReleaseVersion then--Their version is higher than hours, but display version is same, ignore it.
+				--So below we fix these problems so our users don't get spammed with invalid update notifications do to BW sending bad version information
+				if displayVersion == DBM.DisplayVersion or displayVersion == DBM.DisplayReleaseVersion then--Their version is higher than ours, but display version is same, ignore it.
 					--Since we know their version information is crap, nil it out.
 					raid[sender].revision = nil
 					raid[sender].version = nil
@@ -3704,8 +3704,10 @@ do
 		end
 	end
 
-	function DBM:CHAT_MSG_WHISPER(msg, name)
-		return onWhisper(msg, name, false)
+	function DBM:CHAT_MSG_WHISPER(msg, name, _, _, _, status)
+		if status ~= "GM" then
+			return onWhisper(msg, name, false)
+		end
 	end
 
 	function DBM:CHAT_MSG_BN_WHISPER(msg, ...)
