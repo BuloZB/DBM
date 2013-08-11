@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(817, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10106 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10140 $"):sub(12, -3))
 mod:SetCreatureID(68078, 68079, 68080, 68081)--Ro'shak 68079, Quet'zal 68080, Dam'ren 68081, Iron Qon 68078
 mod:SetMainBossID(68078)
 mod:SetZone()
@@ -56,8 +56,8 @@ local yellLightningStorm				= mod:NewYell(136192)
 local specWarnFrozenBlood				= mod:NewSpecialWarningMove(136520)
 local specWarnFistSmash					= mod:NewSpecialWarningSpell(136146, nil, nil, nil, 2)
 
-local timerImpale						= mod:NewTargetTimer(40, 134691, mod:IsTank() or mod:IsHealer())
-local timerImpaleCD						= mod:NewCDTimer(20, 134691, mod:IsTank() or mod:IsHealer())
+local timerImpale						= mod:NewTargetTimer(40, 134691, nil, mod:IsTank() or mod:IsHealer())
+local timerImpaleCD						= mod:NewCDTimer(20, 134691, nil, mod:IsTank() or mod:IsHealer())
 local timerThrowSpearCD					= mod:NewCDTimer(30, 134926)--30-42 second variation observed
 local timerUnleashedFlameCD				= mod:NewCDTimer(6, 134611, nil, false)--CD for the periodic trigger, not when he'll actually be at 30 energy and use it.
 local timerScorched						= mod:NewBuffFadesTimer(30, 134647)

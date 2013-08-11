@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(825, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10106 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10140 $"):sub(12, -3))
 mod:SetCreatureID(67977)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3)
@@ -43,7 +43,7 @@ local timerStompActive				= mod:NewBuffActiveTimer(10.8, 134920)--Duration of th
 local timerShellConcussion			= mod:NewBuffFadesTimer(20, 136431)
 
 local countdownStomp				= mod:NewCountdown(49, 134920, mod:IsHealer())
-local countdownBreath				= mod:NewCountdown(46, 133939, false) -- Coundown for the kicker. mod:IsRanged() and mod:IsDps()
+local countdownBreath				= mod:NewCountdown(46, 133939, false, nil, nil, nil, true) -- Coundown for the kicker. mod:IsRanged() and mod:IsDps()
 
 local berserkTimer					= mod:NewBerserkTimer(780)
 

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(816, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10106 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10140 $"):sub(12, -3))
 mod:SetCreatureID(69078, 69132, 69134, 69131)--69078 Sul the Sandcrawler, 69132 High Prestess Mar'li, 69131 Frost King Malakk, 69134 Kazra'jin --Adds: 69548 Shadowed Loa Spirit,
 mod:SetZone()
 mod:SetUsedIcons(7, 6)
@@ -91,8 +91,8 @@ local timerBitingCold				= mod:NewBuffFadesTimer(30, 136917)
 local timerBitingColdCD				= mod:NewCDTimer(45, 136917)--10 man Cds (and probably LFR), i have no doubt on 25 man this will either have a shorter cd or affect 3 targets with same CD. Watch for timer diffs though
 local timerFrostBite				= mod:NewBuffFadesTimer(30, 136990)
 local timerFrostBiteCD				= mod:NewCDTimer(45, 136990)--^same comment as above
-local timerFrigidAssault			= mod:NewTargetTimer(15, 136903)
-local timerFrigidAssaultCD			= mod:NewCDTimer(30, 136904)--30 seconds after last one ended (maybe even a next timer, i'll change it with more logs.)
+local timerFrigidAssault			= mod:NewTargetTimer(15, 136903, nil, mod:IsTank() or mod:IsHealer())
+local timerFrigidAssaultCD			= mod:NewCDTimer(30, 136904, nil, mod:IsTank() or mod:IsHealer())--30 seconds after last one ended (maybe even a next timer, i'll change it with more logs.)
 --Kazra'jin
 
 local soundMarkedSoul				= mod:NewSound(137359)
