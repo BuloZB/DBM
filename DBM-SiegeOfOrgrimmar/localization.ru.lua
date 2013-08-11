@@ -34,6 +34,11 @@ L:SetOptionLocalization({
 --------------
 L= DBM:GetModLocalization(868)
 
+L:SetMiscLocalization({
+	tower		= "The door barring the",--The door barring the South/North Tower has been breached!
+	demolisher	= "[Kor'kron Demolisher]|h|r to assault the tower!"--In case they remove the bad epiccenter spellid will use this
+})
+
 --------------------
 --Iron Juggernaut --
 --------------------
@@ -102,23 +107,23 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	calculatedTarget	= "calculating eye!",
+	calculatedTarget	= "choosing criteria",
 	--thanks to blizz, the only accurate way for this to work, is to translate 15 emotes in all languages
-	yellow				= "Yellow",
-	red					= "Red",
-	blue				= "Blue",
-	purple				= "Purple",
-	green				= "Green",
-	bomb				= "Bomb",
-	sword				= "Swords",
-	drums				= "Drums",
-	mantid				= "Mantid",--Assumed
-	staff 				= "Staff",--Assumed
+--	yellow				= "Yellow",
+--	red					= "Red",
+--	blue				= "Blue",
+	purple				= "Purple",--Needs color code replacement still
+	green				= "Green",--Needs color code replacement still
+--	bomb				= "Bomb",
+--	sword				= "Sword",
+--	drums				= "Drums",
+--	mantid				= "Mantid",--Assumed
+--	staff 				= "Staff",--Assumed
 	one					= "One",
-	two					= "Pair",
+	two					= "Two",
 	three				= "Three",
-	four				= "Four",--Assumed
-	five				= "Five",--Assumed
+	four				= "Four",
+	five				= "Five",
 	hisekFlavor			= "Look who's quiet now",--http://ptr.wowhead.com/quest=31510
 	KilrukFlavor		= "Just another day, culling the swarm",--http://ptr.wowhead.com/quest=31109
 	XarilFlavor			= "I see only dark skies in your future",--http://ptr.wowhead.com/quest=31216
