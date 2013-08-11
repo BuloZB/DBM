@@ -6,22 +6,24 @@
 -- This addon is written and copyrighted by:
 --    * Paul Emmerich (Tandanu @ EU-Aegwynn) (DBM-Core)
 --    * Martin Verges (Nitram @ EU-Azshara) (DBM-GUI)
---    * Adam Williams (Omegal @ US-Whisperwind) (Primary boss mod author) Contact: mysticalosx@gmail.com (Twitter: @MysticalOS)
+--    * Adam Williams (Omegal @ US-Whisperwind) (Primary boss mod author) Contact: Twitter @MysticalOS)
 --
 -- The localizations are written by:
 --    * enGB/enUS: Tandanu & Omegal		http://www.deadlybossmods.com
 --    * deDE: Tandanu					http://www.deadlybossmods.com
---    * zhCN: Diablohu					http://www.dreamgen.cn | diablohudream@gmail.com
+--    * deDE: Ebmor						DBM forums (PM: "Ebmor")
 --    * ruRU: Swix						stalker.kgv@gmail.com
 --    * ruRU: TOM_RUS
---    * zhTW: Hman						herman_c1@hotmail.com
---    * zhTW: Azael/kc10577				paul.poon.kw@gmail.com
+--    * zhTW: Whyv                      ultrashining@gmail.com
 --    * koKR: nBlueWiz					everfinale@gmail.com
---    * esES: Snamor/1nn7erpLaY      	romanscat@hotmail.com
 --
--- The ex-translators:
+-- The former/inactive-translators:
 --    * ruRU: BootWin					bootwin@gmail.com
 --    * ruRU: Vampik					admin@vampik.ru
+--    * zhTW: Hman						herman_c1@hotmail.com
+--    * zhTW: Azael/kc10577				paul.poon.kw@gmail.com
+--    * esES: Snamor/1nn7erpLaY      	romanscat@hotmail.com
+--    * zhCN: Diablohu					http://www.dreamgen.cn | diablohudream@gmail.com
 --
 -- Special thanks to:
 --    * Arta
@@ -47,7 +49,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10125 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10139 $"):sub(12, -3)),
 	DisplayVersion = "5.3.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10055 -- the revision of the latest stable version that is available
@@ -795,6 +797,7 @@ do
 				"CHAT_MSG_RAID_BOSS_EMOTE",
 				"RAID_BOSS_EMOTE",
 				"PLAYER_ENTERING_WORLD",
+				"LFG_ROLE_CHECK_SHOW",
 				"LFG_PROPOSAL_SHOW",
 				"LFG_PROPOSAL_FAILED",
 				"LFG_PROPOSAL_SUCCEEDED",
@@ -1840,6 +1843,11 @@ do
 	end
 end
 
+function DBM:LFG_ROLE_CHECK_SHOW()
+	if not UnitIsGroupLeader("player") and DBM.Options.UseMasterVolume then
+		PlaySoundFile("Sound\\interface\\levelup2.ogg", "Master")--Because regular sound uses SFX channel which is too low of volume most of time
+	end
+end
 
 function DBM:LFG_PROPOSAL_SHOW()
 	DBM.Bars:CreateBar(40, DBM_LFG_INVITE, "Interface\\Icons\\Spell_Holy_BorrowedTime")
@@ -1878,6 +1886,9 @@ function DBM:UPDATE_BATTLEFIELD_STATUS()
 		if GetBattlefieldStatus(i) == "confirm" then
 			queuedBattlefield[i] = select(2, GetBattlefieldStatus(i))
 			DBM.Bars:CreateBar(85, queuedBattlefield[i], "Interface\\Icons\\Spell_Holy_BorrowedTime")	-- need to confirm the timer
+			if DBM.Options.UseMasterVolume then
+				PlaySoundFile("Sound\\interface\\levelup2.ogg", "Master")--Because regular sound uses SFX channel which is too low of volume most of time
+			end
 		elseif queuedBattlefield[i] then
 			DBM.Bars:CancelBar(queuedBattlefield[i])
 			queuedBattlefield[i] = nil
@@ -3684,7 +3695,7 @@ do
 			end
 			mod = mod or inCombat[1]
 			local hp = ("%d%%"):format((mod.mainBossId and DBM:GetBossHealthByCID(mod.mainBossId) or mod.highesthealth and DBM:GetHighestBossHealth() or DBM:GetLowestBossHealth()) * 100)
-			sendWhisper(sender, chatPrefix..DBM_CORE_STATUS_WHISPER:format(difficultyText..(mod.combatInfo.name or ""), hp or DBM_CORE_UNKNOWN, getNumAlivePlayers(), GetNumGroupMembers()))
+			sendWhisper(sender, chatPrefix..DBM_CORE_STATUS_WHISPER:format(difficultyText..(mod.combatInfo.name or ""), hp or DBM_CORE_UNKNOWN, getNumAlivePlayers(), DBM:GetNumGroupMembers()))
 		elseif #inCombat > 0 and DBM.Options.AutoRespond and
 		(isRealIdMessage and (not isOnSameServer(sender) or not DBM:GetRaidUnitId(select(4, BNGetFriendInfoByID(sender)))) or not isRealIdMessage and not DBM:GetRaidUnitId(sender)) then
 			if not difficultyText then -- prevent error when timer recovery function worked and etc (StartCombat not called)
@@ -3700,7 +3711,7 @@ do
 				if IsInScenarioGroup() then
 					sendWhisper(sender, chatPrefix..DBM_CORE_AUTO_RESPOND_WHISPER_SCENARIO:format(playerName, difficultyText..(mod.combatInfo.name or ""), getNumAlivePlayers(), GetNumGroupMembers()))
 				else
-					sendWhisper(sender, chatPrefix..DBM_CORE_AUTO_RESPOND_WHISPER:format(playerName, difficultyText..(mod.combatInfo.name or ""), hp or DBM_CORE_UNKNOWN, getNumAlivePlayers(), GetNumGroupMembers()))
+					sendWhisper(sender, chatPrefix..DBM_CORE_AUTO_RESPOND_WHISPER:format(playerName, difficultyText..(mod.combatInfo.name or ""), hp or DBM_CORE_UNKNOWN, getNumAlivePlayers(), DBM:GetNumGroupMembers()))
 				end
 				DBM:AddMsg(DBM_CORE_AUTO_RESPONDED)
 			end
