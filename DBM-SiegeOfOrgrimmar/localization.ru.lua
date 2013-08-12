@@ -72,6 +72,10 @@ L= DBM:GetModLocalization(846)
 ------------------------
 L= DBM:GetModLocalization(870)
 
+L:SetMiscLocalization({
+	Victory	= "Module 2's all prepared for system reset"
+})
+
 ---------------------------
 -- Thok the Bloodthirsty --
 ---------------------------
