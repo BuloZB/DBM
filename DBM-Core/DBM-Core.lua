@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10148 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10150 $"):sub(12, -3)),
 	DisplayVersion = "5.3.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10055 -- the revision of the latest stable version that is available
@@ -3730,7 +3730,7 @@ do
 			local hp = ("%d%%"):format((mod.mainBossId and DBM:GetBossHealthByCID(mod.mainBossId) or mod.highesthealth and DBM:GetHighestBossHealth() or DBM:GetLowestBossHealth()) * 100)
 			if not autoRespondSpam[sender] then
 				if IsInScenarioGroup() then
-					sendWhisper(sender, chatPrefix..DBM_CORE_AUTO_RESPOND_WHISPER_SCENARIO:format(playerName, difficultyText..(mod.combatInfo.name or ""), getNumAlivePlayers(), DBM:GetNumRealGroupMembers()))
+					sendWhisper(sender, chatPrefix..DBM_CORE_AUTO_RESPOND_WHISPER_SCENARIO:format(playerName, difficultyText..(mod.combatInfo.name or ""), getNumAlivePlayers(), DBM:GetNumGroupMembers()))
 				else
 					sendWhisper(sender, chatPrefix..DBM_CORE_AUTO_RESPOND_WHISPER:format(playerName, difficultyText..(mod.combatInfo.name or ""), hp or DBM_CORE_UNKNOWN, getNumAlivePlayers(), DBM:GetNumRealGroupMembers()))
 				end

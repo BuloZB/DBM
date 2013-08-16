@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10129 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10149 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 mod:SetZone()
 
@@ -182,7 +182,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 --		timerNapalmOilCD:Start()
 	elseif spellId == 146359 then--Regeneration (Assault Mode power regen activation)
 		--2 seconds slower than emote, but it's not pressing enough to matter so it's better localisation wise to do it this way
-		timerNapalmOilCD:Cancel()
+--		timerNapalmOilCD:Cancel()
 		timerDemolisherCanonCD:Cancel()
 		timerMortarBarrageCD:Cancel()
 --		timerCuttingLaserCD:Cancel()
