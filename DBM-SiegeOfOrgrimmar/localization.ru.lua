@@ -34,9 +34,22 @@ L:SetOptionLocalization({
 --------------
 L= DBM:GetModLocalization(868)
 
+L:SetTimerLocalization({
+	timerAddsCD		= "След. волна аддов",
+	timerTowerCD	= "След. башня и адды"
+})
+
+L:SetOptionLocalization({
+	timerAddsCD		= "Отсчет времени до следующей волны аддов",
+	timerTowerCD	= "Отсчет времени до следующего нападения на башню"
+})
+
 L:SetMiscLocalization({
-	tower		= "The door barring the",--The door barring the South/North Tower has been breached!
-	demolisher	= "[Kor'kron Demolisher]|h|r to assault the tower!"--In case they remove the bad epiccenter spellid will use this
+	newForces1	= "Here they come!",--Jaina's line, horde may not be same
+	newForces2	= "Dragonmaw, advance!",
+	newForces3	= "For Hellscream!",
+	newForces4	= "Next squad, push forward!",
+	tower		= "The door barring the"--The door barring the South/North Tower has been breached!
 })
 
 --------------------
@@ -54,12 +67,21 @@ L= DBM:GetModLocalization(856)
 ---------------------
 L= DBM:GetModLocalization(850)
 
+L:SetWarningLocalization({
+	warnDefensiveStanceSoon		= "Защитная стойка через %d сек."
+})
+
+L:SetOptionLocalization({
+	warnDefensiveStanceSoon		= "5 секундный отсчет перед $spell:143593"
+})
+
 L:SetMiscLocalization({
-	newForces1				= "Warriors, on the double!",
-	newForces2				= "Defend the gate!",
-	newForces3				= "Rally the forces!",
-	newForces4				= "Kor'kron, at my side!",
-	newForces5				= "Next squad, to the front!"
+	newForces1					= "Warriors, on the double!",
+	newForces2					= "Defend the gate!",
+	newForces3					= "Rally the forces!",
+	newForces4					= "Kor'kron, at my side!",
+	newForces5					= "Next squad, to the front!",
+	allForces					= "All Kor'kron... under my command... kill them... NOW!"
 })
 
 -----------------
@@ -73,6 +95,7 @@ L= DBM:GetModLocalization(846)
 L= DBM:GetModLocalization(870)
 
 L:SetMiscLocalization({
+	Module1 = "Module 1's all prepared for system reset.",
 	Victory	= "Module 2's all prepared for system reset"
 })
 
@@ -111,18 +134,9 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	calculatedTarget	= "choosing criteria",
-	--thanks to blizz, the only accurate way for this to work, is to translate 15 emotes in all languages
---	yellow				= "Yellow",
---	red					= "Red",
---	blue				= "Blue",
+	--thanks to blizz, the only accurate way for this to work, is to translate 5 emotes in all languages
 	purple				= "Purple",--Needs color code replacement still
 	green				= "Green",--Needs color code replacement still
---	bomb				= "Bomb",
---	sword				= "Sword",
---	drums				= "Drums",
---	mantid				= "Mantid",--Assumed
---	staff 				= "Staff",--Assumed
 	one					= "One",
 	two					= "Two",
 	three				= "Three",
