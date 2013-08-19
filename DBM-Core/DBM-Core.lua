@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10156 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10157 $"):sub(12, -3)),
 	DisplayVersion = "5.3.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10055 -- the revision of the latest stable version that is available
@@ -1937,7 +1937,7 @@ function DBM:UPDATE_MOUSEOVER_UNIT()
 					break
 				end
 			end
-		elseif (cId == 62346 or cId == 60491 or cId == 69161 or cId == 69099) and not IsAddOnLoaded("DBM-Pandaria") then--Mists of Pandaria World Bosses: Anger, Salyis
+		elseif (cId == 62346 or cId == 60491 or cId == 69161 or cId == 69099 or cId == 71953 or cId == 71954 or cId == 72057 or cId == 71953 or cId == 71955) and not IsAddOnLoaded("DBM-Pandaria") then--Mists of Pandaria World Bosses: Anger, Salyis
 			for i, v in ipairs(DBM.AddOns) do
 				if v.modId == "DBM-Pandaria" then
 					self:LoadMod(v)
@@ -1974,7 +1974,7 @@ function DBM:PLAYER_TARGET_CHANGED()
 					break
 				end
 			end
-		elseif (cId == 62346 or cId == 60491 or cId == 69161 or cId == 69099) and not IsAddOnLoaded("DBM-Pandaria") then
+		elseif (cId == 62346 or cId == 60491 or cId == 69161 or cId == 69099 or cId == 71953 or cId == 71954 or cId == 72057 or cId == 71953 or cId == 71955) and not IsAddOnLoaded("DBM-Pandaria") then
 			for i, v in ipairs(DBM.AddOns) do
 				if v.modId == "DBM-Pandaria" then
 					self:LoadMod(v)
