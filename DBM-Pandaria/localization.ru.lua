@@ -65,7 +65,8 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	Victory					= "Your hope shines brightly, and even more brightly when you work together to overcome. It will ever light your way in even the darkest of places."
+	Pull					= "Тогда начнем.",
+	Victory					= "Вас озаряет свет надежды, и он становится ярче, когда вы объединяетесь для свершений! Он будет светить вам даже в кромешной тьме."
 })
 
 ------------------------------
@@ -73,10 +74,22 @@ L:SetMiscLocalization({
 ------------------------------
 L= DBM:GetModLocalization(858)
 
+L:SetMiscLocalization({
+	Wave1					= "Думайте о последствиях своих действий!",
+	Wave2					= "Слушайте внутренний голос и стремитесь к истине!",
+	Pull					= "Начнем схватку!",
+	Victory					= "Мудрость помогла вам пройти испытание. Пусть она всегда ведет вас к свету."
+})
+
 --------------------------
 -- Niuzao, The Black Ox --
 --------------------------
 L= DBM:GetModLocalization(859)
+
+L:SetMiscLocalization({
+	Pull					= "Увидим.",
+	Victory					= "Вас будут окружать враги невероятной силы. Большей, чем вы можете представить. Но вы все выдержите благодаря своей стойкости. Помните об этом!"
+})
 
 ---------------------------
 -- Xuen, The White Tiger --
@@ -84,7 +97,8 @@ L= DBM:GetModLocalization(859)
 L= DBM:GetModLocalization(860)
 
 L:SetMiscLocalization({
-	Victory					= "You are strong, stronger even than you realize. Carry this thought with you into the darkness ahead, and let it shield you."
+	Pull					= "Ха-ха. Испытание начинается!",
+	Victory					= "Вы сильны, даже сильнее, чем представляете! Ступайте с этим знанием во тьму, и оно защитит вас."
 })
 
 ------------------------------------
