@@ -2,11 +2,11 @@ if GetBuildInfo() ~= "5.4.0" then return end
 local mod	= DBM:NewMod(859, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10162 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10165 $"):sub(12, -3))
 mod:SetCreatureID(71954)
-mod:SetMinSyncRevision(10161)
+mod:SetMinSyncRevision(10162)
 
-mod:RegisterCombat("yell", L.Pull)
+mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
 	"SPELL_CAST_START",
@@ -74,11 +74,11 @@ mod.SPELL_AURA_APPLIED_DOSE = mod.SPELL_AURA_APPLIED
 function mod:CHAT_MSG_MONSTER_YELL(msg)
 	if msg == L.VictoryDem then--Only have demonic not regular yet
 		self:SendSync("Victory")
---[[	elseif msg == L.Pull and not self:IsInCombat() then
+	elseif msg == L.Pull and not self:IsInCombat() then
 		if self:GetCIDFromGUID(UnitGUID("target")) == 71954 or self:GetCIDFromGUID(UnitGUID("targettarget")) == 71954 then
 			yellTriggered = true
 			DBM:StartCombat(self, 0)
-		end--]]
+		end
 	end
 end
 
