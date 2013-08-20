@@ -52,7 +52,7 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	Pull				= "Чувствуете порывы холодного ветра? Приближается буря…"
+	Pull				= "Чувствуете порывы холодного ветра?"
 })
 
 ---------------------------
@@ -62,6 +62,10 @@ L= DBM:GetModLocalization(857)
 
 L:SetOptionLocalization({
 	BeaconArrow				= "Показывать стрелку DBM когда на ком-то $spell:144473"
+})
+
+L:SetMiscLocalization({
+	Victory					= "Your hope shines brightly, and even more brightly when you work together to overcome. It will ever light your way in even the darkest of places."
 })
 
 ------------------------------
@@ -78,6 +82,10 @@ L= DBM:GetModLocalization(859)
 -- Xuen, The White Tiger --
 ---------------------------
 L= DBM:GetModLocalization(860)
+
+L:SetMiscLocalization({
+	Victory					= "You are strong, stronger even than you realize. Carry this thought with you into the darkness ahead, and let it shield you."
+})
 
 ------------------------------------
 -- Ordos, Fire-God of the Yaungol --
