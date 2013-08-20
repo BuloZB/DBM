@@ -2,11 +2,12 @@ if GetBuildInfo() ~= "5.4.0" then return end
 local mod	= DBM:NewMod(858, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10159 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10162 $"):sub(12, -3))
 mod:SetCreatureID(71955)
 mod:SetZone()
+mod:SetMinSyncRevision(10161)
 
-mod:RegisterCombat("combat")
+mod:RegisterCombat("yell", L.Pull)
 
 mod:RegisterEventsInCombat(
 	"SPELL_CAST_START",
@@ -20,13 +21,13 @@ mod:RegisterEvents(
 
 local warnJadefireBreath		= mod:NewSpellAnnounce(144530, 2, nil, mod:IsTank())
 local warnJadefireBolt			= mod:NewSpellAnnounce(144532, 3)--Target scanning works but only grabs one of like 3-5 targets.
-local warnJadefireWall			= mod:NewSpellAnnounce(144533, 4)
+--local warnJadefireWall			= mod:NewSpellAnnounce(144533, 4)
 
 local specWarnJadefireBreath	= mod:NewSpecialWarningSpell(144530, mod:IsTank())
 local specWarnJadefireBlaze		= mod:NewSpecialWarningMove(144538)
-local specWarnJadefireWall		= mod:NewSpecialWarningSpell(144533, nil, nil, nil, 2)
+--local specWarnJadefireWall		= mod:NewSpecialWarningSpell(144533, nil, nil, nil, 2)
 
-local timerJadefireBreathCD		= mod:NewCDTimer(19, 144530, nil, mod:IsTank())
+local timerJadefireBreathCD		= mod:NewCDTimer(18.5, 144530, nil, mod:IsTank())
 local timerJadefireBoltCD		= mod:NewCDTimer(18, 144532)
 --local timerJadefireWallCD		= mod:NewCDTimer(25, 144533)
 
@@ -79,13 +80,13 @@ function mod:SPELL_AURA_APPLIED(args)
 end
 
 function mod:CHAT_MSG_MONSTER_YELL(msg)
-	if msg == L.Pull and not self:IsInCombat() then
+	if msg == L.Victory then
+		self:SendSync("Victory")
+	--[[elseif msg == L.Pull and not self:IsInCombat() then
 		if self:GetCIDFromGUID(UnitGUID("target")) == 71955 or self:GetCIDFromGUID(UnitGUID("targettarget")) == 71955 then
 			yellTriggered = true
 			DBM:StartCombat(self, 0)
-		end
-	elseif msg == L.Victory then
-		self:SendSync("Victory")
+		end--]]
 	end
 end
 
