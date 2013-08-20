@@ -45,9 +45,9 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	newForces1	= "Here they come!",--Jaina's line, horde may not be same
+	newForces1	= "Вот и они!",--Jaina's line, horde may not be same, guessed
 	newForces2	= "Dragonmaw, advance!",
-	newForces3	= "For Hellscream!",
+	newForces3	= "За Адского крика!",--guessed
 	newForces4	= "Next squad, push forward!",
 	tower		= "The door barring the"--The door barring the South/North Tower has been breached!
 })
@@ -68,16 +68,16 @@ L= DBM:GetModLocalization(856)
 L= DBM:GetModLocalization(850)
 
 L:SetWarningLocalization({
-	warnDefensiveStanceSoon		= "Защитная стойка через %d сек."
+	warnDefensiveStanceSoon		= "Оборонительная стойка через %d сек."
 })
 
 L:SetOptionLocalization({
-	warnDefensiveStanceSoon		= "5 секундный отсчет перед $spell:143593"
+	warnDefensiveStanceSoon		= "Обратный отсчет за 5 секунд до $spell:143593"
 })
 
 L:SetMiscLocalization({
 	newForces1					= "Warriors, on the double!",
-	newForces2					= "Defend the gate!",
+	newForces2					= "Защищайте ворота!",--guessed
 	newForces3					= "Rally the forces!",
 	newForces4					= "Kor'kron, at my side!",
 	newForces5					= "Next squad, to the front!",
@@ -135,13 +135,13 @@ L:SetOptionLocalization({
 
 L:SetMiscLocalization({
 	--thanks to blizz, the only accurate way for this to work, is to translate 5 emotes in all languages
-	purple				= "Purple",--Needs color code replacement still
-	green				= "Green",--Needs color code replacement still
-	one					= "One",
-	two					= "Two",
-	three				= "Three",
-	four				= "Four",
-	five				= "Five",
+	purple				= "фиолетовый",--Needs color code replacement still, guessed
+	green				= "зеленый",--Needs color code replacement still, guessed
+	one					= "один",--guessed
+	two					= "два",--guessed
+	three				= "три",--guessed
+	four				= "четыре",--guessed
+	five				= "пять",--guessed
 	hisekFlavor			= "Look who's quiet now",--http://ptr.wowhead.com/quest=31510
 	KilrukFlavor		= "Just another day, culling the swarm",--http://ptr.wowhead.com/quest=31109
 	XarilFlavor			= "I see only dark skies in your future",--http://ptr.wowhead.com/quest=31216
