@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10165 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10167 $"):sub(12, -3)),
 	DisplayVersion = "5.3.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10055 -- the revision of the latest stable version that is available
@@ -4296,11 +4296,11 @@ function bossModPrototype:checkTankDistance(cid, distance)
 			x, y = GetPlayerMapPosition(uId)
 		end
 		local inRange = DBM.RangeCheck:GetDistance("player", x, y)--We check how far we are from the tank who has that boss
-		if (inRange and inRange < distance) or (x == 0 and y == 0) then--You are near the person tanking boss
-			return true
+		if (inRange and inRange > distance) or not (x == 0 and y == 0) then--You are not near the person tanking boss
+			return false
 		end
 	end
-	return false
+	return true
 end
 
 function bossModPrototype:Stop(cid)
