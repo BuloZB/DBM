@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10158 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10170 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 mod:SetZone()
 
@@ -59,7 +59,7 @@ local timerCrawlerMineCD		= mod:NewCDTimer(30, 144673)
 local timerSiegeModeCD			= mod:NewNextTimer(116, 84974, nil, nil, "timerSiegeModeCD")--Wish spell name was a litlte shorter but still better than localizing
 local timerCuttingLaser			= mod:NewTargetTimer(10, 146325)--Spell tooltip says 15 but combat log showed 10
 --local timerCuttingLaserCD		= mod:NewCDTimer(10, 146325)
---local timerShockPulseCD		= mod:NewCDTimer(10, 144485)
+--local timerShockPulseCD			= mod:NewCDTimer(16, 144485)--Assumed based on some adjustments in latest PTR build (no doubt from the complaining abougt a 10-25 second variation). Its probably 16-25 now
 --local timerNapalmOilCD		= mod:NewCDTimer(21.5, 144492)
 local timerDemolisherCanonCD	= mod:NewCDTimer(10, 144154)
 local timerMortarBarrageCD		= mod:NewCDTimer(30, 144555)
