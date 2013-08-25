@@ -135,13 +135,13 @@ L:SetOptionLocalization({
 
 L:SetMiscLocalization({
 	--thanks to blizz, the only accurate way for this to work, is to translate 5 emotes in all languages
-	purple				= "фиолетовый",--Needs color code replacement still, guessed
-	green				= "зеленый",--Needs color code replacement still, guessed
-	one					= "один",--guessed
-	two					= "два",--guessed
-	three				= "три",--guessed
-	four				= "четыре",--guessed
-	five				= "пять",--guessed
+	purple				= "Фиолетовый",--Needs color code replacement still, guessed
+	green				= "Зеленый",--Needs color code replacement still, guessed
+	one					= "Один",--guessed
+	two					= "Два",--guessed
+	three				= "Три",--guessed
+	four				= "Четыре",--guessed
+	five				= "Пять",--guessed
 	hisekFlavor			= "Look who's quiet now",--http://ptr.wowhead.com/quest=31510
 	KilrukFlavor		= "Just another day, culling the swarm",--http://ptr.wowhead.com/quest=31109
 	XarilFlavor			= "I see only dark skies in your future",--http://ptr.wowhead.com/quest=31216
