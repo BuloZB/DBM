@@ -44,7 +44,7 @@
 
 
 
-local revision =("$Revision: 10173 $"):sub(12, -3)
+local revision =("$Revision: 10184 $"):sub(12, -3)
 local FrameTitle = "DBM_GUI_Option_"	-- all GUI frames get automatically a name FrameTitle..ID
 
 local PanelPrototype = {}
@@ -422,7 +422,7 @@ do
 			textbeside = dropdown
 			textpad = 35
 		end
-		if dropdown or (name and name:find("|H")) then -- ...and replace it with a SimpleHTML frame
+		if name then -- switch all checkbutton frame to SimpleHTML frame (auto wrap)
 			_G[buttonName.."Text"] = CreateFrame("SimpleHTML", buttonName.."Text", button)
 			html = _G[buttonName.."Text"]
 			html:SetFontObject("GameFontNormal")

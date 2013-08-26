@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(852, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10129 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10180 $"):sub(12, -3))
 mod:SetCreatureID(71543)--Doesn't die, will need kill detection
 mod:SetReCombatTime(45)--Lets just assume he has same bug as tsulong in advance and avoid problems
 mod:SetZone()
@@ -113,11 +113,9 @@ end
 function mod:UNIT_POWER_FREQUENT(uId)
 	local power = UnitPower(uId)
 	if power == 0 and self:AntiSpam(3, 1) then
-		print("DBM Debug: Boss defeated?")
 	end
 	if power > lastPower then--Only time his power ever goes UP is when he is defeated. he reaches 0 power, then goes back to 1 power
 		DBM:EndCombat(self)
-		print("DBM Debug: Boss gained power. This has only been observed in victories so assuming this is a victory")
 	end
 	lastPower = power
 end

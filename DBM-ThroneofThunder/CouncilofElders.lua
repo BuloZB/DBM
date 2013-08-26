@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(816, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10140 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10185 $"):sub(12, -3))
 mod:SetCreatureID(69078, 69132, 69134, 69131)--69078 Sul the Sandcrawler, 69132 High Prestess Mar'li, 69131 Frost King Malakk, 69134 Kazra'jin --Adds: 69548 Shadowed Loa Spirit,
 mod:SetZone()
 mod:SetUsedIcons(7, 6)
@@ -259,7 +259,7 @@ function mod:SPELL_AURA_APPLIED(args)
 			dischargeCount = 0
 			kazraPossessed = true
 		end
-		if (self.Options.HealthFrame or DBM.Options.AlwaysShowHealthFrame) and self.Options.PHealthFrame then
+		if DBM.BossHealth:IsShown() and self.Options.PHealthFrame then
 			local bossHealth = math.floor(UnitHealthMax(uid or "boss4") * 0.25)
 			showDamagedHealthBar(self, args.destGUID, args.spellName.." : "..args.destName, bossHealth)
 		end
@@ -349,7 +349,7 @@ function mod:SPELL_AURA_REMOVED(args)
 			kazraPossessed = false
 			timerRecklessChargeCD:Cancel()--Because it's not going to be 25 sec anymore. It'll go back to 6 seconds. He'll probably do it right away since more than likely it'll be off CD
 		end
-		if (self.Options.HealthFrame or DBM.Options.AlwaysShowHealthFrame) and self.Options.PHealthFrame then
+		if DBM.BossHealth:IsShown() and self.Options.PHealthFrame then
 			hideDamagedHealthBar()
 		end
 	elseif args.spellId == 136903 then

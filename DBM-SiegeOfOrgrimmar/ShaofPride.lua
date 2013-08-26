@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10156 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10182 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -74,7 +74,7 @@ local timerBurstingPride		= mod:NewCastTimer(3, 144911)
 local timerProjection			= mod:NewCastTimer(6, 146822)
 
 local countdownSwellingPride	= mod:NewCountdown(60.5, 144400)
-local countdownReflection		= mod:NewCountdown(20.5, 144800, nil, nil, nil, nil, true)
+local countdownReflection		= mod:NewCountdown(20.5, 144800, false, nil, nil, nil, true)
 
 mod:AddBoolOption("InfoFrame")
 mod:AddBoolOption("SetIconOnMark", false)

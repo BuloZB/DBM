@@ -11,7 +11,7 @@ L:SetWarningLocalization({
 })
 
 L:SetOptionLocalization({
-	specWarnWaterMove	= "$spell:138470 위에 있을 때 특수 경고 보기\n($spell:137313 시전 직전 또는 $spell:138732 약화 효과 시간이 얼마 안 남았을때)"
+	specWarnWaterMove	= "$spell:138470 위에 있을 때 특수 경고 보기<br/>($spell:137313 시전 직전 또는 $spell:138732 약화 효과 시간이 얼마 안 남았을때)"
 })
 
 --------------
@@ -55,7 +55,7 @@ L:SetWarningLocalization({
 
 L:SetOptionLocalization({
 	PHealthFrame		= "우두머리 체력 바 사용시 $spell:136442 사라짐까지 남은 체력도 함께 보기",
-	AnnounceCooldowns	= "공격대 생존기 사용을 위해 $spell:137166 시전 횟수를 음성으로 듣기\n(카즈라진의 빙의가 풀리면 초기화됨)"
+	AnnounceCooldowns	= "공격대 생존기 사용을 위해 $spell:137166 시전 횟수를 음성으로 듣기<br/>(카즈라진의 빙의가 풀리면 초기화됨)"
 })
 
 ------------
@@ -167,7 +167,7 @@ L:SetOptionLocalization({
 	specWarnFogRevealed			= "안개도깨비가 드러날 때 특수 경고 보기",
 	ArrowOnBeam					= "$journal:6882 시전 중에 이동해야 될 방향을 DBM 화살표로 보기",
 	InfoFrame					= "$spell:133795 중첩 정보 창 보기",
-	SetParticle					= "전투 시작시 입자 밀도를 최저로 설정하기\n(전투 종료후 원래 설정이 복구됩니다.)"
+	SetParticle					= "전투 시작시 입자 밀도를 최저로 설정하기<br/>(전투 종료후 원래 설정이 복구됩니다.)"
 })
 
 L:SetMiscLocalization({
@@ -215,7 +215,7 @@ L:SetWarningLocalization({
 })
 
 L:SetOptionLocalization({
-	RangeFrame		= "전투 진영에 따라 거리 창 보기(10m)\n(일정 인원 이상이 뭉쳐 있을 때만 보이는 똑똑한 거리 창 입니다.)",
+	RangeFrame		= "전투 진영에 따라 거리 창 보기(10m)<br/>(일정 인원 이상이 뭉쳐 있을 때만 보이는 똑똑한 거리 창 입니다.)",
 	InfoFrame		= "$spell:136193 주문에 영향을 받은 대상을 정보 창에서 보기"
 })
 
@@ -271,25 +271,17 @@ L:SetMiscLocalization({
 L= DBM:GetModLocalization(831)
 
 L:SetWarningLocalization({
-	specWarnVitaSoaker			= "당신이 다음 불안정한 생령 전이자 입니다!",
-	warnVitaSoakerSoon			= "불안정한 생령 전이까지 2명 남음",
 	specWarnUnstablVitaJump		= "당신에게 불안정한 생령 전이됨!"
 })
 
 L:SetOptionLocalization({
-	warnVitaSoakerSoon			= "$spell:138297 전이 차례가 두번째 일때 알림 보기(정보 창 필요)",
 	specWarnUnstablVitaJump		= "$spell:138297 주문이 당신에게 전이된 경우 특수 경고 보기",
-	specWarnVitaSoaker			= "다음 $spell:138297 전이 차례가 당신일 경우 특수 경고 보기(정보 창 필요)",
-	SetIconsOnVita				= "$spell:138297 대상과 그 대상에서 가장 먼 공격대원에게 전술 목표 아이콘 설정",
-	InfoFrame					= "$spell:138372 효과가 없는 대상을 정렬하여 정보 창에서 보기<br/>(방어 전담 제외, 불안정한 생령 전이 알림 사용시 반드시 활성화 되어 있어야 합니다.)",
-	AnnounceVitaSoaker			= "다음 $spell:138297 전이자를 공격대 경보 대화로 알리기(승급 권한 필요)"
+	SetIconsOnVita				= "$spell:138297 대상과 그 대상에서 가장 먼 공격대원에게 전술 목표 아이콘 설정"
 })
 
 L:SetMiscLocalization({
 	Defeat						= "잠깐",
-	NoSensitivity				= "생령 전이 순서",
-	VitaSoakerOptionConflict	= "경고: 불안정한 생령 전이 알림이 설정 되어 있으나, 정보창이 꺼져 있습니다. 이 기능은 정보창 없이는 작동하지 않습니다!",
-	VitaChatMessage				= "다음 불안정한 생령 전이자 : %s"
+	BigWigsRecommendation		= "불안정한 생령 전이 도우미가 필요할 경우, BigWigs 및 BigWigs Ra-den assist 애드온을 이용하시는 것을 권장합니다."
 })
 
 -------------

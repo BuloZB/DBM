@@ -34,6 +34,24 @@ L:SetOptionLocalization({
 --------------
 L= DBM:GetModLocalization(868)
 
+L:SetTimerLocalization({
+	timerAddsCD		= "다음 병사",
+	timerTowerCD	= "다음 포탑과 병사"
+})
+
+L:SetOptionLocalization({
+	timerAddsCD		= "다음 정예 병사 바 표시",
+	timerTowerCD	= "다음 포탑 포격 바 표시"--번역이 조금 다른데? 나중에 확인
+})
+
+L:SetMiscLocalization({
+	newForces1		= "Here they come!",--Jaina's line, horde may not be same, 호드의 경우 다시 확인
+	newForces2		= "Dragonmaw, advance!",
+	newForces3		= "For Hellscream!",
+	newForces4		= "Next squad, push forward!",
+	tower			= "The door barring the"--The door barring the South/North Tower has been breached!
+})
+
 --------------------
 --Iron Juggernaut --
 --------------------
@@ -49,12 +67,21 @@ L= DBM:GetModLocalization(856)
 ---------------------
 L= DBM:GetModLocalization(850)
 
-L:SetMiscLocalization({--정식버전 출시시 로컬라이징 필요
-	newForces1				= "Warriors, on the double!",
-	newForces2				= "Defend the gate!",
-	newForces3				= "Rally the forces!",
-	newForces4				= "Kor'kron, at my side!",
-	newForces5				= "Next squad, to the front!"
+L:SetWarningLocalization({
+	warnDefensiveStanceSoon		= "%d초 후 방어 태세"
+})
+
+L:SetOptionLocalization({
+	warnDefensiveStanceSoon		= "$spell:143593 주문의 사전 초읽기 알림 보기(5초 전부터)"
+})
+
+L:SetMiscLocalization({
+	newForces1					= "Warriors, on the double!",
+	newForces2					= "Defend the gate!",
+	newForces3					= "Rally the forces!",
+	newForces4					= "Kor'kron, at my side!",
+	newForces5					= "Next squad, to the front!",
+	allForces					= "All Kor'kron... under my command... kill them... NOW!"
 })
 
 -----------------
@@ -67,13 +94,18 @@ L= DBM:GetModLocalization(846)
 ------------------------
 L= DBM:GetModLocalization(870)
 
+L:SetMiscLocalization({
+	Module1 = "Module 1's all prepared for system reset.",
+	Victory	= "Module 2's all prepared for system reset"
+})
+
 ---------------------------
 -- Thok the Bloodthirsty --
 ---------------------------
 L= DBM:GetModLocalization(851)
 
 L:SetOptionLocalization({
-	RangeFrame	= "거리 창 보기(10m)\n(광기 경고 수치에 달한 공격대원만 보임)"
+	RangeFrame	= "거리 창 보기(10m)<br/>(광기 경고 수치에 달한 공격대원만 보임)"
 })
 
 ----------------------------
@@ -102,22 +134,14 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	calculatedTarget	= "calculating eye!",
-	yellow				= "Yellow",
-	red					= "Red",
-	blue				= "Blue",
-	purple				= "Purple",
-	green				= "Green",
-	bomb				= "Bomb",
-	sword				= "Swords",
-	drums				= "Drums",
-	mantid				= "Mantid",--Assumed
-	staff 				= "Staff",--Assumed
+	--thanks to blizz, the only accurate way for this to work, is to translate 5 emotes in all languages
+	purple				= "Purple",--Needs color code replacement still
+	green				= "Green",--Needs color code replacement still
 	one					= "One",
-	two					= "Pair",
+	two					= "Two",
 	three				= "Three",
-	four				= "Four",--Assumed
-	five				= "Five",--Assumed
+	four				= "Four",
+	five				= "Five",
 	hisekFlavor			= "Look who's quiet now",--http://ptr.wowhead.com/quest=31510
 	KilrukFlavor		= "Just another day, culling the swarm",--http://ptr.wowhead.com/quest=31109
 	XarilFlavor			= "I see only dark skies in your future",--http://ptr.wowhead.com/quest=31216

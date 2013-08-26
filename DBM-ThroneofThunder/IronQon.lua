@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(817, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10140 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10185 $"):sub(12, -3))
 mod:SetCreatureID(68078, 68079, 68080, 68081)--Ro'shak 68079, Quet'zal 68080, Dam'ren 68081, Iron Qon 68078
 mod:SetMainBossID(68078)
 mod:SetZone()
@@ -431,7 +431,7 @@ function mod:UNIT_DIED(args)
 	if cid == 68079 then--Ro'shak
 		timerUnleashedFlameCD:Cancel()
 		timerMoltenOverload:Cancel()
-		if self:IsDifficulty("heroic10", "heroic25") then--In heroic, all mounts die in phase 4.
+		if self:IsDifficulty("heroic10", "heroic25") and DBM.BossHealth:IsShown() then--In heroic, all mounts die in phase 4.
 			DBM.BossHealth:RemoveBoss(cid)
 		else
 			if self.Options.RangeFrame then
@@ -466,7 +466,7 @@ function mod:UNIT_DIED(args)
 				DBM.RangeCheck:Hide()
 			end
 		end
-		if self:IsDifficulty("heroic10", "heroic25") then--In heroic, all mounts die in phase 4.
+		if self:IsDifficulty("heroic10", "heroic25") and DBM.BossHealth:IsShown() then--In heroic, all mounts die in phase 4.
 			DBM.BossHealth:RemoveBoss(cid)
 		else
 			phase = 3
@@ -480,7 +480,7 @@ function mod:UNIT_DIED(args)
 	elseif cid == 68081 then--Dam'ren
 		timerDeadZoneCD:Cancel()
 		timerFreezeCD:Cancel()
-		if self:IsDifficulty("heroic10", "heroic25") then--In heroic, all mounts die in phase 4.
+		if self:IsDifficulty("heroic10", "heroic25") and DBM.BossHealth:IsShown() then--In heroic, all mounts die in phase 4.
 			DBM.BossHealth:RemoveBoss(cid)
 		else
 			phase = 4
