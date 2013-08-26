@@ -197,6 +197,7 @@ L.DontShowPT					= "Не отображать таймер пулла"
 L.DontShowPTCountdownText		= "Не отображать текст отсчета таймера пулла"
 L.DontPlayPTCountdown			= "Не воспроизводить звук отсчета таймера пулла"
 L.DontShowPTText				= "Не отображать текст объявления для таймера пулла"
+L.DontShowPTNoID				= "Блокировать таймеры пулла, отправленные без идентификатора зоны"
 
 L.Panel_HideBlizzard			= "Скрыть Blizzard"
 L.Area_HideBlizzard				= "Настройки скрытия Blizzard"
