@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(821, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10106 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10174 $"):sub(12, -3))
 mod:SetCreatureID(68065, 70235, 70247)--Frozen 70235, Venomous 70247 (only 2 heads that ever start in front, so no need to look for combat with arcane or fire for combat detection)
 mod:SetMainBossID(68065)
 mod:SetZone()
@@ -148,9 +148,9 @@ local function CheckHeads(GUID)
 	local megaeraFound = false
 	for i = 1, 5 do
 		if UnitExists("boss"..i) then--Check if new units exist we haven't detected and added yet.
+			local cid = mod:GetCIDFromGUID(UnitGUID("boss"..i))
 			if not activeHeadGUIDS[UnitGUID("boss"..i)] then
 				activeHeadGUIDS[UnitGUID("boss"..i)] = true
-				local cid = mod:GetCIDFromGUID(UnitGUID("boss"..i))
 				if cid == 70235 then--Frozen
 					iceInFront = iceInFront + 1
 					if iceBehind > 0 then
@@ -179,7 +179,7 @@ local function CheckHeads(GUID)
 		end
 	end
 	if not megaeraFound then--If you reset megaera with a vanish or feign death, etc. EncounterInProgress() stays true after wipe
-		DBM:EndCombat(self, true)--So we need this work around to detect and force end combat on megaera if this happens
+		DBM:EndCombat(mod, true)--So we need this work around to detect and force end combat on megaera if this happens
 	end
 --	print("DBM Boss Debug: ", "Active Heads: ".."Fire: "..fireInFront.." Ice: "..iceInFront.." Venom: "..venomInFront.." Arcane: "..arcaneInFront)
 --	print("DBM Boss Debug: ", "Inactive Heads: ".."Fire: "..fireBehind.." Ice: "..iceBehind.." Venom: "..venomBehind.." Arcane: "..arcaneBehind)

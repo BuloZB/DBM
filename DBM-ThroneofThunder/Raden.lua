@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(831, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10122 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10174 $"):sub(12, -3))
 mod:SetCreatureID(69473)--69888
 mod:SetZone()
 mod:SetUsedIcons(2, 1)
@@ -104,8 +104,6 @@ function mod:OnCombatStart(delay)
 	creationCount = 0
 	stalkerCount = 0
 	horrorCount = 0
-	lastPlayerOne = nil
-	lastPlayerTwo = nil
 	timerCreationCD:Start(11-delay, 1)
 	countdownCreation:Start(11-delay)
 	if not BigWigs and not self.Options.ShowedBigWigsmessage then

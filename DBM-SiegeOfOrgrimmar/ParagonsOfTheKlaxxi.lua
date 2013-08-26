@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10170 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10174 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetZone()
 mod:SetUsedIcons(1)
@@ -662,9 +662,9 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg)--This emote always comes first hopefu
 	end
 end
 
-local function delayMonsterEmote()
+local function delayMonsterEmote(target)
 	--Because now the raid boss emotes fire AFTER this and we need them first
-	local target = DBM:GetFullNameByShortName(target)
+	target = DBM:GetFullNameByShortName(target)
 	warnCalculated:Show(target)
 	timerCalculated:Start()
 	timerInsaneCalculationCD:Start()
@@ -774,6 +774,6 @@ end
 function mod:CHAT_MSG_MONSTER_EMOTE(msg, npc, _, _, target)
 	if npc == calculatingDude then
 		self:Unschedule(delayMonsterEmote)
-		self:Schedule(0.5, delayMonsterEmote)
+		self:Schedule(0.5, delayMonsterEmote, target)
 	end
 end
