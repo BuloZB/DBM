@@ -16,8 +16,17 @@ L= DBM:GetModLocalization(849)
 ---------------------------
 L= DBM:GetModLocalization(866)
 
+L:SetTimerLocalization{
+	timerCombatStarts	= "Бой начинается"
+}
+
 L:SetOptionLocalization({
+	timerCombatStarts	= "Отсчет времени до начала боя",
 	InfoFrame			= "Информационное окно для $journal:8252"
+})
+
+L:SetMiscLocalization({
+	wasteOfTime			= "Very well, I will create a field to keep your corruption quarantined."
 })
 
 ------------------
@@ -61,6 +70,10 @@ L= DBM:GetModLocalization(864)
 -- Kor'kron Dark Shaman --
 --------------------------
 L= DBM:GetModLocalization(856)
+
+L:SetMiscLocalization({
+	PrisonYell		= "Тюрьма на %s спадает (%d)"
+})
 
 ---------------------
 -- General Nazgrim --
@@ -135,8 +148,6 @@ L:SetOptionLocalization({
 
 L:SetMiscLocalization({
 	--thanks to blizz, the only accurate way for this to work, is to translate 5 emotes in all languages
-	purple				= "Фиолетовый",--Needs color code replacement still, guessed
-	green				= "Зеленый",--Needs color code replacement still, guessed
 	one					= "Один",--guessed
 	two					= "Два",--guessed
 	three				= "Три",--guessed
