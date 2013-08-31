@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10198 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10202 $"):sub(12, -3)),
 	DisplayVersion = "5.3.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.6", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10174 -- the revision of the latest stable version that is available
@@ -2800,7 +2800,7 @@ do
 	function DBM:INSTANCE_ENCOUNTER_ENGAGE_UNIT()
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
-				if v.type == "combat" and isBossEngaged(v.multiMobPullDetection or v.mob) then
+				if v.type == "combat" and isBossEngaged(v.multiMobPullDetection or v.mob) and IsEncounterInProgress() then
 					self:StartCombat(v.mod, 0)
 				end
 			end

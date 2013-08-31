@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10198 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10202 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249)--Boss needs to engage off Varian/Lor'themar, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(120)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
@@ -68,8 +68,8 @@ local specWarnFlamesofGalakrondTank	= mod:NewSpecialWarningStack(147029, mod:IsT
 local specWarnFlamesofGalakrondOther= mod:NewSpecialWarningTarget(147029, mod:IsTank())
 
 --Stage 2: Bring Her Down!
-local timerAddsCD					= mod:NewTimer(55, "timerAddsCD")
-local timerTowerCD					= mod:NewTimer(20, "timerTowerCD")
+local timerAddsCD					= mod:NewTimer(55, "timerAddsCD", 2457)
+local timerTowerCD					= mod:NewTimer(20, "timerTowerCD", 88852)
 local timerDemolisherCD				= mod:NewNextTimer(20, "ej8562", nil, nil, nil, 116040)--EJ is just not complete yet, shouldn't need localizing
 ----High Enforcer Thranok (Road)
 local timerShatteringCleaveCD		= mod:NewCDTimer(7.5, 146849, nil, mod:IsTank())
@@ -233,12 +233,10 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg)
 		demoCount = demoCount + 1
 		warnDemolisher:Show()
 		if demoCount == 1 then
-			timerAddsCD:Start(90)--May be 34-35 as well and i was out of range of yell (since i was assaulting tower pretty far away) If i missed one the rest of timers were all be wrong
+			timerAddsCD:Start(90)
 		elseif demoCount == 2 then
 			timerAddsCD:Start(34)
 		end
---	elseif msg == L.tower or msg:find(L.tower) then
-		--towerCount = towerCount + 1
 	end
 end
 
