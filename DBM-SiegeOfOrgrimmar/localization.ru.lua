@@ -54,11 +54,11 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	newForces1	= "Вот и они!",--Jaina's line, horde may not be same, guessed
-	newForces2	= "Dragonmaw, advance!",
-	newForces3	= "За Адского крика!",--guessed
-	newForces4	= "Next squad, push forward!",
-	tower		= "The door barring the"--The door barring the South/North Tower has been breached!
+	newForces1	= "Вот и они!",--Jaina's line, horde may not be same
+	newForces2	= "Драконья Пасть, вперед!",
+	newForces3	= "За Гарроша!",
+	newForces4	= "Следующий отряд!",
+	tower		= "Дверь "--Дверь южной/северной башни разбита!
 })
 
 --------------------
