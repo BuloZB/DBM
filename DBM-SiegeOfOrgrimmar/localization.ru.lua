@@ -89,12 +89,12 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	newForces1					= "Warriors, on the double!",
-	newForces2					= "Защищайте ворота!",--guessed
-	newForces3					= "Rally the forces!",
-	newForces4					= "Kor'kron, at my side!",
-	newForces5					= "Next squad, to the front!",
-	allForces					= "All Kor'kron... under my command... kill them... NOW!"
+	newForces1					= "Воины, бегом!",
+	newForces2					= "Удерживайте врата!",
+	newForces3					= "Сомкнуть ряды!",
+	newForces4					= "Кор'крон, ко мне!",
+	newForces5					= "Следующий отряд, вперед!",
+	allForces					= "Кор'кронцы... все, кто со мной! Убейте их!"
 })
 
 -----------------
