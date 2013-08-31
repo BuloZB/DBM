@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10170 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10196 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 mod:SetZone()
 
@@ -126,7 +126,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		timerIgniteArmorCD:Start()
 		if amount >= 3 then
 			if args:IsPlayer() then
-				specWarnIgniteArmor:Show(args.amount)
+				specWarnIgniteArmor:Show(amount)
 			else
 				specWarnIgniteArmorOther:Show(args.destName)
 			end
