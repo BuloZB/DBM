@@ -200,6 +200,7 @@ DBM_CORE_AUTO_SPEC_WARN_TEXTS = {
 	move		= "%s - move away",
 	run			= "%s - run away",
 	cast		= "%s - stop casting",
+	reflect		= "%s - stop attacking",
 	count		= "%s! (%%d)",
 	stack		= "%%d stacks of %s on you",
 	switch		= ">%s< - switch targets"
@@ -219,7 +220,8 @@ DBM_CORE_AUTO_SPEC_WARN_OPTIONS = {
 	close 		= "Show special warning when someone close to you is affected by $spell:%s",
 	move 		= "Show special warning to move out from $spell:%s",
 	run 		= "Show special warning to run away from $spell:%s",
-	cast 		= "Show special warning for $spell:%s cast",
+	cast 		= "Show special warning to stop casting for $spell:%s",--Spell Interrupt
+	reflect 	= "Show special warning to stop attacking $spell:%s",--Spell Reflect
 	count 		= "Show special warning for $spell:%s",
 	stack 		= "Show special warning when you are affected by >=%d stacks of $spell:%s",--too long?
 	switch		= "Show special warning to switch targets for $spell:%s"
