@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10191 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10226 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetZone()
 mod:SetUsedIcons(1)
@@ -80,22 +80,20 @@ local specWarnDeathFromAboveNear	= mod:NewSpecialWarningClose(142232)
 local yellDeathFromAbove			= mod:NewYell(142232)
 --Xaril the Poisoned-Mind
 local specWarnCausticBlood			= mod:NewSpecialWarningSpell(142315, mod:IsTank())
-mod:AddBoolOption("specWarnToxicInjection", true, "announce")--Combine the 7 special warnings for same spell into 1
-local specWarnToxicBlue				= mod:NewSpecialWarningYou(142532, nil, false)
-local specWarnToxicRed				= mod:NewSpecialWarningYou(142533, nil, false)
-local specWarnToxicYellow			= mod:NewSpecialWarningYou(142534, nil, false)
-local specWarnToxicOrange			= mod:NewSpecialWarningYou(142547, nil, false)--Heroic
-local specWarnToxicPurple			= mod:NewSpecialWarningYou(142548, nil, false)--Heroic
-local specWarnToxicGreen			= mod:NewSpecialWarningYou(142549, nil, false)--Heroic
---local specWarnToxicWhite			= mod:NewSpecialWarningYou(142550, nil, false)--Not in EJ
-mod:AddBoolOption("specWarnToxicCatalyst", true, "announce")--Combine the cataclysts as well.
-local specWarnCatalystBlue			= mod:NewSpecialWarningYou(142725, nil, false, nil, 3)
-local specWarnCatalystRed			= mod:NewSpecialWarningYou(142726, nil, false, nil, 3)
-local specWarnCatalystYellow		= mod:NewSpecialWarningYou(142727, nil, false, nil, 3)
-local specWarnCatalystOrange		= mod:NewSpecialWarningYou(142728, nil, false, nil, 3)--Heroic
-local specWarnCatalystPurple		= mod:NewSpecialWarningYou(142729, nil, false, nil, 3)--Heroic
-local specWarnCatalystGreen			= mod:NewSpecialWarningYou(142730, nil, false, nil, 3)--Heroic
---local specWarnCatalystWhite		= mod:NewSpecialWarningYou(142731, nil, false, nil, 3)--Not in EJ
+local specWarnToxicBlue				= mod:NewSpecialWarningYou(142532)
+local specWarnToxicRed				= mod:NewSpecialWarningYou(142533)
+local specWarnToxicYellow			= mod:NewSpecialWarningYou(142534)
+local specWarnToxicOrange			= mod:NewSpecialWarningYou(142547)--Heroic
+local specWarnToxicPurple			= mod:NewSpecialWarningYou(142548)--Heroic
+local specWarnToxicGreen			= mod:NewSpecialWarningYou(142549)--Heroic
+--local specWarnToxicWhite			= mod:NewSpecialWarningYou(142550)--Not in EJ
+local specWarnCatalystBlue			= mod:NewSpecialWarningYou(142725, nil, nil, nil, 3)
+local specWarnCatalystRed			= mod:NewSpecialWarningYou(142726, nil, nil, nil, 3)
+local specWarnCatalystYellow		= mod:NewSpecialWarningYou(142727, nil, nil, nil, 3)
+local specWarnCatalystOrange		= mod:NewSpecialWarningYou(142728, nil, nil, nil, 3)--Heroic
+local specWarnCatalystPurple		= mod:NewSpecialWarningYou(142729, nil, nil, nil, 3)--Heroic
+local specWarnCatalystGreen			= mod:NewSpecialWarningYou(142730, nil, nil, nil, 3)--Heroic
+--local specWarnCatalystWhite		= mod:NewSpecialWarningYou(142731, nil, nil, nil, 3)--Not in EJ
 mod:AddBoolOption("yellToxicCatalyst", true, "misc")--And lastly, combine yells
 local yellCatalystBlue				= mod:NewYell(142725, nil, nil, false)
 local yellCatalystRed				= mod:NewYell(142726, nil, nil, false)
@@ -203,7 +201,7 @@ local function DFAScan()
 	for i = 1, 5 do
 		local unitID = "boss"..i
 		if UnitExists(unitID) and mod:GetCIDFromGUID(UnitGUID(unitID)) == 71161 then
-			if UnitExists(unitID.."target") and not self:IsTanking(uId, unitID) then
+			if UnitExists(unitID.."target") and not mod:IsTanking(unitID.."target", unitID) then
 				mod:Unschedule(DFAScan)
 				local targetname = DBM:GetUnitFullName(unitID.."target")
 				warnDeathFromAbove:Show(targetname)
@@ -233,7 +231,10 @@ local function CheckBosses(GUID)
 	local vulnerable = false
 	for i = 1, 5 do
 		local unitID = "boss"..i
-		if UnitExists(unitID) and not activeBossGUIDS[UnitGUID(unitID)] then--Check if new units exist we haven't detected and added yet.
+		--"<0.0 19:23:10> [INSTANCE_ENCOUNTER_ENGAGE_UNIT] Fake Args:#1#1#Xaril the Poisoned Mind#0xF13115F500000294#elite#228971920#1#1#Kaz'tik the Manipulator#0xF13115F400000293#elite#183177232#1#1#Hisek the Swarmkeeper#0xF13115F100000290
+		--"<7.4 19:23:17> [INSTANCE_ENCOUNTER_ENGAGE_UNIT] Fake Args:#1#1#Kaz'tik the Manipulator#0xF13115F400000293#elite#183177232#1#1#Xaril the Poisoned Mind#0xF13115F500000294#elite#228971920#1#1#Kil'ruk the Wind-Reaver#0xF13115F900000297#elite#261682208#1#1#Hisek the Swarmkeeper
+		--Only 3 bosses activate, but for some reason inactive bosses are sometimes firing IEEU, all I can do now is try to fix it using UnitAffectingCombat
+		if UnitExists(unitID) and not activeBossGUIDS[UnitGUID(unitID)] and UnitAffectingCombat(unitID) then--Check if new units exist we haven't detected and added yet.
 			activeBossGUIDS[UnitGUID(unitID)] = true
 			activatedTargets[#activatedTargets + 1] = UnitName(unitID)
 			--Activation Controller
@@ -246,11 +247,11 @@ local function CheckBosses(GUID)
 			elseif cid == 71156 then--Kaz'tik the Manipulator
 		
 			elseif cid == 71155 then--Korven the Prime
-				timerShieldBashCD:Start(25)
+--				timerShieldBashCD:Start(25)
 			elseif cid == 71160 then--Iyyokuk the Lucid
-				timerInsaneCalculationCD:Start()
+--				timerInsaneCalculationCD:Start()
 			elseif cid == 71154 then--Ka'roz the Locust
-				timerFlashCD:Start(15)
+--				timerFlashCD:Start(15)
 			elseif cid == 71152 then--Skeer the Bloodseeker
 				--timerBloodlettingCD:Start()
 				if UnitDebuff("player", GetSpellInfo(143279)) then vulnerable = true end
@@ -295,7 +296,7 @@ end
 --^don't let above fool you, not all of the paragons fire this spell!!! that is why we MUST use IEEU
 function mod:INSTANCE_ENCOUNTER_ENGAGE_UNIT()
 	self:Unschedule(CheckBosses)
-	self:Schedule(0.2, CheckBosses)--Delay check to make sure we run function only once on pull
+	self:Schedule(0.5, CheckBosses)--Delay check to make sure we run function only once on pull
 end
 
 function mod:SPELL_CAST_START(args)
@@ -305,9 +306,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystBlue:Show()
 		end
 		if UnitDebuff("player", GetSpellInfo(142532)) then
-			if self.Options.specWarnToxicCatalyst then
-				specWarnCatalystBlue:Show()
-			end
+			specWarnCatalystBlue:Show()
 			if self.Options.yellToxicCatalyst then
 				yellCatalystBlue:Yell()
 			end
@@ -318,9 +317,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystRed:Show()
 		end
 		if UnitDebuff("player", GetSpellInfo(142533)) then
-			if self.Options.specWarnToxicCatalyst then
-				specWarnCatalystRed:Show()
-			end
+			specWarnCatalystRed:Show()
 			if self.Options.yellToxicCatalyst then
 				yellCatalystRed:Yell()
 			end
@@ -331,9 +328,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystYellow:Show()
 		end
 		if UnitDebuff("player", GetSpellInfo(142534)) then
-			if self.Options.specWarnToxicCatalyst then
-				specWarnCatalystYellow:Show()
-			end
+			specWarnCatalystYellow:Show()
 			if self.Options.yellToxicCatalyst then
 				yellCatalystYellow:Yell()
 			end
@@ -344,9 +339,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystOrange:Show()
 		end
 		if UnitDebuff("player", GetSpellInfo(142547)) then
-			if self.Options.specWarnToxicCatalyst then
-				specWarnCatalystOrange:Show()
-			end
+			specWarnCatalystOrange:Show()
 			if self.Options.yellToxicCatalyst then
 				yellCatalystOrange:Yell()
 			end
@@ -357,9 +350,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystPurple:Show()
 		end
 		if UnitDebuff("player", GetSpellInfo(142548)) then
-			if self.Options.specWarnToxicCatalyst then
-				specWarnCatalystPurple:Show()
-			end
+			specWarnCatalystPurple:Show()
 			if self.Options.yellToxicCatalyst then
 				yellCatalystPurple:Yell()
 			end
@@ -370,9 +361,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystGreen:Show()
 		end
 		if UnitDebuff("player", GetSpellInfo(142549)) then
-			if self.Options.specWarnToxicCatalyst then
-				specWarnCatalystGreen:Show()
-			end
+			specWarnCatalystGreen:Show()
 			if self.Options.yellToxicCatalyst then
 				yellCatalystGreen:Yell()
 			end
@@ -436,17 +425,17 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif args.spellId == 143339 then
 		local amount = args.amount or 1
 		warnInjection:Show(args.destName, amount)
-	elseif args.spellId == 142532 and self.Options.specWarnToxicInjection and args:IsPlayer() then
+	elseif args.spellId == 142532 and args:IsPlayer() then
 		specWarnToxicBlue:Show()
-	elseif args.spellId == 142533 and self.Options.specWarnToxicInjection and args:IsPlayer() then
+	elseif args.spellId == 142533 and args:IsPlayer() then
 		specWarnToxicRed:Show()
-	elseif args.spellId == 142534 and self.Options.specWarnToxicInjection and args:IsPlayer() then
+	elseif args.spellId == 142534 and args:IsPlayer() then
 		specWarnToxicYellow:Show()
-	elseif args.spellId == 142547 and self.Options.specWarnToxicInjection and args:IsPlayer() then
+	elseif args.spellId == 142547 and args:IsPlayer() then
 		specWarnToxicOrange:Show()
-	elseif args.spellId == 142548 and self.Options.specWarnToxicInjection and args:IsPlayer() then
+	elseif args.spellId == 142548 and args:IsPlayer() then
 		specWarnToxicPurple:Show()
-	elseif args.spellId == 142549 and self.Options.specWarnToxicInjection and args:IsPlayer() then
+	elseif args.spellId == 142549 and args:IsPlayer() then
 		specWarnToxicGreen:Show()
 	elseif args.spellId == 142671 then
 		warnMesmerize:Show(args.destName)
