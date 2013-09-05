@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(817, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10185 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10231 $"):sub(12, -3))
 mod:SetCreatureID(68078, 68079, 68080, 68081)--Ro'shak 68079, Quet'zal 68080, Dam'ren 68081, Iron Qon 68078
 mod:SetMainBossID(68078)
 mod:SetZone()
@@ -414,6 +414,11 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		timerWindStorm:Schedule(70)
 		timerWindStormCD:Start()
 	elseif spellId == 136146 and self:AntiSpam(2, 5) then
+		if phase < 4 then--Shit broke, which happens sometimes
+			phase = 4
+			timerThrowSpearCD:Cancel()
+			self:Unschedule(checkSpear)
+		end
 		fistSmashCount = fistSmashCount + 1
 		warnFistSmash:Show(fistSmashCount)
 		specWarnFistSmash:Show()

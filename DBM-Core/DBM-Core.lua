@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10227 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10236 $"):sub(12, -3)),
 	DisplayVersion = "5.3.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.6", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10174 -- the revision of the latest stable version that is available
@@ -173,6 +173,8 @@ DBM.DefaultOptions = {
 	DontPlayPTCountdown = false,
 	DontShowPTText = false,
 	DontShowPTNoID = false,
+	DontShowCTCount = false,
+	PTCountThreshold = 5,
 	LatencyThreshold = 250,
 	BigBrotherAnnounceToRaid = false,
 	SettingsMessageShown = false,
@@ -2143,6 +2145,10 @@ do
 		end
 	end
 
+	local function countDownTextDelay(timer)
+		TimerTracker_OnEvent(TimerTracker, "START_TIMER", 2, timer, timer)
+	end
+
 	local syncHandlers = {}
 	local whisperSyncHandlers = {}
 
@@ -2213,7 +2219,8 @@ do
 			dummyMod.countdown:Cancel()
 		end
 		if not DBM.Options.DontShowPTCountdownText then
-			TimerTracker_OnEvent(TimerTracker, "PLAYER_ENTERING_WORLD")--easiest way to nil out timers on TimerTracker frame. This frame just has no actual star/stop functions :\
+			DBM:Unschedule(countDownTextDelay)
+			TimerTracker_OnEvent(TimerTracker, "PLAYER_ENTERING_WORLD")--easiest way to nil out timers on TimerTracker frame. This frame just has no actual star/stop functions
 		end
 		dummyMod.text:Cancel()
 		if timer == 0 then return end--"/dbm pull 0" will strictly be used to cancel the pull timer (which is why we let above part of code run but not below)
@@ -2224,7 +2231,12 @@ do
 			dummyMod.countdown:Start(timer)
 		end
 		if not DBM.Options.DontShowPTCountdownText then
-			TimerTracker_OnEvent(TimerTracker, "START_TIMER", 2, timer, timer)--Hopefully this doesn't taint. Initial tests show positive even though it is an intrusive way of calling a blizzard timer. It's too bad the max value doesn't seem to actually work
+			local threshold = DBM.Options.PTCountThreshold
+			if timer > threshold then
+				DBM:Schedule(timer-threshold, countDownTextDelay, threshold)
+			else
+				TimerTracker_OnEvent(TimerTracker, "START_TIMER", 2, timer, timer)
+			end
 		end
 		if not DBM.Options.DontShowPTText then
 			dummyMod.text:Show(DBM_CORE_ANNOUNCE_PULL:format(timer))
@@ -5722,20 +5734,34 @@ do
 	local enragePrototype = {}
 	local mt = {__index = enragePrototype}
 
+	local function countDownTextDelay()
+		TimerTracker_OnEvent(TimerTracker, "START_TIMER", 2, 5, 5)
+	end
+
 	function enragePrototype:Start(timer)
 		timer = timer or self.timer or 600
 		timer = timer <= 0 and self.timer - timer or timer
 		self.bar:SetTimer(timer)
 		self.bar:Start()
-		if warning1 then
+		if self.warning1 then
 			if timer > 660 then self.warning1:Schedule(timer - 600, 10, DBM_CORE_MIN) end
 			if timer > 300 then self.warning1:Schedule(timer - 300, 5, DBM_CORE_MIN) end
 			if timer > 180 then self.warning2:Schedule(timer - 180, 3, DBM_CORE_MIN) end
 		end
-		if warning2 then
+		if self.warning2 then
 			if timer > 60 then self.warning2:Schedule(timer - 60, 1, DBM_CORE_MIN) end
 			if timer > 30 then self.warning2:Schedule(timer - 30, 30, DBM_CORE_SEC) end
 			if timer > 10 then self.warning2:Schedule(timer - 10, 10, DBM_CORE_SEC) end
+		end
+		if self.countdown then
+			if not DBM.Options.DontPlayPTCountdown then
+				self.countdown:Start(timer)
+			end
+			if not DBM.Options.DontShowPTCountdownText then
+				if timer > 5 then
+					DBM:Schedule(timer-5, countDownTextDelay)
+				end
+			end
 		end
 	end
 
@@ -5745,8 +5771,17 @@ do
 
 	function enragePrototype:Cancel()
 		self.owner:Unschedule(self.Start, self)
-		self.warning1:Cancel()
-		self.warning2:Cancel()
+		if warning1 then
+			self.warning1:Cancel()
+		end
+		if warning2 then
+			self.warning2:Cancel()
+		end
+		if countdown then
+			DBM:Unschedule(countDownTextDelay)
+			self.countdown:Cancel()
+			TimerTracker_OnEvent(TimerTracker, "PLAYER_ENTERING_WORLD")
+		end
 		self.bar:Stop()
 	end
 	enragePrototype.Stop = enragePrototype.Cancel
@@ -5772,18 +5807,18 @@ do
 	function bossModPrototype:NewCombatTimer(timer, text, barText, barIcon)
 		timer = timer or 10
 		local bar = self:NewTimer(timer, barText or DBM_CORE_GENERIC_TIMER_COMBAT, barIcon or 2457, nil, "timer_combat")
+		local countdown = self:NewCountdown(0, 0, nil, nil, nil, true)
 		local obj = setmetatable(
 			{
-				--Maybe get fancy and insert a countdown object here
 				bar = bar,
 				timer = timer,
+				countdown = countdown,
 				owner = self
 			},
 			mt
 		)
 		return obj
 	end
-
 end
 
 
