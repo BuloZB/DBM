@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10144 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10246 $"):sub(12, -3))
 mod:SetCreatureID(71529)
 mod:SetZone()
 mod:SetUsedIcons(8)
@@ -83,6 +83,8 @@ local timerFrostBreathCD		= mod:NewCDTimer(9.5, 143773, nil, mod:IsTank())
 local timerScorchingBreath		= mod:NewTargetTimer(30, 143767, nil, mod:IsTank() or mod:IsHealer())
 local timerScorchingBreathCD	= mod:NewCDTimer(11, 143767, nil, mod:IsTank())--Often 12, but sometimes 11
 local timerBurningBloodCD		= mod:NewCDTimer(3.5, 143783, nil, false)--cast often, but someone might want to show it
+
+local berserkTimer				= mod:NewBerserkTimer(600)
 
 local soundBloodFrenzy			= mod:NewSound(144067)
 local soundFixate				= mod:NewSound(143445)
@@ -172,6 +174,7 @@ function mod:OnCombatStart(delay)
 	table.wipe(burningBloodTargets)
 	timerFearsomeRoarCD:Start(-delay)
 	timerDeafeningScreechCD:Start(-delay, 1)
+	berserkTimer:Start(-delay)
 	if self.Options.RangeFrame then
 		if self:IsDifficulty("normal10", "heroic10") then
 			DBM.RangeCheck:Show(10, nil, nil, 4)
