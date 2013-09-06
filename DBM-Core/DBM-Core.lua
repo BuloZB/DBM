@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10250 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10251 $"):sub(12, -3)),
 	DisplayVersion = "5.3.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.6", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10174 -- the revision of the latest stable version that is available
@@ -5799,13 +5799,13 @@ do
 
 	function enragePrototype:Cancel()
 		self.owner:Unschedule(self.Start, self)
-		if warning1 then
+		if self.warning1 then
 			self.warning1:Cancel()
 		end
-		if warning2 then
+		if self.warning2 then
 			self.warning2:Cancel()
 		end
-		if countdown then
+		if self.countdown then
 			DBM:Unschedule(countDownTextDelay)
 			self.countdown:Cancel()
 			TimerTracker_OnEvent(TimerTracker, "PLAYER_ENTERING_WORLD")
