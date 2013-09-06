@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10182 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10250 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -188,6 +188,7 @@ function mod:OnCombatStart(delay)
 		DBM.InfoFrame:SetHeader(prideLevel)
 		DBM.InfoFrame:Show(5, "playerpower", 5, ALTERNATE_POWER_INDEX)
 	end
+	print("DBM NOTICED: Blizzard changed power gains after this mod was writen and it's likely most of timers will be wrong until fight is relogged and mod is patched")
 end
 
 function mod:OnCombatEnd()
