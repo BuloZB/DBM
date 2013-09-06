@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(846, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10106 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10243 $"):sub(12, -3))
 mod:SetCreatureID(71454)
 mod:SetZone()
 
@@ -120,7 +120,11 @@ function mod:OnCombatStart(delay)
 	timerArcingSmashCD:Start(11-delay, 1)
 	timerBreathofYShaarjCD:Start(-delay, 1)
 	timerBloodRageCD:Start(122-delay)
-	berserkTimer:Start(-delay)
+	if self:IsDifficulty("lfr25") then
+		berserkTimer:Start(720-delay)
+	else
+		berserkTimer:Start(-delay)
+	end
 	if self.Options.RangeFrame then
 		DBM.RangeCheck:Show(5)
 	end
