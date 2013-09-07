@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(865, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10167 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10252 $"):sub(12, -3))
 mod:SetCreatureID(71504)--71591 Automated Shredder
 mod:SetZone()
 
@@ -36,7 +36,7 @@ local warnShockwaveMissile				= mod:NewCountAnnounce(143641, 3)
 --local warnLaserTurretActivated			= mod:NewSpellAnnounce("ej8208", 3, 143867, false)--Many scripted triggers. gonna need an emote or UNIT_SPELL event for this i'm sure
 local warnLaserFixate					= mod:NewTargetAnnounce(143828, 3, 143867)--Not in combat log, needs more debugging to find a way around blizz fail
 local warnMagneticCrush					= mod:NewSpellAnnounce(144466, 3)--Unsure if correct ID, could be 143487 instead
-local warnCrawlerMine					= mod:NewSpellAnnounce("ej8212", 3, "INTERFACE\ICONS\INV_MISC_BOMB_02.BLP")--Crawler Mine Spawning
+local warnCrawlerMine					= mod:NewSpellAnnounce("ej8212", 3, 144010)--Crawler Mine Spawning
 local warnReadyToGo						= mod:NewTargetAnnounce(145580, 4)--Crawler mine not dead fast enough
 
 --Siegecrafter Blackfuse
