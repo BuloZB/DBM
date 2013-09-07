@@ -234,7 +234,7 @@ local function CheckBosses(GUID)
 		--"<0.0 19:23:10> [INSTANCE_ENCOUNTER_ENGAGE_UNIT] Fake Args:#1#1#Xaril the Poisoned Mind#0xF13115F500000294#elite#228971920#1#1#Kaz'tik the Manipulator#0xF13115F400000293#elite#183177232#1#1#Hisek the Swarmkeeper#0xF13115F100000290
 		--"<7.4 19:23:17> [INSTANCE_ENCOUNTER_ENGAGE_UNIT] Fake Args:#1#1#Kaz'tik the Manipulator#0xF13115F400000293#elite#183177232#1#1#Xaril the Poisoned Mind#0xF13115F500000294#elite#228971920#1#1#Kil'ruk the Wind-Reaver#0xF13115F900000297#elite#261682208#1#1#Hisek the Swarmkeeper
 		--Only 3 bosses activate, but for some reason inactive bosses are sometimes firing IEEU, all I can do now is try to fix it using a scan for "ready to fight" to filter out the IEEU that fires for the next boss
-		if UnitExists(unitID) and not activeBossGUIDS[UnitGUID(unitID)] and not UnitBuff(UnitID, GetSpellInfo(143542)) then--Check if new units exist we haven't detected and added yet.
+		if UnitExists(unitID) and not activeBossGUIDS[UnitGUID(unitID)] and not UnitBuff(unitID, GetSpellInfo(143542)) then--Check if new units exist we haven't detected and added yet.
 			activeBossGUIDS[UnitGUID(unitID)] = true
 			activatedTargets[#activatedTargets + 1] = UnitName(unitID)
 			--Activation Controller
