@@ -19,7 +19,7 @@ local specWarnLockedOn		= mod:NewSpecialWarningRun(143828)
 
 mod:RemoveOption("HealthFrame")
 mod:RemoveOption("SpeedKillTimer")
-mod:AddBoolOption("RangeFrame")
+--mod:AddBoolOption("RangeFrame")
 
 function mod:SPELL_AURA_APPLIED(args)
 	if not mod.Options.Enabled then return end
