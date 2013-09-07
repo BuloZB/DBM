@@ -24,13 +24,13 @@ mod:RemoveOption("SpeedKillTimer")
 function mod:SPELL_AURA_APPLIED(args)
 	if not mod.Options.Enabled then return end
 	if args.spellId == 143828 then
+		warnLockedOn:Show()
 		if args:IsPlayer() then
-			warnLockedOn:Show()
 			specWarnLockedOn:Show()
 		end
 	end
 end
-
+--[[
 function mod:SPELL_CAST_START(args)
 	if not mod.Options.Enabled then return end
 end
@@ -38,3 +38,4 @@ end
 function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 	if not mod.Options.Enabled then return end
 end
+--]]
