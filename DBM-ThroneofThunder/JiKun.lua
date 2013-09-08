@@ -177,13 +177,13 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg, _, _, _, target)
 end
 
 local nestCoords = {
-	--Lower Nests 
+	--Lower Nests
 	[1] = { 57.70, 30.50 },--Lower Northeast
 	[2] = { 55.00, 61.50 },--Lower Southeast
 	[3] = { 45.60, 55.00 },--Lower Southwest
 	[4] = { 40.30, 39.10 },--Lower West
 	[5] = { 46.70, 23.60 },--Lower Northwest
-	--Upper Nests 
+	--Upper Nests
 	[6] = { 62.80, 35.50 },--Upper Northeast
 	[7] = { 57.30, 59.70 },--Upper Southeast
 	[8] = { 40.20, 58.30 },--Upper Southwest
