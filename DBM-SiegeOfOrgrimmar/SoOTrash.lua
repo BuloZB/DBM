@@ -14,9 +14,9 @@ mod:RegisterEvents(
 	"RAID_BOSS_WHISPER"
 )
 
-local warnLockedOn			= mod:NewTargetAnnounce(143828, 3)
+local warnLockedOn			= mod:NewTargetAnnounce(146680, 3)
 
-local specWarnLockedOn		= mod:NewSpecialWarningRun(143828)
+local specWarnLockedOn		= mod:NewSpecialWarningRun(146680)
 
 mod:RemoveOption("HealthFrame")
 mod:RemoveOption("SpeedKillTimer")
