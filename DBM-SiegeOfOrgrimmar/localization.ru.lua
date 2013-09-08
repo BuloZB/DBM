@@ -143,11 +143,11 @@ L:SetOptionLocalization({
 
 L:SetMiscLocalization({
 	--thanks to blizz, the only accurate way for this to work, is to translate 5 emotes in all languages
-	one					= "один",--guessed
-	two					= "два",--guessed
-	three				= "три",--guessed
-	four				= "четыре",--guessed
-	five				= "пять",--guessed
+	one					= "один",
+	two					= "два",
+	three				= "три",
+	four				= "четыре",
+	five				= "пять",
 	hisekFlavor			= "Смотрите, кто теперь тихий",--http://ptr.wowhead.com/quest=31510
 	KilrukFlavor		= "Обычный рабочий день, уничтожаем рой",--http://ptr.wowhead.com/quest=31109
 	XarilFlavor			= "Я вижу только темные небеса в твоем будущем",--http://ptr.wowhead.com/quest=31216

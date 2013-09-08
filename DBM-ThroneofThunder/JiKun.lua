@@ -177,12 +177,22 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg, _, _, _, target)
 end
 
 local nestCoords = {
-	[0] = { 47.00, 40.81 },--6
-	[1] = { 57.79, 30.15 },--1
-	[2] = { 55.14, 60.95 },--2
-	[3] = { 45.89, 55.20 },--3
-	[4] = { 63.25, 36.04 },--4
-	[5] = { 57.46, 59.61 }--5
+	--Lower Nests 
+	[1] = { 57.70, 30.50 },--Lower Northeast
+	[2] = { 55.00, 61.50 },--Lower Southeast
+	[3] = { 45.60, 55.00 },--Lower Southwest
+	[4] = { 40.30, 39.10 },--Lower West
+	[5] = { 46.70, 23.60 },--Lower Northwest
+	--Upper Nests 
+	[6] = { 62.80, 35.50 },--Upper Northeast
+	[7] = { 57.30, 59.70 },--Upper Southeast
+	[8] = { 40.20, 58.30 },--Upper Southwest
+	[9] = { 47.20, 40.70 },--Upper Middle (aka, upper west)
+	[10] = { 43.50, 24.10 }--Upper Northwest
+}
+
+local nestCoordsLFR = {
+	[0] = 9, [1] = 1, [2] = 2, [3] = 3, [4] = 6, [5] = 7
 }
 
 local flockTableLFR = {
@@ -264,7 +274,8 @@ local function FormatNestLoc(dirs, skip)
 	for i, v in pairs(dirs) do
 		nest = nest + 1
 		if trackedNests[nest] and mod:IsDifficulty("lfr25", "normal10", "heroic10") and not skip then
-			DBM.Arrow:ShowRunTo(nestCoords[nest % 6][1]/100, nestCoords[nest % 6][2]/100, 3, 40)
+			local nestId = nestCoordsLFR[nest % 6]
+			DBM.Arrow:ShowRunTo(nestCoords[nestId][1]/100, nestCoords[nestId][2]/100, 3, 40)
 			print(format("Tracked nest: %d", nest))
 		end
 		ret = ret .. format("%d-%s %s", nest, v[1], v[2])
