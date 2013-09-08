@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("SoOTrash", "DBM-SiegeOfOrgrimmar")
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9878 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10259 $"):sub(12, -3))
 --mod:SetModelID(47785)
 mod:SetZone()
 
@@ -37,7 +37,14 @@ end
 
 function mod:RAID_BOSS_WHISPER(msg)
 	if msg:find("Ability_Siege_Engineer_Superheated") then
-		warnLockedOn:Show()
 		specWarnLockedOn:Show()
+		self:SendSync("LockedOnTarget", UnitGUID("player"))
+	end
+end
+
+function mod:OnSync(msg, guid)
+	if msg == "LockedOnTarget" and guid then
+		local targetName = DBM:GetFullPlayerNameByGUID(guid)
+		warnLockedOn:Show(targetName)
 	end
 end
