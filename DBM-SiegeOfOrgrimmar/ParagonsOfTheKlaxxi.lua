@@ -604,8 +604,14 @@ function mod:UNIT_DIED(args)
 		timerInsaneCalculationCD:Cancel()
 	elseif cid == 71154 then--Ka'roz the Locust
 		timerFlashCD:Cancel()
+		timerHurlAmberCD:Cancel()
 	elseif cid == 71152 then--Skeer the Bloodseeker
 		timerBloodlettingCD:Cancel()
+	elseif cid == 71158 then--Rik'kal the Dissector
+		timerMutateCD:Cancel()
+	elseif cid == 71153 then--Hisek the Swarmkeeper
+		timerAimCD:Cancel()
+		--timerRapidFireCD:Cancel()
 	end
 
 	if FlavorTable[cid] then
