@@ -6,7 +6,7 @@
 -- This addon is written and copyrighted by:
 --    * Paul Emmerich (Tandanu @ EU-Aegwynn) (DBM-Core)
 --    * Martin Verges (Nitram @ EU-Azshara) (DBM-GUI)
---    * Adam Williams (Omegal @ US-Whisperwind) (Primary boss mod author) Contact: Twitter @MysticalOS)
+--    * Adam Williams (Omegal @ US-Whisperwind) (Primary boss mod author & DBM maintainer) Contact: Twitter @MysticalOS)
 --
 -- The localizations are written by:
 --    * enGB/enUS: Tandanu & Omegal		http://www.deadlybossmods.com
@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10260 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10266 $"):sub(12, -3)),
 	DisplayVersion = "5.3.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.3.6", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10174 -- the revision of the latest stable version that is available
@@ -1645,12 +1645,6 @@ do
 		self:Schedule(1.5, updateAllRoster)
 	end
 
---[[
-	function DBM:INSTANCE_GROUP_SIZE_CHANGED()
-		I don't feel this will really be needed. we'll update size on combatstart. unless someone leaving group in middle of boss fight updates boss scaling WHILE ENGAGED, this is probably not nessesary but we'll see.
-	end
---]]
-
 	function DBM:IsInRaid()
 		return inRaid
 	end
@@ -1879,9 +1873,11 @@ do
 	end
 end
 
+local lastLFGAlert = 0
 function DBM:LFG_ROLE_CHECK_SHOW()
-	if not UnitIsGroupLeader("player") and DBM.Options.LFDEnhance then
+	if not UnitIsGroupLeader("player") and DBM.Options.LFDEnhance and GetTime() - lastLFGAlert > 5 then
 		PlaySoundFile("Sound\\interface\\levelup2.ogg", "Master")--Because regular sound uses SFX channel which is too low of volume most of time
+		lastLFGAlert = GetTime()
 	end
 end
 

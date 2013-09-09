@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(865, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10259 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10264 $"):sub(12, -3))
 mod:SetCreatureID(71504)--71591 Automated Shredder
 mod:SetZone()
 
@@ -261,6 +261,6 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg, npc, _, _, target)
 		warnAutomatedShredder:Show()
 		specWarnAutomatedShredder:Show()
 		timerDeathFromAboveCD:Start(17)
-		timerAutomatedShredderCD:Start()
+--		timerAutomatedShredderCD:Start()--Changed? and i lost log so i just have to disable the timer.
 	end
 end

@@ -1,8 +1,7 @@
-if GetBuildInfo() ~= "5.4.0" then return end
 local mod	= DBM:NewMod(857, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10165 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10266 $"):sub(12, -3))
 mod:SetCreatureID(71952)
 mod:SetZone()
 mod:SetMinSyncRevision(10162)
