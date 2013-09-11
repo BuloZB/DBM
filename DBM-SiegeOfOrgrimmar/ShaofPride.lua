@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10275 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10279 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -50,7 +50,7 @@ local yellCorruptedPrison		= mod:NewYell(144574, nil, false)
 --Pride
 local specWarnBurstingPride		= mod:NewSpecialWarningMove(144911)--25-49 Energy
 local yellBurstingPride			= mod:NewYell(144911)
-local specWarnProjection		= mod:NewSpecialWarningYou(146822)--50-74 Energy
+local specWarnProjection		= mod:NewSpecialWarningYou(146822, nil, nil, nil, 3)--50-74 Energy
 local specWarnAuraOfPride		= mod:NewSpecialWarningYou(146817)--75-99 Energy
 local yellAuraOfPride			= mod:NewYell(146817)
 local specWarnOvercome			= mod:NewSpecialWarningYou(144843, nil, nil, nil, 3)--100 EnergyHonestly, i have a feeling your best option if this happens is to find a way to kill yourself!
