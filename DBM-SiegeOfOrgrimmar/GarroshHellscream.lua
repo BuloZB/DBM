@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10220 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10281 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetZone()
 
@@ -72,7 +72,7 @@ local timerYShaarjsProtection		= mod:NewCastTimer(60, 144945)
 local timerWhirlingCorruptionCD		= mod:NewCDTimer(40, 144985)--One bar for both, "empowered" makes timer too long. CD not yet known except for first
 local timerWhirlingCorruption		= mod:NewBuffActiveTimer(9, 144985)
 local timerTouchOfYShaarjCD			= mod:NewCDTimer(45, 145071)
-local timerGrippingDespairCD		= mod:NewCDTimer(8.5, 145183)
+local timerGrippingDespairCD		= mod:NewCDTimer(8.5, 145183, nil, mod:IsTank())
 local timerGrippingDespair			= mod:NewTargetTimer(15, 145183, nil, mod:IsTank())
 
 local soundWhirlingCorrpution		= mod:NewSound(144985)
