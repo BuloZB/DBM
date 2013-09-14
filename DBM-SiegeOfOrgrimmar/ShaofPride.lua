@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10279 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10304 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -208,6 +208,7 @@ function mod:SPELL_CAST_START(args)
 		end
 	elseif args.spellId == 144832 then
 		--These abilitie cd reset on CAST_START not finish and cause a desync from energy
+		countdownReflection:Cancel()
 		timerWoundedPrideCD:Start()
 		timerSelfReflectionCD:Start()
 		countdownReflection:Start()
@@ -255,7 +256,6 @@ function mod:SPELL_CAST_SUCCESS(args)
 		warnUnleashed:Show()
 		timerGiftOfTitansCD:Cancel()
 		countdownSwellingPride:Cancel()
-		countdownReflection:Cancel()
 		firstWound = false
 		UnleashedCast = true
 		timerManifestationCD:Start()--Not yet verified if altered or not
