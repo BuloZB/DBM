@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10327 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10330 $"):sub(12, -3)),
 	DisplayVersion = "5.4.2 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.1", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10320 -- the revision of the latest stable version that is available
@@ -2100,11 +2100,11 @@ end
 	--This should avoid most load problems (especially in LFR) When zoning in while in combat which causes the mod to fail to load/work correctly
 	--IF we are fighting a boss, we don't have much of a choice but to try and load anyways since script ran too long isn't actually a guarentee.
 	--The main place we should force a mod load in combat is for IsEncounterInProgress because i'm pretty sure blizzard waves "script ran too long" function for a small amount of time after a DC
-	--Now that there are 9 world bosses, that mod is generating "script ran too long" more often on slow computers. Trying some micro optimizes to see if that eliminates
-	--If i still get many reports of world boss mod load failing, I will remove them from load delay since a failed mod load is even less useful than no mod load.
+	--Now that there are 9 world bosses, that mod is generating "script ran too long" more often on slow computers.
+	--I had to remove world boss combat loading because of this. it's rare you engage boss before loading mod anyways.
 function DBM:LoadMod(mod)
 	if type(mod) ~= "table" then return false end
-	if InCombatLockdown() and IsInInstance() and not IsEncounterInProgress() then
+	if InCombatLockdown() and not IsEncounterInProgress() then
 		if not loadDelay then--Prevent duplicate DBM_CORE_LOAD_MOD_COMBAT message.
 			self:AddMsg(DBM_CORE_LOAD_MOD_COMBAT:format(tostring(mod.name)))
 		end
