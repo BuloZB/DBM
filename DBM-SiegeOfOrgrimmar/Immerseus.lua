@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(852, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10274 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10339 $"):sub(12, -3))
 mod:SetCreatureID(71543)--Doesn't die, will need kill detection
 mod:SetReCombatTime(45)--Lets just assume he has same bug as tsulong in advance and avoid problems
 mod:SetZone()
@@ -50,7 +50,7 @@ function mod:OnCombatStart(delay)
 		"UNIT_POWER_FREQUENT boss1"--Do not want this one persisting out of combat even after a wipe, in case you go somewhere else.
 	)
 	if self:IsDifficulty("heroic10", "heroic25") then
-		timerSwellingCorruptionCD:Start(12.5-delay)--12.5-14sec variation
+		timerSwellingCorruptionCD:Start(10-delay)--10-14sec variation
 	end
 end
 
@@ -96,13 +96,7 @@ end
 mod.SPELL_PERIODIC_MISSED = mod.SPELL_PERIODIC_DAMAGE
 
 function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
-	if spellId == 143020 then--Split
-		warnSplit:Show()
-		timerBreathCD:Cancel()
-		timerSwirlCD:Cancel()
-		timerShaBoltCD:Cancel()
-		timerSwellingCorruptionCD:Cancel()
-	elseif spellId == 143293 and self:AntiSpam(3, 2) then--Sha Bolt
+	if spellId == 143293 and self:AntiSpam(3, 2) then--Sha Bolt
 		warnShaBolt:Show()
 		timerShaBoltCD:Start()
 	elseif spellId == 143578 then--Swelling Corruption
@@ -124,11 +118,17 @@ end
 function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg, _, _, _, target)
 	if msg:find("spell:143469") then--Reforms
 		warnReform:Show()
---		timerBreathCD:Start(15)--8-15 second variation, iffy on this being set
-		timerSwirlCD:Start(24)--24-26 variation, this probably is set?
---[[		if self:IsDifficulty("heroic10", "heroic25") then
-			timerSwellingCorruptionCD:Start(12.5)
-		end--]]
+		timerBreathCD:Start(14)
+		timerSwirlCD:Start(24)
+		if self:IsDifficulty("heroic10", "heroic25") then
+			timerSwellingCorruptionCD:Start(17)
+		end
+	elseif msg:find("spell:143020") then--split
+		warnSplit:Show()
+		timerBreathCD:Cancel()
+		timerSwirlCD:Cancel()
+		timerShaBoltCD:Cancel()
+		timerSwellingCorruptionCD:Cancel()
 	end
 end
 

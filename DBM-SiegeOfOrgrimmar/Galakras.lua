@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10327 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10341 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(120)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
@@ -244,7 +244,7 @@ function mod:OnSync(msg)
 		if addsCount == 1 then
 			timerAddsCD:Start(48)
 		elseif addsCount == 3 then
-			timerProtoCD:Start()
+			timerProtoCD:Start()--TODO seems there is another drake wave in a late wave, like 8-10ish, need to find that wave
 			timerAddsCD:Start(110)
 		else
 			timerAddsCD:Start()

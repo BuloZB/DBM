@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10335 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10336 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetZone()
 
@@ -18,6 +18,12 @@ mod:RegisterEventsInCombat(
 
 mod:RegisterEvents(
 	"CHAT_MSG_MONSTER_YELL"
+)
+
+local boss = EJ_GetSectionInfo(8216)
+
+mod:SetBossHealthInfo(
+	72276, boss
 )
 
 --Amalgam of Corruption
