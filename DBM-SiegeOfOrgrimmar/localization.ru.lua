@@ -83,7 +83,8 @@ L:SetWarningLocalization({
 })
 
 L:SetOptionLocalization({
-	warnDefensiveStanceSoon		= "Обратный отсчет за 5 секунд до $spell:143593"
+	warnDefensiveStanceSoon		= "Обратный отсчет за 5 секунд до $spell:143593",
+	SetIconOnAdds				= "Устанавливать метки на $journal:7920"
 })
 
 L:SetMiscLocalization({
@@ -168,6 +169,10 @@ L:SetMiscLocalization({
 -- Garrosh Hellscream --
 ------------------------
 L= DBM:GetModLocalization(869)
+
+L:SetOptionLocalization({
+	SetIconOnShaman			= "Устанавливать метки на $journal:8294"
+})
 
 -------------
 --  Trash  --
