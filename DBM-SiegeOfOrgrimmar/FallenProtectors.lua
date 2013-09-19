@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10280 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10333 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetZone()
 
@@ -84,7 +84,7 @@ local timerGarroteCD				= mod:NewCDTimer(30, 143198, nil, mod:IsHealer())--30-46
 local timerBaneCD					= mod:NewCDTimer(17, 143446, nil, mod:IsHealer())--17-25 (heroic 13-20)
 local timerCalamityCD				= mod:NewCDTimer(42, 143491)--42-50 (when two can be cast in a row) Also affected by boss specials
 
---local berserkTimer				= mod:NewBerserkTimer(490)
+local berserkTimer					= mod:NewBerserkTimer(600)
 
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
@@ -111,16 +111,6 @@ function mod:BrewTarget(targetname, uId)
 	end
 end
 
-function mod:InfernoStrikeTarget(targetname, uId)
-	if not targetname then return end
-	print("DBM DEBUG: InfernoStrikeTarget", targetname)--Need to verify timing is grabbing new target and not previous target
---[[	warnInfernoStrike:Show(targetname)
-	if targetname == UnitName("player") then
-		specWarnInfernoStrike:Show()
-		yellInfernoStrike:Yell()
-	end--]]
-end
-
 function mod:OnCombatStart(delay)
 	timerVengefulStrikesCD:Start(7-delay)
 	timerGarroteCD:Start(15-delay)
@@ -128,8 +118,8 @@ function mod:OnCombatStart(delay)
 	timerCorruptedBrewCD:Start(18-delay)
 	timerGougeCD:Start(23-delay)
 	timerCalamityCD:Start(31-delay)
-	timerClashCD:Start(-delay)--Unsure if stll same, since this almost NEVER happens, at least one of them will enter a special and cancel this timer
---	berserkTimer:Start(-delay)
+	timerClashCD:Start(45-delay)
+	berserkTimer:Start(-delay)
 end
 
 function mod:SPELL_CAST_START(args)
@@ -164,7 +154,6 @@ function mod:SPELL_CAST_START(args)
 		warnDefiledGround:Show()
 		timerDefiledGroundCD:Start()
 	elseif args.spellId == 143962 then
-		self:BossTargetScanner(71481, "InfernoStrikeTarget", 2, 1)
 		warnInfernoStrike:Show()
 		timerInfernoStrikeCD:Start()
 	elseif args.spellId == 143497 then

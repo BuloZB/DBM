@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10328 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10335 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetZone()
 
@@ -67,7 +67,7 @@ local timerTitanicSmashCD				= mod:NewCDTimer(14.5, 144628)--14-17sec variation
 local timerPiercingCorruptionCD			= mod:NewCDTimer(14, 144657)--14-17sec variation
 local timerHurlCorruptionCD				= mod:NewNextTimer(20, 144649)
 
-local berserkTimer						= mod:NewBerserkTimer(420)
+local berserkTimer						= mod:NewBerserkTimer(418)
 
 local countdownLookWithin				= mod:NewCountdownFades(59, "ej8220")
 local countdownLingeringCorruption		= mod:NewCountdown(15.5, 144514, nil, nil, nil, nil, true)
@@ -208,6 +208,8 @@ function mod:OnSync(msg)
 		unleashedAngerCast = 0
 	elseif msg == "prepull" then
 		timerCombatStarts:Start()
+	elseif msg == "ManifestationDied" and not playerInside and self:AntiSpam(1) then
+		specWarnManifestationSoon:Show()
 	end
 end
 
@@ -215,13 +217,7 @@ function mod:CHAT_MSG_ADDON(prefix, message, channel, sender)
 	--Because core already registers BigWigs prefix with server, shouldn't need it here
 	if prefix == "BigWigs" and message then
 		local bwPrefix, bwMsg = message:match("^(%u-):(.+)")
-		if bwMsg == "InsideBigAddDeath" and not playerInside and self:AntiSpam(5, sender) then
-			specWarnManifestationSoon:Show()
-		end
-	--Filter the DBm message here vs OnSync because OnSync pre handles sender and it's not as easy to filter as this
-	elseif prefix == "D4" and message then
-		local dbmPrefix, dbmMsg = strsplit("\t", message)
-		if dbmMsg == "ManifestationDied" and not playerInside and self:AntiSpam(5, sender) then
+		if bwMsg == "InsideBigAddDeath" and not playerInside and self:AntiSpam(1) then
 			specWarnManifestationSoon:Show()
 		end
 	end
