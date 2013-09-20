@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10341 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10345 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(120)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
@@ -9,6 +9,10 @@ mod:SetZone()
 mod:SetUsedIcons(8)
 
 mod:RegisterCombat("combat")
+
+mod:RegisterEvents(
+	"CHAT_MSG_MONSTER_YELL"
+)
 
 mod:RegisterEventsInCombat(
 	"SPELL_CAST_START",
@@ -22,7 +26,6 @@ mod:RegisterEventsInCombat(
 	"SPELL_MISSED",
 	"UNIT_DIED",
 	"UNIT_SPELLCAST_SUCCEEDED",
-	"CHAT_MSG_MONSTER_YELL",
 	"CHAT_MSG_RAID_BOSS_EMOTE"
 )
 
@@ -91,8 +94,10 @@ function mod:OnCombatStart(delay)
 	addsCount = 0
 	firstTower = false
 	flamesCount = 0
-	timerAddsCD:Start(11-delay)
-	timerTowerCD:Start(116.5-delay)
+	timerAddsCD:Start(10.5-delay)
+	if not self:IsDifficulty("heroic10", "heroic25") then
+		timerTowerCD:Start(116.5-delay)
+	end
 end
 
 function mod:SPELL_CAST_START(args)
@@ -222,6 +227,8 @@ end
 function mod:CHAT_MSG_MONSTER_YELL(msg)
 	if msg == L.newForces1 or msg == L.newForces1H or msg == L.newForces2 or msg == L.newForces3 or msg == L.newForces4 then
 		self:SendSync("Adds")
+	elseif msg == L.Pull and not self:IsInCombat() then
+		DBM:StartCombat(self, 0)
 	end
 end
 
@@ -231,7 +238,7 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg)
 		warnDemolisher:Show()
 	elseif msg:find(L.tower) then
 		timerDemolisherCD:Start()
-		if not firstTower then
+		if not firstTower and not self:IsDifficulty("heroic10", "heroic25") then
 			firstTower = true
 			timerTowerCD:Start()
 		end

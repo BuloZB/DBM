@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10341 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10347 $"):sub(12, -3)),
 	DisplayVersion = "5.4.2 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.1", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10320 -- the revision of the latest stable version that is available
@@ -1034,7 +1034,7 @@ do
 		-- clean up sync spam timers and auto respond spam blockers
 		-- TODO: optimize this; using next(t, k) all the time on nearly empty hash tables is not a good idea...doesn't really matter here as modSyncSpam only very rarely contains more than 4 entries...
 		local k, v = next(modSyncSpam, nil)
-		if v and (time - v > 2.5) then
+		if v and (time - v > 8) then
 			modSyncSpam[k] = nil
 		end
 	end)
@@ -2003,7 +2003,11 @@ function DBM:CINEMATIC_START(...)
 	if DBM.Options.MovieFilter == "Never" then return end
 	SetMapToCurrentZone()
 	local currentMapID = GetCurrentMapAreaID()
-	if currentMapID == 993 then return end--It bugs out in SoO and just skips all movies :\
+	if currentMapID == 953 then--Siege of Org
+		for i = 105930, 105935 do--Scan items that trigger movies
+			if select(3,GetItemCooldown(i)) > 0 then return end--Prevent movie skip if we detect any of them on cooldown (ie it was JUST used)
+		end
+	end
 	local currentFloor = GetCurrentMapDungeonLevel() or 0
 	if DBM.Options.MovieFilter == "Block" or DBM.Options.MovieFilter == "AfterFirst" and DBM.Options.MoviesSeen[currentMapID..currentFloor] then
 		CinematicFrame_CancelCinematic()
@@ -2898,7 +2902,7 @@ do
 	function DBM:INSTANCE_ENCOUNTER_ENGAGE_UNIT()
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
-				if v.type == "combat" and isBossEngaged(v.multiMobPullDetection or v.mob) and IsEncounterInProgress() then
+				if v.type == "combat" and isBossEngaged(v.multiMobPullDetection or v.mob) then
 					self:StartCombat(v.mod, 0)
 				end
 			end
@@ -4408,6 +4412,7 @@ function bossModPrototype:checkTankDistance(cid, distance)
 	local distance = distance or 50
 	local _, uId = self:GetBossTarget(cid)
 	if uId then--Now we know who is tanking that boss
+		print("DBM DEBUG: checkTankDistance CID/uId,Name is ", cid, uId, UnitName(uId))
 		local x, y = GetPlayerMapPosition(uId)
 		if x == 0 and y == 0 then
 			SetMapToCurrentZone()
@@ -4415,6 +4420,7 @@ function bossModPrototype:checkTankDistance(cid, distance)
 		end
 		if x == 0 and y == 0 then return true end
 		local inRange = DBM.RangeCheck:GetDistance("player", x, y)--We check how far we are from the tank who has that boss
+		print("DBM DEBUG: checkTankDistance Range is "..inRange)
 		if (inRange and inRange > distance) then--You are not near the person tanking boss
 			return false
 		end
@@ -6220,7 +6226,7 @@ function bossModPrototype:SendSync(event, ...)
 	local time = GetTime()
 	--Mod syncs are more strict and enforce latency threshold always.
 	--Do not put latency check in main sendSync local function (line 313) though as we still want to get version information, etc from these users.
-	if select(4, GetNetStats()) < DBM.Options.LatencyThreshold and (not modSyncSpam[spamId] or (time - modSyncSpam[spamId]) > 2.5) then
+	if select(4, GetNetStats()) < DBM.Options.LatencyThreshold and (not modSyncSpam[spamId] or (time - modSyncSpam[spamId]) > 8) then
 		self:ReceiveSync(event, nil, self.revision or 0, tostringall(...))
 		sendSync("M", str)
 	end
@@ -6229,7 +6235,7 @@ end
 function bossModPrototype:ReceiveSync(event, sender, revision, ...)
 	local spamId = self.id .. event .. strjoin("\t", ...)
 	local time = GetTime()
-	if (not modSyncSpam[spamId] or (time - modSyncSpam[spamId]) > 2.5) and self.OnSync and (not (self.blockSyncs and sender)) and (not sender or (not self.minSyncRevision or revision >= self.minSyncRevision)) then
+	if (not modSyncSpam[spamId] or (time - modSyncSpam[spamId]) > 8) and self.OnSync and (not (self.blockSyncs and sender)) and (not sender or (not self.minSyncRevision or revision >= self.minSyncRevision)) then
 		modSyncSpam[spamId] = time
 		-- we have to use the sender as last argument for compatibility reasons (stupid old API...)
 		-- avoid table allocations for frequently used number of arguments

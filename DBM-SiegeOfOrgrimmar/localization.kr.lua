@@ -51,6 +51,7 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
+	Pull			= "용아귀 부족 용사들이여! 항구를 탈환하고 적을 바다로 몰아내라! 헬스크림 님과 진정한 호드를 위하여!",
 	newForces1		= "놈들이 와요!",--제이나 대사
 	newForces1H		= "저 계집을 당장 끌어내려라. 내가 친히 그녀의 목을 칠 것이다.",--실바나스 대사 (확인 필요)
 	newForces2		= "용아귀 용사들아, 진격하라!",
@@ -83,7 +84,8 @@ L:SetWarningLocalization({
 })
 
 L:SetOptionLocalization({
-	warnDefensiveStanceSoon		= "$spell:143593 이전에 초읽기 알림 보기(5초 전부터)"
+	warnDefensiveStanceSoon		= "$spell:143593 이전에 초읽기 알림 보기(5초 전부터)",
+	SetIconOnAdds				= "$journal:7920에 전술 목표 아이콘 설정"
 })
 
 L:SetMiscLocalization({
@@ -168,6 +170,10 @@ L:SetMiscLocalization({
 -- Garrosh Hellscream --
 ------------------------
 L= DBM:GetModLocalization(869)
+
+L:SetOptionLocalization({
+	SetIconOnShaman			= "$journal:8294에 전술 목표 아이콘 설정"
+})
 
 -------------
 --  Trash  --
