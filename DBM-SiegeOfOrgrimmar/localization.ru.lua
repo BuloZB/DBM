@@ -51,6 +51,7 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
+	Pull		= "Воины Драконьей Пасти! Отбейте пристань и сбросьте врага в море! Во имя Истинной Орды!",
 	newForces1	= "Вот и они!",--Jaina's line, horde may not be same
 	newForces1H	= "Сбейте ее скорее, не терпится взять ее за глотку.",--Sylva's line, horde
 	newForces2	= "Драконья Пасть, вперед!",
