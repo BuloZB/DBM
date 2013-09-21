@@ -2147,7 +2147,7 @@ function DBM:LoadMod(mod)
 		if DBM_GUI then
 			DBM_GUI:UpdateModList()
 		end
-		local _, instanceType, difficultyID, _, _, _, _, mapID = GetInstanceInfo()
+		local _, _, difficultyID, _, _, _, _, mapID = GetInstanceInfo()
 		if difficultyID == 8 then
 			RequestChallengeModeMapInfo()
 			RequestChallengeModeLeaders(mapID)
