@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10337 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10359 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetZone()
 mod:SetUsedIcons(8, 7)
@@ -161,6 +161,7 @@ function mod:OnCombatStart(delay)
 	mindControlCount = 0
 	shamanAlive = 0
 	table.wipe(touchOfYShaarjTargets)
+	table.wipe(adds)
 	timerDesecrateCD:Start(10.5-delay, 1)
 	timerSiegeEngineerCD:Start(20-delay)
 	timerHellscreamsWarsongCD:Start(22-delay)
