@@ -126,6 +126,10 @@ L:SetOptionLocalization({
 ----------------------------
 L= DBM:GetModLocalization(865)
 
+L:SetOptionLocalization({
+	InfoFrame			= "Информационное окно для $journal:8202"
+})
+
 L:SetMiscLocalization({
 	newWeapons	= "На сборочную линию начинает поступать незаконченное оружие.",
 	newShredder	= "Приближается автоматический крошшер!"
