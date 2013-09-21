@@ -31,8 +31,6 @@ local specWarnShaSplash					= mod:NewSpecialWarningMove(143297)
 local specWarnSwirl						= mod:NewSpecialWarningSpell(143309, nil, nil, nil, 2)
 local specWarnSwellingCorruptionTarget	= mod:NewSpecialWarningTarget(143578)
 local specWarnSwellingCorruptionFades	= mod:NewSpecialWarningFades(143578)
-local specWarnSwellingCorruptionTarget	= mod:NewSpecialWarningTarget(143578)
-local specWarnSwellingCorruptionFades	= mod:NewSpecialWarningFades(143578)
 
 local timerBreathCD						= mod:NewCDTimer(35, 143436, nil, mod:IsTank() or mod:IsHealer())--35-65 second variation wtf?
 local timerSwirl						= mod:NewBuffActiveTimer(13, 143309)
