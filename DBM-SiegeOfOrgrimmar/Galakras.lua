@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10345 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10353 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(120)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
@@ -219,8 +219,9 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		specWarnMuzzleSpray:Show()
 	elseif spellId == 50630 and self:AntiSpam(2, 3) then--Eject All Passengers:
 		timerAddsCD:Cancel()
+		timerProtoCD:Cancel()
 		warnPhase2:Show()
-		timerFlamesofGalakrondCD:Start(18.6)--TODO, verify consistency since this timing may depend on where drake lands and time it takes to get picked up.
+		timerFlamesofGalakrondCD:Start(18.6, 1)--TODO, verify consistency since this timing may depend on where drake lands and time it takes to get picked up.
 	end
 end
 
@@ -250,8 +251,8 @@ function mod:OnSync(msg)
 		addsCount = addsCount + 1
 		if addsCount == 1 then
 			timerAddsCD:Start(48)
-		elseif addsCount == 3 then
-			timerProtoCD:Start()--TODO seems there is another drake wave in a late wave, like 8-10ish, need to find that wave
+		elseif addsCount % 3 == 0 then--seems that 4, 7, 10 wave Proto?
+			timerProtoCD:Start()
 			timerAddsCD:Start(110)
 		else
 			timerAddsCD:Start()

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(852, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10339 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10353 $"):sub(12, -3))
 mod:SetCreatureID(71543)--Doesn't die, will need kill detection
 mod:SetReCombatTime(45)--Lets just assume he has same bug as tsulong in advance and avoid problems
 mod:SetZone()
@@ -19,27 +19,30 @@ mod:RegisterEventsInCombat(
 	"CHAT_MSG_MONSTER_YELL"
 )
 
-local warnBreath					= mod:NewSpellAnnounce(143436, 3, nil, mod:IsTank() or mod:IsHealer())
-local warnShaBolt					= mod:NewSpellAnnounce(143295, 3, nil, false)
-local warnSwirl						= mod:NewSpellAnnounce(143309, 4)
-local warnSplit						= mod:NewSpellAnnounce(143020, 2)
-local warnReform					= mod:NewSpellAnnounce(143469, 2)
-local warnSwellingCorruptionCast	= mod:NewSpellAnnounce(143578, 2, 143574)--Heroic (this is the boss spellcast trigger spell NOT personal debuff warning)
+local warnBreath						= mod:NewSpellAnnounce(143436, 3, nil, mod:IsTank() or mod:IsHealer())
+local warnShaBolt						= mod:NewSpellAnnounce(143295, 3, nil, false)
+local warnSwirl							= mod:NewSpellAnnounce(143309, 4)
+local warnSplit							= mod:NewSpellAnnounce(143020, 2)
+local warnReform						= mod:NewSpellAnnounce(143469, 2)
+local warnSwellingCorruptionCast		= mod:NewSpellAnnounce(143578, 2, 143574)--Heroic (this is the boss spellcast trigger spell NOT personal debuff warning)
 
-local specWarnBreath				= mod:NewSpecialWarningSpell(143436, mod:IsTank())
-local specWarnShaSplash				= mod:NewSpecialWarningMove(143297)
-local specWarnSwirl					= mod:NewSpecialWarningSpell(143309, nil, nil, nil, 2)
+local specWarnBreath					= mod:NewSpecialWarningSpell(143436, mod:IsTank())
+local specWarnShaSplash					= mod:NewSpecialWarningMove(143297)
+local specWarnSwirl						= mod:NewSpecialWarningSpell(143309, nil, nil, nil, 2)
+local specWarnSwellingCorruptionTarget	= mod:NewSpecialWarningTarget(143578)
+local specWarnSwellingCorruptionFades	= mod:NewSpecialWarningFades(143578)
 local specWarnSwellingCorruptionTarget	= mod:NewSpecialWarningTarget(143578)
 local specWarnSwellingCorruptionFades	= mod:NewSpecialWarningFades(143578)
 
-local timerBreathCD					= mod:NewCDTimer(35, 143436, nil, mod:IsTank() or mod:IsHealer())--35-65 second variation wtf?
-local timerShaBoltCD				= mod:NewCDTimer(6, 143295, nil, false)--every 6-20 seconds (yeah it variates that much)
-local timerSwirlCD					= mod:NewCDTimer(48.5, 143309)
-local timerShaResidue				= mod:NewBuffActiveTimer(10, 143459)
-local timerPurifiedResidue			= mod:NewBuffActiveTimer(15, 143524)
-local timerSwellingCorruptionCD		= mod:NewCDTimer(75, 143578, nil, nil, nil, 143574)
+local timerBreathCD						= mod:NewCDTimer(35, 143436, nil, mod:IsTank() or mod:IsHealer())--35-65 second variation wtf?
+local timerSwirl						= mod:NewBuffActiveTimer(13, 143309)
+local timerShaBoltCD					= mod:NewCDTimer(6, 143295, nil, false)--every 6-20 seconds (yeah it variates that much)
+local timerSwirlCD						= mod:NewCDTimer(48.5, 143309)
+local timerShaResidue					= mod:NewBuffActiveTimer(10, 143459)
+local timerPurifiedResidue				= mod:NewBuffActiveTimer(15, 143524)
+local timerSwellingCorruptionCD			= mod:NewCDTimer(75, 143578, nil, nil, nil, 143574)
 
-local berserkTimer					= mod:NewBerserkTimer(605)
+local berserkTimer						= mod:NewBerserkTimer(605)
 
 local lastPower = 100
 
@@ -68,6 +71,7 @@ function mod:SPELL_CAST_START(args)
 	elseif args.spellId == 143309 then
 		warnSwirl:Show()
 		specWarnSwirl:Show()
+		timerSwirl:Start()
 		timerSwirlCD:Show()
 	end
 end
@@ -90,7 +94,7 @@ function mod:SPELL_AURA_REMOVED(args)
 	elseif args.spellId == 143524 and args:IsPlayer() then
 		timerPurifiedResidue:Cancel()
 	elseif args.spellId == 143574 then
-		specWarnSwellingCorruptionFades:Show(args.destName)
+		specWarnSwellingCorruptionFades:Show()
 	end
 end
 

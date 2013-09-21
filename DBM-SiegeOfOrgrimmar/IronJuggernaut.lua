@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10327 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10353 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 mod:SetZone()
 
@@ -61,7 +61,7 @@ local timerCuttingLaser			= mod:NewTargetTimer(10, 146325)--Spell tooltip says 1
 --local timerCuttingLaserCD		= mod:NewCDTimer(10, 146325)
 local timerShockPulseCD			= mod:NewNextCountTimer(16.5, 144485)--Confirmed, blizzard did take solid argued feedback and changed this mechanic, yay.
 --local timerNapalmOilCD		= mod:NewCDTimer(21.5, 144492)
-local timerDemolisherCanonCD	= mod:NewCDTimer(10, 144154)
+local timerDemolisherCanonCD	= mod:NewCDTimer(9, 144154)
 local timerMortarBarrageCD		= mod:NewCDTimer(30, 144555)
 
 local soundCuttingLaser			= mod:NewSound(146325)
