@@ -29,6 +29,8 @@ local warnSwellingCorruptionCast	= mod:NewSpellAnnounce(143578, 2, 143574)--Hero
 local specWarnBreath				= mod:NewSpecialWarningSpell(143436, mod:IsTank())
 local specWarnShaSplash				= mod:NewSpecialWarningMove(143297)
 local specWarnSwirl					= mod:NewSpecialWarningSpell(143309, nil, nil, nil, 2)
+local specWarnSwellingCorruptionTarget	= mod:NewSpecialWarningTarget(143578)
+local specWarnSwellingCorruptionFades	= mod:NewSpecialWarningFades(143578)
 
 local timerBreathCD					= mod:NewCDTimer(35, 143436, nil, mod:IsTank() or mod:IsHealer())--35-65 second variation wtf?
 local timerShaBoltCD				= mod:NewCDTimer(6, 143295, nil, false)--every 6-20 seconds (yeah it variates that much)
@@ -77,6 +79,8 @@ function mod:SPELL_AURA_APPLIED(args)
 		timerPurifiedResidue:Start()
 	elseif args.spellId == 143297 and args:IsPlayer() and self:AntiSpam(2, 1) then
 		specWarnShaSplash:Show()
+	elseif args.spellId == 143574 then
+		specWarnSwellingCorruptionTarget:Show(args.destName)
 	end
 end
 
@@ -85,6 +89,8 @@ function mod:SPELL_AURA_REMOVED(args)
 		timerShaResidue:Cancel()
 	elseif args.spellId == 143524 and args:IsPlayer() then
 		timerPurifiedResidue:Cancel()
+	elseif args.spellId == 143574 then
+		specWarnSwellingCorruptionFades:Show(args.destName)
 	end
 end
 
