@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10358 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10362 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(120)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
@@ -101,7 +101,7 @@ function mod:OnCombatStart(delay)
 end
 
 function mod:SPELL_CAST_START(args)
-	if args.spellId == 147688 then--Can't tank check because this mob has no target during cast
+	if args.spellId == 147688 and self:checkTankDistance(args.sourceGUID, 40) then
 		warnArcingSmash:Show()
 		specWarnArcingSmash:Show()
 	elseif args.spellId == 146757 and self:checkTankDistance(args.sourceGUID, 40) then
