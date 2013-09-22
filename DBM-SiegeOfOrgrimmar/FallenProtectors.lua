@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10338 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10367 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetZone()
 mod:SetUsedIcons(7)
@@ -75,7 +75,6 @@ local specWarnMarked				= mod:NewSpecialWarningYou(143840)
 local yellMarked					= mod:NewYell(143840, nil, false)
 --Sun Tenderheart
 local specWarnShaShear				= mod:NewSpecialWarningInterrupt(143423, false)
-local specWarnBane					= mod:NewSpecialWarningSpell(143446, mod:IsHealer())
 local specWarnCalamity				= mod:NewSpecialWarningSpell(143491, nil, nil, nil, 2)
 ----Sun Tenderheart's Desperate Measures
 local specWarnDarkMeditation		= mod:NewSpecialWarningSpell(143546)
@@ -92,7 +91,7 @@ local timerGougeCD					= mod:NewCDTimer(30, 143330, nil, mod:IsTank())--30-41
 local timerGarroteCD				= mod:NewCDTimer(30, 143198, nil, mod:IsHealer())--30-46 (heroic 20-26)
 --Sun Tenderheart
 local timerBaneCD					= mod:NewCDTimer(17, 143446, nil, mod:IsHealer())--17-25 (heroic 13-20)
-local timerCalamityCD				= mod:NewCDTimer(42, 143491)--42-50 (when two can be cast in a row) Also affected by boss specials
+local timerCalamityCD				= mod:NewCDTimer(40, 143491)--40-50 (when two can be cast in a row) Also affected by boss specials
 
 local berserkTimer					= mod:NewBerserkTimer(600)
 
@@ -125,26 +124,12 @@ function mod:BrewTarget(targetname, uId)
 	end
 end
 
-local function findDebuff(spellName)
-	for uId in DBM:GetGroupMembers() do
-		local name = DBM:GetUnitFullName(uId)
-		if UnitDebuff(uId, strikeDebuff) then
-			print("DBM DEBUG: InfernoStrike on "..name)
-			if name == UnitName("player") then
-				specWarnInfernoStrike:Show()
-				yellInfernoStrike:Yell()
-			end
-			if mod.Options.SetIconOnStrike then
-				SetRaidTarget(uId, 7)
-				if previousStrike then
-					SetRaidTarget(previousStrike, 0)
-				end
-			end
-			previousStrike = uId
-			return
-		end
+function mod:InfernoStrikeTarget(targetname, uId)
+	if not targetname then return end
+	print("DBM DEBUG: Infero Strike on "..targetname.." ?")
+	if targetname == UnitName("player") then
+		
 	end
-	mod:Schedule(0.1, findDebuff)
 end
 
 function mod:OnCombatStart(delay)
@@ -176,7 +161,6 @@ function mod:SPELL_CAST_START(args)
 		end
 	elseif args.spellId == 143446 then
 		warnBane:Show()
-		specWarnBane:Show()
 		if self:IsDifficulty("heroic10", "heroic25") then
 			timerBaneCD:Start(13)--TODO, verify normal to see if it was changed too
 		else
@@ -192,7 +176,7 @@ function mod:SPELL_CAST_START(args)
 	elseif args.spellId == 143962 then
 		warnInfernoStrike:Show()
 		timerInfernoStrikeCD:Start()
-		self:Schedule(0.5, findDebuff)
+		self:BossTargetScanner(71481, "InfernoStrikeTarget", 0.5, 1)--This one is a pain, because boss looks at CORRECT target for a super split second, then stares at previous target for rest of time. Repeated scans don't fix it because you really can't tell good target from shit one
 	elseif args.spellId == 143497 then
 		warnBondGoldenLotus:Show()
 	elseif args.spellId == 144396 then
@@ -282,7 +266,6 @@ function mod:SPELL_AURA_REMOVED(args)
 			SetRaidTarget(previousStrike, 0)
 			previousStrike = nil
 		end
-		self:Unschedule(findDebuff)
 	elseif args.spellId == 143812 then--Mark of Anguish
 		timerGarroteCD:Start(12)--TODO, verify consistency in all difficulties
 		timerGougeCD:Start(23)--Seems to be either be exactly 23 or exactly 35. Not sure what causes it to switch.
