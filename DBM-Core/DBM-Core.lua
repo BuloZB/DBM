@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10371 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10377 $"):sub(12, -3)),
 	DisplayVersion = "5.4.2 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.1", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10320 -- the revision of the latest stable version that is available
@@ -3028,6 +3028,7 @@ function DBM:StartCombat(mod, delay, synced, syncedStartHp, noKillRecord)
 		if not mod.Options.Enabled then return end
 		-- HACK: makes sure that we don't detect a false pull if the event fires again when the boss dies...
 		if mod.lastKillTime and GetTime() - mod.lastKillTime < (mod.reCombatTime or 20) then return end
+		if mod.lastWipeTime and GetTime() - mod.lastWipeTime < (mod.reCombatTime2 or 20) then return end
 		if not mod.combatInfo then return end
 		if mod.combatInfo.noCombatInVehicle and UnitInVehicle("player") then -- HACK
 			return
@@ -3225,6 +3226,7 @@ function DBM:EndCombat(mod, wipe)
 			return--Don't run any further, stats are nil on a bad load so rest of this code will also error out.
 		end
 		if wipe then
+			mod.lastWipeTime = GetTime()
 			--Fix for "attempt to perform arithmetic on field 'pull' (a nil value)" (which was actually caused by stats being nil, so we never did getTime on pull, fixing one SHOULD fix the other)
 			local thisTime = GetTime() - mod.combatInfo.pull
 			local wipeHP = ("%d%%"):format((mod.mainBossId and DBM:GetBossHealthByCID(mod.mainBossId) or mod.highesthealth and DBM:GetHighestBossHealth() or DBM:GetLowestBossHealth()) * 100)
@@ -4416,10 +4418,10 @@ function bossModPrototype:BossTargetScanner(cid, returnFunc, scanInterval, scanT
 end
 
 function bossModPrototype:checkTankDistance(guid, distance)
-	local guid = guid or self.creatureId--CID fallback since GetBossTarget should sort it out
-	local distance = distance or 50
+	local guid = guid or self.creatureId--CID fallback since GetBossTarget should sort it out (supports GUID or CID)
+	local distance = distance or 40
 	local _, uId, mobuId = self:GetBossTarget(guid)
-	if not uId or (uId and (uId == "boss1" or uId == "boss2" or uId == "boss3" or uId == "boss4" or uId == "boss5")) then--Mob has no target, or is targeting a UnitID we cannot range check
+	if mobuId and (not uId or (uId and (uId == "boss1" or uId == "boss2" or uId == "boss3" or uId == "boss4" or uId == "boss5"))) then--Mob has no target, or is targeting a UnitID we cannot range check
 		if IsInRaid() then
 			for i = 1, GetNumGroupMembers() do
 				if UnitDetailedThreatSituation("raid"..i, mobuId) == 3 then uId = "raid"..i end--Found highest threat target, make them uId
@@ -6224,8 +6226,9 @@ function bossModPrototype:SetWipeTime(t)
 end
 
 -- fix for LFR ToES Tsulong combat detection bug after killed.
-function bossModPrototype:SetReCombatTime(t)-- bad wording: ReCombat?
+function bossModPrototype:SetReCombatTime(t, t2)--T1, after kill. T2 after wipe
 	self.reCombatTime = t
+	self.reCombatTime2 = t2
 end
 
 function bossModPrototype:IsWipe()

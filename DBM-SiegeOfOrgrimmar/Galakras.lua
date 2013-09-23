@@ -1,9 +1,9 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10362 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10377 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
-mod:SetReCombatTime(120)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
+mod:SetReCombatTime(120, 15)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
 mod:SetZone()
 mod:SetUsedIcons(8)
@@ -94,17 +94,17 @@ function mod:OnCombatStart(delay)
 	addsCount = 0
 	firstTower = false
 	flamesCount = 0
-	timerAddsCD:Start(10.5-delay)
+	timerAddsCD:Start(6.5-delay)
 	if not self:IsDifficulty("heroic10", "heroic25") then
 		timerTowerCD:Start(116.5-delay)
 	end
 end
 
 function mod:SPELL_CAST_START(args)
-	if args.spellId == 147688 and self:checkTankDistance(args.sourceGUID, 40) then
+	if args.spellId == 147688 and self:checkTankDistance(args.sourceGUID) then
 		warnArcingSmash:Show()
 		specWarnArcingSmash:Show()
-	elseif args.spellId == 146757 and self:checkTankDistance(args.sourceGUID, 40) then
+	elseif args.spellId == 146757 and self:checkTankDistance(args.sourceGUID) then
 		local source = args.sourceName
 		warnChainHeal:Show()
 		if source == UnitName("target") or source == UnitName("focus") then 
@@ -114,11 +114,11 @@ function mod:SPELL_CAST_START(args)
 end
 
 function mod:SPELL_CAST_SUCCESS(args)
-	if args.spellId == 146769 and self:checkTankDistance(args.sourceGUID, 40) then
+	if args.spellId == 146769 and self:checkTankDistance(args.sourceGUID) then
 		warnCrushersCall:Show()
 		specWarnCrushersCall:Show()
 		timerCrushersCallCD:Start()
-	elseif args.spellId == 146849 and self:checkTankDistance(args.sourceGUID, 40) then
+	elseif args.spellId == 146849 and self:checkTankDistance(args.sourceGUID) then
 		warnShatteringCleave:Show()
 		timerShatteringCleaveCD:Start()
 	end
@@ -138,10 +138,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		if self.Options.FixateIcon then
 			self:SetIcon(args.destName, 8)
 		end
-	elseif args.spellId == 147029 then--Tank debuff version
-		warnFlamesofGalakrond:Show(args.destName, 1)
-		timerFlamesofGalakrond:Start(args.destName)
-	elseif args.spellId == 147328 and self:checkTankDistance(args.sourceGUID, 40) then
+	elseif args.spellId == 147328 and self:checkTankDistance(args.sourceGUID) then
 		warnWarBanner:Show()
 		specWarnWarBanner:Show()
 	elseif args.spellId == 146899 and self:checkTankDistance(args.sourceGUID, 50) then--Use a bigger range than 40 since npcs tend to stand further out
