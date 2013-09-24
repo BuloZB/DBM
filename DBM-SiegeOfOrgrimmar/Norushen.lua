@@ -200,7 +200,6 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 end
 
 function mod:CHAT_MSG_MONSTER_YELL(msg)
-	print("DBM-Norushen yell: "..msg)
 	if msg == L.wasteOfTime then
 		self:SendSync("prepull")
 	end
