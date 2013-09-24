@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10379 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10388 $"):sub(12, -3)),
 	DisplayVersion = "5.4.2 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.1", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10320 -- the revision of the latest stable version that is available
@@ -204,6 +204,8 @@ local enabled = true
 local blockEnable = false
 local lastCombatStarted = GetTime()
 local loadcIds = {}
+local forceloadmapIds = {}
+local blockMovieSkipItems = {}
 local inCombat = {}
 local combatInfo = {}
 local bossIds = {}
@@ -799,9 +801,21 @@ do
 							end
 						end
 						if GetAddOnMetadata(i, "X-DBM-Mod-LoadCID") then
-							local cIdTable = {strsplit(",", GetAddOnMetadata(i, "X-DBM-Mod-LoadCID"))}
-							for i = 1, #cIdTable do
-								loadcIds[tonumber(cIdTable[i]) or ""] = addonName
+							local idTable = {strsplit(",", GetAddOnMetadata(i, "X-DBM-Mod-LoadCID"))}
+							for i = 1, #idTable do
+								loadcIds[tonumber(idTable[i]) or ""] = addonName
+							end
+						end
+						if GetAddOnMetadata(i, "X-DBM-Mod-ForceLoad-MapID") then
+							local idTable = {strsplit(",", GetAddOnMetadata(i, "X-DBM-Mod-ForceLoad-MapID"))}
+							for i = 1, #idTable do
+								forceloadmapIds[tonumber(idTable[i]) or ""] = true
+							end
+						end
+						if GetAddOnMetadata(i, "X-DBM-Mod-Block-Movie-Skip-ItemID") then
+							local idTable = {strsplit(",", GetAddOnMetadata(i, "X-DBM-Mod-Block-Movie-Skip-ItemID"))}
+							for i = 1, #idTable do
+								blockMovieSkipItems[tonumber(idTable[i]) or ""] = tonumber(mapIdTable[1])
 							end
 						end
 					end
@@ -1149,6 +1163,10 @@ SlashCmdList["DEADLYBOSSMODS"] = function(msg)
 		end
 		local timer = tonumber(cmd:sub(5)) or 10
 		sendSync("PT", timer.."\t"..LastInstanceMapID)
+	elseif cmd:sub(1, 3) == "lag" then
+		sendSync("L")
+		DBM:AddMsg(DBM_CORE_LAG_CHECKING)
+		DBM:Schedule(5, function() DBM:ShowLag() end)
 	elseif cmd:sub(1, 5) == "arrow" then
 		if not DBM:IsInRaid() then
 			DBM:AddMsg(DBM_ARROW_NO_RAIDGROUP)
@@ -1263,6 +1281,37 @@ do
 		self:AddMsg(DBM_CORE_VERSIONCHECK_FOOTER:format(TotalDBM, TotalBW))
 		for i = #sortMe, 1, -1 do
 			sortMe[i] = nil
+		end
+	end
+end
+
+do
+	local sortLag = {}
+	local nolagResponse = {}
+	local function sortit(v1, v2)
+		return (v1.worldlag or 0) < (v2.worldlag or 0)
+	end
+	function DBM:ShowLag()
+		for i, v in pairs(raid) do
+			table.insert(sortLag, v)
+		end
+		table.sort(sortLag, sortit)
+		self:AddMsg(DBM_CORE_LAG_HEADER)
+		for i, v in ipairs(sortLag) do
+			if v.worldlag then
+				self:AddMsg(DBM_CORE_LAG_ENTRY:format(v.name, v.worldlag, v.homelag))
+			else
+				table.insert(nolagResponse, v.name)
+			end
+		end
+		if #nolagResponse > 0 then
+			DBM:AddMsg(DBM_CORE_LAG_FOOTER:format(table.concat(nolagResponse, ", ")))
+			for i = #nolagResponse, 1, -1 do
+				nolagResponse[i] = nil
+			end
+		end
+		for i = #sortLag, 1, -1 do
+			sortLag[i] = nil
 		end
 	end
 end
@@ -2000,13 +2049,13 @@ function DBM:PLAYER_TARGET_CHANGED()
 	end
 end
 
-function DBM:CINEMATIC_START(...)
+function DBM:CINEMATIC_START()
 	if DBM.Options.MovieFilter == "Never" then return end
 	SetMapToCurrentZone()
-	local currentMapID = GetCurrentMapAreaID()
-	if currentMapID == 953 then--Siege of Org
-		for i = 105930, 105935 do--Scan items that trigger movies
-			if select(3,GetItemCooldown(i)) > 0 then return end--Prevent movie skip if we detect any of them on cooldown (ie it was JUST used)
+	local _, _, _, _, _, _, _, currentMapID = GetInstanceInfo()
+	for itemId, mapId in pairs(blockMovieSkipItems) do
+		if mapId == currentMapID then
+			if select(3, GetItemCooldown(itemId)) > 0 then return end
 		end
 	end
 	local currentFloor = GetCurrentMapDungeonLevel() or 0
@@ -2066,11 +2115,8 @@ do
 	local function FixForShittyComputers()
 		local _, instanceType, _, _, _, _, _, mapID = GetInstanceInfo()
 		LastInstanceMapID = mapID
-		if instanceType == "none" and (mapID ~= 369) and (mapID ~= 1043) and (mapID ~= 974) then return end -- instance type of brawlers guild and DMF are none
+		if instanceType == "none" and not forceloadmapIds[mapID] then return end
 		DBM:LoadModsOnDemand("mapId", mapID)
-		if instanceType == "scenario" and (mapID ~= 1148) and DBM:GetModByName("d511") then--mod already loaded (Filter 1148, which is proving grounds)
-			DBM:InstanceCheck()
-		end
 	end
 	--Faster and more accurate loading for instances, but useless outside of them
 	function DBM:LOADING_SCREEN_DISABLED()
@@ -2082,16 +2128,15 @@ do
 			local modTable = v[checkTable]
 			local _, _, _, enabled = GetAddOnInfo(v.modId)
 			if enabled and not IsAddOnLoaded(v.modId) and modTable and checkEntry(modTable, checkValue) then
-				if self:LoadMod(v) and v.type == "SCENARIO" then
-					DBM:InstanceCheck()
-				end
+				self:LoadMod(v)
 			end
 		end
+		DBM:ScenarioCheck()--Do not filter. Because ScenarioCheck function includes filter.
 	end
 end
 
 --Scenario mods
-function DBM:InstanceCheck()
+function DBM:ScenarioCheck()
 	if combatInfo[LastInstanceMapID] then
 		for i, v in ipairs(combatInfo[LastInstanceMapID]) do
 			if (v.type == "scenario") and checkEntry(v.msgs, LastInstanceMapID) then
@@ -2152,7 +2197,7 @@ function DBM:LoadMod(mod)
 			RequestChallengeModeMapInfo()
 			RequestChallengeModeLeaders(mapID)
 		end
-		if instanceType == "pvp" and IsAddOnLoaded("DBM-PVP") then--Is a battleground and pvp mods are installed
+		if instanceType == "pvp" and IsAddOnLoaded("DBM-PvP") then--Is a battleground and pvp mods are installed
 			if DBM:GetModByName("z30") and DBM:GetModByName("z30").revision >= 3 then--They are loaded and correct revision
 				--Do nothing
 			else--They either aren't loaded or are wrong revision. in either case, it means they have old pvp mods installed that don't load correctly or are out of date
@@ -2342,7 +2387,7 @@ do
 							other = i
 						end
 					end
-					if found then
+					if found then--Only requires 2 for update notification (maybe also make 3?)
 						showedUpdateReminder = true
 						if not DBM.Options.BlockVersionUpdateNotice or revDifference > 333 then
 							DBM:ShowUpdateReminder(displayVersion, version)
@@ -2375,13 +2420,25 @@ do
 					end
 					if found then--Running alpha version that's out of date
 						showedUpdateReminder = true
-						--Bug happened again, but this print NEVER happened?? In fact, everyone in raid got the bug to happen, and suspiciously after several people in raid turned bigwigs on....
 						DBM:AddMsg(DBM_CORE_UPDATEREMINDER_HEADER_ALPHA:format(revDifference))
 					end
 				end
 			end
 		end
 		DBM:GROUP_ROSTER_UPDATE()
+	end
+
+	syncHandlers["L"] = function(sender)
+		local _, _, home, world = GetNetStats()
+		sendSync("LAG", ("%d\t%d"):format(home, world))
+	end
+	
+	syncHandlers["LAG"] = function(sender, homelag, worldlag)
+		homelag, worldlag = tonumber(homelag or ""), tonumber(worldlag or "")
+		if homelag and worldlag and raid[sender] then
+			raid[sender].homelag = homelag
+			raid[sender].worldlag = worldlag
+		end
 	end
 
 	syncHandlers["U"] = function(sender, time, text)
@@ -4420,16 +4477,10 @@ function bossModPrototype:checkTankDistance(guid, distance)
 	local distance = distance or 40
 	local _, uId, mobuId = self:GetBossTarget(guid)
 	if mobuId and (not uId or (uId and (uId == "boss1" or uId == "boss2" or uId == "boss3" or uId == "boss4" or uId == "boss5"))) then--Mob has no target, or is targeting a UnitID we cannot range check
-		if IsInRaid() then
-			for i = 1, GetNumGroupMembers() do
-				if UnitDetailedThreatSituation("raid"..i, mobuId) == 3 then uId = "raid"..i end--Found highest threat target, make them uId
-				break
-			end
-		elseif IsInGroup() then
-			for i = 1, GetNumSubgroupMembers() do
-				if UnitDetailedThreatSituation("party"..i, mobuId) == 3 then uId = "party"..i end
-				break
-			end
+		local unitID = (IsInRaid() and "raid") or (IsInGroup() and "party") or "player"
+		for i = 1, DBM:GetNumGroupMembers() do
+			if UnitDetailedThreatSituation(unitID..i, mobuId) == 3 then uId = unitID..i end--Found highest threat target, make their uId
+			break
 		end
 	end
 	if uId then--Now we know who mob is targeting (or highest threat is)
