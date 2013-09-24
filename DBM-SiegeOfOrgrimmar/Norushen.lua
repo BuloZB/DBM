@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10384 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10387 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetZone()
 
@@ -90,7 +90,7 @@ function mod:OnCombatStart(delay)
 	playerInside = false
 	timerBlindHatredCD:Start(25-delay)
 	if self:IsDifficulty("lfr25") then--Might also be flex as well
-		berserkTimer:Start(480-delay)--8min in LFR
+		berserkTimer:Start(480-delay)--8min in LFR (I did lfr run last week, And confirmed LFR berserk is 10min. Why changed to 8min? Hotfixed? Please removd this comment on next commit)
 	else
 		berserkTimer:Start(-delay)
 	end

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(818, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10302 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10387 $"):sub(12, -3))
 mod:SetCreatureID(68036)--Crimson Fog 69050, 
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 1)
@@ -285,7 +285,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 					x, y = GetPlayerMapPosition(uId)
 				end
 				local inRange = DBM.RangeCheck:GetDistance("player", x, y)
-				if inRange and inRange < 21 then--Range hard to get perfect, a player 30 yards away might still be in it. I say 15 is probably good middle ground to catch most of the "near"
+				if inRange and inRange < 50 then--Range hard to get perfect, a player 30 yards away might still be in it. I say 15 is probably good middle ground to catch most of the "near"
 					specWarnForceOfWillNear:Show(args.destName)
 				end
 			end
@@ -395,7 +395,7 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif args.spellId == 137727 and self.Options.SetIconLifeDrain then -- Life Drain current target. If target warning needed, insert into this block. (maybe very spammy)
 		self:SetIcon(args.destName, 8)--Skull
 	elseif args.spellId == 133798 and self.Options.InfoFrame and not self:IsDifficulty("lfr25") then -- Force update
-		DBM.InfoFrame:Update("playerdebuffstacks")
+		DBM.InfoFrame:Update()
 		if args:IsPlayer() then
 			yellLifeDrain:Yell(playerName, args.amount or 1)
 		end

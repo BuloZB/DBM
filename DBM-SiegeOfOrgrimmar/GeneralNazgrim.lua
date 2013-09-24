@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(850, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10380 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10388 $"):sub(12, -3))
 mod:SetCreatureID(71515)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 4, 2, 1)
@@ -171,6 +171,33 @@ local function scanForMobs()
 	end
 end
 
+local function updateInfoFrame()
+	local lines = {}
+	if UnitPower("boss1") < 50 then
+		lines["|cFF088A08"..GetSpellInfo(143500).."|r"] = UnitPower("boss1")
+		lines[GetSpellInfo(143536)] = 50
+		lines[GetSpellInfo(143503)] = 70
+		lines[GetSpellInfo(143872)] = 100
+	elseif UnitPower("boss1") < 70 then
+		lines[GetSpellInfo(143500)] = 25
+		lines["|cFF088A08"..GetSpellInfo(143536).."|r"] = UnitPower("boss1")
+		lines[GetSpellInfo(143503)] = 70
+		lines[GetSpellInfo(143872)] = 100
+	elseif UnitPower("boss1") < 100 then
+		lines[GetSpellInfo(143500)] = 25
+		lines[GetSpellInfo(143536)] = 50
+		lines["|cFF088A08"..GetSpellInfo(143503).."|r"] = UnitPower("boss1")
+		lines[GetSpellInfo(143872)] = 100
+	elseif UnitPower("boss1") == 100 then
+		lines[GetSpellInfo(143500)] = 25
+		lines[GetSpellInfo(143536)] = 50
+		lines[GetSpellInfo(143503)] = 70
+		lines["|cFF088A08"..GetSpellInfo(143872).."|r"] = UnitPower("boss1")
+	end
+	
+	return lines
+end
+
 function mod:OnCombatStart(delay)
 	addsCount = 0
 	table.wipe(adds)
@@ -231,7 +258,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		timerBerserkerStanceCD:Start()
 		if self.Options.InfoFrame then
 			DBM.InfoFrame:SetHeader(GetSpellInfo(143589))
-			DBM.InfoFrame:Show(4, "nazgrimpower")
+			DBM.InfoFrame:Show(4, "function", updateInfoFrame)
 		end
 	elseif args.spellId == 143594 then
 		warnBerserkerStance:Show()
@@ -244,7 +271,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		warnDefensiveStanceSoon:Schedule(59, 1)
 		if self.Options.InfoFrame then
 			DBM.InfoFrame:SetHeader(GetSpellInfo(143594))
-			DBM.InfoFrame:Show(4, "nazgrimpower")
+			DBM.InfoFrame:Show(4, "function", updateInfoFrame)
 		end
 	elseif args.spellId == 143593 then
 		warnDefensiveStance:Show()
@@ -252,7 +279,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		timerDefensiveStance:Start()
 		if self.Options.InfoFrame then
 			DBM.InfoFrame:SetHeader(GetSpellInfo(143593))
-			DBM.InfoFrame:Show(4, "nazgrimpower")
+			DBM.InfoFrame:Show(4, "function", updateInfoFrame)
 		end
 	elseif args.spellId == 143536 then
 		warnKorkronBanner:Show()
