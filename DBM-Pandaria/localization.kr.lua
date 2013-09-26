@@ -75,8 +75,9 @@ L= DBM:GetModLocalization(858)
 
 L:SetMiscLocalization({
 	Pull				= "시험을 시작하자!",
-	Wave1				= "너희 행동이 어떤 결과를 낳을지 생각해라!",
+	Wave1				= "시련 때문에 판단력이 흐려져선 안 된다!",
 	Wave2				= "내면의 목소리에 귀를 기울이고, 진실을 찾아라!",
+	Wave3				= "너희 행동이 어떤 결과를 낳을지 생각해라!",
 	Victory				= "이 시험에서 너희의 지혜가 빛을 발했다. 그 지혜가 어두운 곳에서 항상 너희의 등불이 되길."
 })
 
@@ -107,5 +108,5 @@ L:SetMiscLocalization({
 L= DBM:GetModLocalization(861)
 
 L:SetMiscLocalization({
-	Pull					= "You will take my place on the eternal brazier."
+	Pull					= "영원한 화로에서 내 자리를 대신해라."
 })

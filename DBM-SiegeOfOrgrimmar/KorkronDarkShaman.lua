@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10365 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10406 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 mod:SetZone()
 mod:SetUsedIcons(5, 4, 3, 2, 1)
@@ -27,7 +27,7 @@ local warnRustedIronTotem			= mod:NewSpellAnnounce(144291, 3)--Heroic (95%)
 
 --Earthbreaker Haromm
 local warnFroststormStrike			= mod:NewStackAnnounce(144215, 2, nil, mod:IsTank())
-local warnToxicMists				= mod:NewTargetAnnounce(144089, 3)
+local warnToxicMists				= mod:NewTargetAnnounce(144089, 3, nil, false)
 local warnFoulStream				= mod:NewTargetAnnounce(144090, 3)
 local warnAshenWall					= mod:NewSpellAnnounce(144070, 4)
 local warnIronTomb					= mod:NewSpellAnnounce(144328, 3)

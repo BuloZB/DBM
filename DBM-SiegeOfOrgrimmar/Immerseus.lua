@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(852, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10353 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10407 $"):sub(12, -3))
 mod:SetCreatureID(71543)--Doesn't die, will need kill detection
 mod:SetReCombatTime(45)--Lets just assume he has same bug as tsulong in advance and avoid problems
 mod:SetZone()
@@ -36,8 +36,8 @@ local timerBreathCD						= mod:NewCDTimer(35, 143436, nil, mod:IsTank() or mod:I
 local timerSwirl						= mod:NewBuffActiveTimer(13, 143309)
 local timerShaBoltCD					= mod:NewCDTimer(6, 143295, nil, false)--every 6-20 seconds (yeah it variates that much)
 local timerSwirlCD						= mod:NewCDTimer(48.5, 143309)
-local timerShaResidue					= mod:NewBuffActiveTimer(10, 143459)
-local timerPurifiedResidue				= mod:NewBuffActiveTimer(15, 143524)
+local timerShaResidue					= mod:NewBuffFadesTimer(10, 143459)
+local timerPurifiedResidue				= mod:NewBuffFadesTimer(15, 143524)
 local timerSwellingCorruptionCD			= mod:NewCDTimer(75, 143578, nil, nil, nil, 143574)
 
 local berserkTimer						= mod:NewBerserkTimer(605)

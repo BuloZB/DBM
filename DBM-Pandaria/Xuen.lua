@@ -1,7 +1,7 @@
-local mod	= DBM:NewMod(860, "DBM-Pandaria", nil, 322)
+local mod	= DBM:NewMod(860, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10283 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10408 $"):sub(12, -3))
 mod:SetCreatureID(71953)
 mod:SetZone()
 mod:SetMinSyncRevision(10162)

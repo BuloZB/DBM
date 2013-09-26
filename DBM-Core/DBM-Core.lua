@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10397 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10408 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -3254,15 +3254,12 @@ end
 function DBM:EndCombat(mod, wipe)
 	if removeEntry(inCombat, mod) then
 		local scenario = mod.type == "SCENARIO"
-		if not wipe then
-			mod.lastKillTime = GetTime()
-			if mod.inCombatOnlyEvents and mod.inCombatOnlyEventsRegistered then
-				-- unregister all events except for SPELL_AURA_REMOVED events (might still be needed to remove icons etc...)
-				mod:UnregisterInCombatEvents("SPELL_AURA_REMOVED")
-				self:Schedule(2, mod.UnregisterInCombatEvents, mod) -- 2 seconds should be enough for all auras to fade
-				self:Schedule(2.1, mod.Stop, mod) -- Remove accident started timers.
-				mod.inCombatOnlyEventsRegistered = nil
-			end
+		if mod.inCombatOnlyEvents and mod.inCombatOnlyEventsRegistered then
+			-- unregister all events except for SPELL_AURA_REMOVED events (might still be needed to remove icons etc...)
+			mod:UnregisterInCombatEvents("SPELL_AURA_REMOVED")
+			self:Schedule(2, mod.UnregisterInCombatEvents, mod) -- 2 seconds should be enough for all auras to fade
+			self:Schedule(2.1, mod.Stop, mod) -- Remove accident started timers.
+			mod.inCombatOnlyEventsRegistered = nil
 		end
 		mod:Stop()
 		mod.inCombat = false
@@ -3339,6 +3336,7 @@ function DBM:EndCombat(mod, wipe)
 			end
 			fireEvent("wipe", mod)
 		else
+			mod.lastKillTime = GetTime()
 			local thisTime = GetTime() - mod.combatInfo.pull
 			local lastTime = (savedDifficulty == "lfr25" and mod.stats.lfr25LastTime) or ((savedDifficulty == "heroic5" or savedDifficulty == "heroic10") and mod.stats.heroicLastTime) or (savedDifficulty == "challenge5" and mod.stats.challengeLastTime) or (savedDifficulty == "flex" and mod.stats.flexLastTime) or (savedDifficulty == "normal25" and mod.stats.normal25LastTime) or (savedDifficulty == "heroic25" and mod.stats.heroic25LastTime) or ((savedDifficulty == "normal5" or savedDifficulty == "normal10" or savedDifficulty == "worldboss") and mod.stats.normalLastTime) or nil
 			local bestTime = (savedDifficulty == "lfr25" and mod.stats.lfr25BestTime) or ((savedDifficulty == "heroic5" or savedDifficulty == "heroic10") and mod.stats.heroicBestTime) or (savedDifficulty == "challenge5" and mod.stats.challengeBestTime) or (savedDifficulty == "flex" and mod.stats.flexBestTime) or (savedDifficulty == "normal25" and mod.stats.normal25BestTime) or (savedDifficulty == "heroic25" and mod.stats.heroic25BestTime) or ((savedDifficulty == "normal5" or savedDifficulty == "normal10" or savedDifficulty == "worldboss") and mod.stats.normalBestTime) or nil
@@ -4090,7 +4088,8 @@ function DBM:RoleCheck()
 	local role = GetSpecializationRole(spec)
 	local specID = GetLootSpecialization()
 	local _, _, _, _, _, lootrole = GetSpecializationInfoByID(specID)
-	if DBM.Options.SetPlayerRole and not InCombatLockdown() and IsInGroup() and not IsPartyLFG() then
+	local _, _, diff = GetInstanceInfo()
+	if DBM.Options.SetPlayerRole and not InCombatLockdown() and IsInGroup() and ((IsPartyLFG() and diff == 14) or not IsPartyLFG()) then
 		if UnitGroupRolesAssigned("player") ~= role then
 			UnitSetRole("player", role)
 		end
@@ -4218,7 +4217,7 @@ do
 	local modsById = setmetatable({}, {__mode = "v"})
 	local mt = {__index = bossModPrototype}
 
-	function DBM:NewMod(name, modId, modSubTab, instanceId)
+	function DBM:NewMod(name, modId, modSubTab, instanceId, creatureInfoId)
 		name = tostring(name) -- the name should never be a number of something as it confuses sync handlers that just receive some string and try to get the mod from it
 		if modsById[name] then error("DBM:NewMod(): Mod names are used as IDs and must therefore be unique.", 2) end
 		local obj = setmetatable(
@@ -4253,7 +4252,16 @@ do
 		end
 
 		if tonumber(name) then
-			local t = EJ_GetEncounterInfo(tonumber(name))
+			local t = ""
+			if type(creatureInfoId) == "number" then
+				t = select(2, EJ_GetCreatureInfo(creatureInfoId, tonumber(name)))
+			else
+				t = EJ_GetEncounterInfo(tonumber(name))
+			end
+			obj.localization.general.name = string.split(",", t or name)
+			obj.modelId = select(4, EJ_GetCreatureInfo(1, tonumber(name)))
+		elseif name:match("z%d+") then
+			local t = EJ_GetCreatureInfo(1, 817)(tonumber(name))
 			obj.localization.general.name = string.split(",", t or name)
 			obj.modelId = select(4, EJ_GetCreatureInfo(1, tonumber(name)))
 		elseif name:match("z%d+") then
@@ -6305,9 +6313,11 @@ function bossModPrototype:SendSync(event, ...)
 	local time = GetTime()
 	--Mod syncs are more strict and enforce latency threshold always.
 	--Do not put latency check in main sendSync local function (line 313) though as we still want to get version information, etc from these users.
-	if select(4, GetNetStats()) < DBM.Options.LatencyThreshold and (not modSyncSpam[spamId] or (time - modSyncSpam[spamId]) > 8) then
+	if not modSyncSpam[spamId] or (time - modSyncSpam[spamId]) > 8 then
 		self:ReceiveSync(event, nil, self.revision or 0, tostringall(...))
-		sendSync("M", str)
+		if select(4, GetNetStats()) < DBM.Options.LatencyThreshold then
+			sendSync("M", str)
+		end
 	end
 end
 
@@ -6490,9 +6500,7 @@ do
 		}, returnKey)
 	}
 	local defaultMiscLocalization = {
-		__index = function(t, k)
-			return t.misc.general[k] or t.misc.options[k] or t.misc.warnings[k] or t.misc.timers[k] or t.misc.cats[k] or k
-		end
+		__index = {}
 	}
 
 	function modLocalizationPrototype:SetGeneralLocalization(t)
@@ -6541,7 +6549,6 @@ do
 			miscStrings = setmetatable({}, defaultMiscLocalization),
 			cats = setmetatable({}, defaultCatLocalization),
 		}
-		obj.miscStrings.misc = obj
 		setmetatable(obj, mt)
 		modLocalizations[name] = obj
 		return obj
