@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10406 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10410 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 mod:SetZone()
 
@@ -78,7 +78,11 @@ function mod:OnCombatStart(delay)
 	timerBorerDrillCD:Start(-delay)
 	timerCrawlerMineCD:Start(-delay)
 	timerSiegeModeCD:Start(120.5-delay)--First one longer than rest
-	berserkTimer:Start(-delay)
+	if self:IsDifficulty("heroic10", "heroic25") then
+		berserkTimer:Start(450-delay)
+	else
+		berserkTimer:Start(-delay)
+	end
 	if self.Options.RangeFrame then
 		DBM.RangeCheck:Show(8)
 	end
