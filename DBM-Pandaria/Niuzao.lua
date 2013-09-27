@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(859, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10420 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10421 $"):sub(12, -3))
 mod:SetCreatureID(71954)
 mod:SetMinSyncRevision(10162)
 
@@ -27,6 +27,8 @@ local specWarnCharge			= mod:NewSpecialWarningSpell(144609, nil, nil, nil, 2)--6
 local timerHeadbuttCD			= mod:NewCDTimer(47, 144610, nil, mod:IsTank())
 local timerMassiveQuake			= mod:NewBuffActiveTimer(13, 144611)
 local timerMassiveQuakeCD		= mod:NewCDTimer(48, 144611)
+
+mod:AddReadyCheckOption(33117, false)
 
 function mod:OnCombatStart(delay, yellTriggered)
 	if yellTriggered then

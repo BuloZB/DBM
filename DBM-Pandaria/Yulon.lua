@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(858, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10420 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10421 $"):sub(12, -3))
 mod:SetCreatureID(71955)
 mod:SetZone()
 mod:SetMinSyncRevision(10162)
@@ -28,6 +28,7 @@ local timerJadefireBreathCD		= mod:NewCDTimer(18.5, 144530, nil, mod:IsTank())
 local timerJadefireWallCD		= mod:NewNextTimer(60, 144533)
 
 mod:AddBoolOption("RangeFrame", true)--For jadefire bolt/blaze (depending how often it's cast, if it's infrequent i'll kill range finder)
+mod:AddReadyCheckOption(33117, false)
 
 function mod:OnCombatStart(delay, yellTriggered)
 	if yellTriggered then--We know for sure this is an actual pull and not diving into in progress

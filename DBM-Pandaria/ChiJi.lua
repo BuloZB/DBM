@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(857, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10420 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10421 $"):sub(12, -3))
 mod:SetCreatureID(71952)
 mod:SetZone()
 mod:SetMinSyncRevision(10162)
@@ -29,6 +29,8 @@ local specWarnCraneRush			= mod:NewSpecialWarningSpell(144470, nil, nil, nil, 2)
 
 local timerInspiringSongCD		= mod:NewCDTimer(30, 144468)--30-50sec variation?
 local timerBlazingSong			= mod:NewBuffActiveTimer(15, 144471)
+
+mod:AddReadyCheckOption(33117, false)
 
 function mod:OnCombatStart(delay, yellTriggered)
 	if yellTriggered then--We know for sure this is an actual pull and not diving into in progress
