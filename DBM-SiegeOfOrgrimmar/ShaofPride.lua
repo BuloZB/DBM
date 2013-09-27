@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10411 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10412 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -40,7 +40,7 @@ local warnMockingBlast			= mod:NewSpellAnnounce(144379, 3, nil, false)
 
 --Sha of Pride
 local specWarnGiftOfTitans		= mod:NewSpecialWarningYou(144359)
-local yellGiftOfTitans			= mod:NewYell(146594, nil, false)
+local yellGiftOfTitans			= mod:NewYell(146594, nil, false, nil, nil, 2)
 local specWarnSwellingPride		= mod:NewSpecialWarningCount(144400, nil, nil, nil, 2)
 local specWarnWoundedPride		= mod:NewSpecialWarningSpell(144358, mod:IsTank())
 local specWarnSelfReflection	= mod:NewSpecialWarningSpell(144800, nil, nil, nil, 2)
