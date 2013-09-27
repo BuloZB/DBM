@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10421 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10423 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -280,6 +280,8 @@ local LoadAddOn = LoadAddOn
 local IsEncounterInProgress = IsEncounterInProgress
 local InCombatLockdown = InCombatLockdown
 local GetAddOnInfo = GetAddOnInfo
+local PlaySoundFile = PlaySoundFile
+local PlaySound = PlaySound
 
 -- for Phanx' Class Colors
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
@@ -3992,10 +3994,12 @@ function DBM:ToggleRaidBossEmoteFrame(toggle, custom)
 		unRegistered = true
 		RaidBossEmoteFrame:UnregisterEvent("RAID_BOSS_EMOTE")
 		RaidBossEmoteFrame:UnregisterEvent("RAID_BOSS_WHISPER")
+		RaidBossEmoteFrame:UnregisterEvent("CLEAR_BOSS_EMOTES")
 	elseif toggle == 0 and unRegistered then
 		unRegistered = false
 		RaidBossEmoteFrame:RegisterEvent("RAID_BOSS_EMOTE")
 		RaidBossEmoteFrame:RegisterEvent("RAID_BOSS_WHISPER")
+		RaidBossEmoteFrame:RegisterEvent("CLEAR_BOSS_EMOTES")
 	end
 end
 
