@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10412 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10419 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -382,7 +382,7 @@ function mod:UNIT_POWER_FREQUENT(uId)
 		manifestationWarned = true
 		warnManifestation:Show()
 		specWarnManifestation:Show()--No spawn trigger to speak of. fortunately for us, they spawn based on boss power.
-	elseif power > 10 and manifestationWarned then
+	elseif power > 10 and power < 82 and manifestationWarned then
 		manifestationWarned = false
 	end
 end
