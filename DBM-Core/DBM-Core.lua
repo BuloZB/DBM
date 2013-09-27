@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10415 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10417 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -6311,9 +6311,7 @@ function bossModPrototype:SendSync(event, ...)
 	--Do not put latency check in main sendSync local function (line 313) though as we still want to get version information, etc from these users.
 	if not modSyncSpam[spamId] or (time - modSyncSpam[spamId]) > 8 then
 		self:ReceiveSync(event, nil, self.revision or 0, tostringall(...))
-		if select(4, GetNetStats()) < DBM.Options.LatencyThreshold then
-			sendSync("M", str)
-		end
+		sendSync("M", str)
 	end
 end
 

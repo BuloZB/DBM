@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(850, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10392 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10416 $"):sub(12, -3))
 mod:SetCreatureID(71515)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 4, 2, 1)
@@ -70,7 +70,7 @@ local specWarnHealingTideTotem		= mod:NewSpecialWarningSwitch(143474, false)--No
 local timerAddsCD					= mod:NewNextCountTimer(45, "ej7920", nil, nil, nil, 2457)
 local timerSunder					= mod:NewTargetTimer(30, 143494, nil, mod:IsTank() or mod:IsHealer())
 local timerSunderCD					= mod:NewCDTimer(10, 143494, nil, mod:IsTank())
-local timerExecuteCD				= mod:NewNextTimer(33.5, 143502, nil, mod:IsTank())
+local timerExecuteCD				= mod:NewCDTimer(18, 143502, nil, mod:IsTank())
 local timerBoneCD					= mod:NewCDTimer(30, 143638, nil, mod:IsHealer())
 local timerBerserkerStanceCD		= mod:NewNextTimer(60, 143594)
 local timerDefensiveStanceCD		= mod:NewNextTimer(60, 143593)
