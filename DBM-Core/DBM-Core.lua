@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10436 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10437 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -4792,13 +4792,23 @@ do
 		if not self.option or self.mod.Options[self.option] then
 			if DBM.Options.DontShowBossAnnounces then return end	-- don't show the announces if the spam filter option is set
 			local colorCode = ("|cff%.2x%.2x%.2x"):format(self.color.r * 255, self.color.g * 255, self.color.b * 255)
-			local text = ("%s%s%s|r%s"):format(
-				(DBM.Options.WarningIconLeft and self.icon and textureCode:format(self.icon)) or "",
-				colorCode,
-				pformat(self.text, #self.combinedtext > 0 and table.concat(self.combinedtext, "<, >") or ...),
-				(DBM.Options.WarningIconRight and self.icon and textureCode:format(self.icon)) or ""
-			)
-			self.combinedtext = {}
+			local text
+			if #self.combinedtext > 0 then
+				text = ("%s%s%s|r%s"):format(
+					(DBM.Options.WarningIconLeft and self.icon and textureCode:format(self.icon)) or "",
+					colorCode,
+					pformat(self.text, table.concat(self.combinedtext, "<, >")),
+					(DBM.Options.WarningIconRight and self.icon and textureCode:format(self.icon)) or ""
+				)
+				self.combinedtext = {}
+			else
+				text = ("%s%s%s|r%s"):format(
+					(DBM.Options.WarningIconLeft and self.icon and textureCode:format(self.icon)) or "",
+					colorCode,
+					pformat(self.text, ...),
+					(DBM.Options.WarningIconRight and self.icon and textureCode:format(self.icon)) or ""
+				)
+			end
 			if not cachedColorFunctions[self.color] then
 				local color = self.color -- upvalue for the function to colorize names, accessing self in the colorize closure is not safe as the color of the announce object might change (it would also prevent the announce from being garbage-collected but announce objects are never destroyed)
 				cachedColorFunctions[color] = function(cap)
