@@ -63,7 +63,7 @@ L= DBM:GetModLocalization(858)
 
 L:SetMiscLocalization({
 	Pull					= "Начнем схватку!",
-	Wave1					= "Do not let your judgement be clouded in trying times!",
+	Wave1					= "Не позволяйте разуму затуманиваться.",
 	Wave2					= "Слушайте внутренний голос и стремитесь к истине!",
 	Wave3					= "Думайте о последствиях своих действий!",
 	Victory					= "Мудрость помогла вам пройти испытание. Пусть она всегда ведет вас к свету."
