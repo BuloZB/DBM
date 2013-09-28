@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10376 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10424 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetZone()
 mod:SetUsedIcons(1)
@@ -167,8 +167,8 @@ local berserkTimer					= mod:NewBerserkTimer(720)
 local countdownEncaseInAmber		= mod:NewCountdown(30, 142564)--Probably switch to secondary countdown if one of his other abilities proves to have priority
 local countdownInjection			= mod:NewCountdown(9.5, 143339, mod:IsTank(), nil, nil, nil, true)
 
-mod:AddBoolOption("RangeFrame")
-mod:AddBoolOption("SetIconOnAim", true)--multi boss fight, will use star and avoid moving skull off a kill target
+mod:AddRangeFrameOption("6/5")
+mod:AddSetIconOption("SetIconOnAim", 142948)--multi boss fight, will use star and avoid moving skull off a kill target
 
 local activatedTargets = {}--A table, for the 3 on pull
 local whirlingTargets = {}

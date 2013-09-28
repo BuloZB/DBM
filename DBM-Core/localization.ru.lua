@@ -255,7 +255,7 @@ DBM_CORE_AUTO_YELL_OPTION_TEXT			= "Кричать, когда на вас $spel
 DBM_CORE_AUTO_YELL_ANNOUNCE_TEXT		= "%s на " .. UnitName("player") .. "!"
 DBM_CORE_AUTO_RANGE_OPTION_TEXT			= "Показывать окно проверки дистанции (%s м) для $spell:%s"--string used for range so we can use things like "5/2" as a value for that field
 DBM_CORE_AUTO_RANGE_OPTION_TEXT_SHORT	= "Показывать окно проверки дистанции (%s м)"--For when a range frame is just used for more than one thing
-
+DBM_CORE_AUTO_READY_CHECK_OPTION_TEXT	= "Проигрывать звук проверки готовности когда пулят босса (даже если он не является целью)"
 
 -- New special warnings
 DBM_CORE_MOVE_SPECIAL_WARNING_BAR	= "Индикатор спец-предупреждения"

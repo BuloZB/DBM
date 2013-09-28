@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10419 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10424 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -79,8 +79,8 @@ local berserkTimer				= mod:NewBerserkTimer(600)
 local countdownSwellingPride	= mod:NewCountdown(75.5, 144400)
 local countdownReflection		= mod:NewCountdown(25, 144800, false, nil, nil, nil, true)
 
-mod:AddBoolOption("InfoFrame")
-mod:AddBoolOption("SetIconOnMark", false)
+mod:AddInfoFrameOption("ej8255")
+mod:AddSetIconOption("SetIconOnMark", 144351, false)
 
 local tinsert, tconcat, twipe = table.insert, table.concat, table.wipe--Sha of tables....Might as well cache frequent table globals
 local UnitPower, UnitPowerMax, UnitIsDeadOrGhost, UnitGUID = UnitPower, UnitPowerMax, UnitIsDeadOrGhost, UnitGUID

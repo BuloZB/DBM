@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10423 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10434 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -3108,7 +3108,7 @@ function DBM:StartCombat(mod, delay, synced, syncedStartHp, noKillRecord, trigge
 	if not checkEntry(inCombat, mod) then
 		if not mod.Options.Enabled then return end
 		-- HACK: makes sure that we don't detect a false pull if the event fires again when the boss dies...
-		if mod.lastKillTime and GetTime() - mod.lastKillTime < (mod.reCombatTime or 20) then return end
+		if mod.lastKillTime and GetTime() - mod.lastKillTime < (mod.reCombatTime or 120) then return end
 		if mod.lastWipeTime and GetTime() - mod.lastWipeTime < (mod.reCombatTime2 or 20) then return end
 		if not mod.combatInfo then return end
 		if mod.combatInfo.noCombatInVehicle and UnitInVehicle("player") then -- HACK
@@ -4510,10 +4510,10 @@ function bossModPrototype:BossTargetScanner(cid, returnFunc, scanInterval, scanT
 	end
 end
 
-function bossModPrototype:checkTankDistance(guid, distance)
-	local guid = guid or self.creatureId--CID fallback since GetBossTarget should sort it out (supports GUID or CID)
+function bossModPrototype:CheckTankDistance(cid, distance)
+	local cid = cid or self.creatureId--GetBossTarget supports GUID or CID and it will automatically return correct values with EITHER ONE
 	local distance = distance or 40
-	local _, uId, mobuId = self:GetBossTarget(guid)
+	local _, uId, mobuId = self:GetBossTarget(cid)
 	if mobuId and (not uId or (uId and (uId == "boss1" or uId == "boss2" or uId == "boss3" or uId == "boss4" or uId == "boss5"))) then--Mob has no target, or is targeting a UnitID we cannot range check
 		local unitID = (IsInRaid() and "raid") or (IsInGroup() and "party") or "player"
 		for i = 1, DBM:GetNumGroupMembers() do
@@ -6144,6 +6144,32 @@ function bossModPrototype:AddSpecialWarningOption(name, default, defaultSound, c
 	self.Options[name] = (default == nil) or default
 	self.Options[name .. "SpecialWarningSound"] = defaultSound or "Sound\\Spells\\PVPFlagTaken.ogg"
 	self:SetOptionCategory(name, cat)
+end
+
+function bossModPrototype:AddSetIconOption(name, spellId, default, isHostile)
+	self.Options[name] = (default == nil) or default
+	self:SetOptionCategory(name, "misc")
+	if isHostile then
+		self.localization.options[name] = DBM_CORE_AUTO_ICONS_OPTION_TEXT2:format(spellId)
+	else
+		self.localization.options[name] = DBM_CORE_AUTO_ICONS_OPTION_TEXT:format(spellId)
+	end
+end
+
+function bossModPrototype:AddRangeFrameOption(range, spellId, default)
+	self.Options["RangeFrame"] = (default == nil) or default
+	self:SetOptionCategory("RangeFrame", "misc")
+	if spellId then
+		self.localization.options["RangeFrame"] = DBM_CORE_AUTO_RANGE_OPTION_TEXT:format(range, spellId)
+	else
+		self.localization.options["RangeFrame"] = DBM_CORE_AUTO_RANGE_OPTION_TEXT_SHORT:format(range)
+	end
+end
+
+function bossModPrototype:AddInfoFrameOption(spellId, default)
+	self.Options["InfoFrame"] = (default == nil) or default
+	self:SetOptionCategory("InfoFrame", "misc")
+	self.localization.options["InfoFrame"] = DBM_CORE_AUTO_INFO_FRAME_OPTION_TEXT:format(spellId)
 end
 
 function bossModPrototype:AddReadyCheckOption(questId, default)

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(846, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10326 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10424 $"):sub(12, -3))
 mod:SetCreatureID(71454)
 mod:SetZone()
 mod:SetUsedIcons(4, 3, 2, 1)
@@ -54,8 +54,8 @@ local countdownImplodingEnergy			= mod:NewCountdown(10, 142986)
 
 local soundDisplacedEnergy				= mod:NewSound(142913)
 
-mod:AddBoolOption("RangeFrame", true)--Various things
-mod:AddBoolOption("SetIconOnDisplacedEnergy", false)
+mod:AddRangeFrameOption("8/5")--Various things
+mod:AddSetIconOption("SetIconOnDisplacedEnergy", 142913, false)
 
 local displacedEnergyTargets	= {}
 local displacedEnergyTargetsIcons = {}

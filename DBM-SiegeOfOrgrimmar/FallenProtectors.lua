@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10402 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10429 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetZone()
 mod:SetUsedIcons(7)
@@ -96,8 +96,8 @@ local timerCalamityCD				= mod:NewCDTimer(40, 143491)--40-50 (when two can be ca
 
 local berserkTimer					= mod:NewBerserkTimer(600)
 
-mod:AddBoolOption("SetIconOnStrike")
-mod:AddBoolOption("RangeFrame", false)
+mod:AddSetIconOption("SetIconOnStrike", 143962)
+mod:AddRangeFrameOption(5, 143423, false)--For heroic. Need to chage smart range frame?
 
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10406 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10434 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(180, 15)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
@@ -26,6 +26,7 @@ mod:RegisterEventsInCombat(
 	"SPELL_MISSED",
 	"UNIT_DIED",
 	"UNIT_SPELLCAST_SUCCEEDED",
+	"UPDATE_WORLD_STATES",
 	"CHAT_MSG_RAID_BOSS_EMOTE"
 )
 
@@ -73,7 +74,7 @@ local specWarnFlamesofGalakrondOther= mod:NewSpecialWarningTarget(147029, mod:Is
 
 --Stage 2: Bring Her Down!
 local timerAddsCD					= mod:NewNextTimer(55, "ej8553", nil, nil, nil, 2457)
-local timerTowerCD					= mod:NewNextTimer(151, 81232, nil, nil, nil, 88852)
+local timerTowerCD					= mod:NewNextTimer(99, 81232, nil, nil, nil, 88852)
 local timerDemolisherCD				= mod:NewNextTimer(20, "ej8562", nil, nil, nil, 116040)--EJ is just not complete yet, shouldn't need localizing
 local timerProtoCD					= mod:NewNextTimer(55, "ej8587", nil, nil, nil, 59961)
 ----High Enforcer Thranok (Road)
@@ -84,7 +85,7 @@ local timerCrushersCallCD			= mod:NewNextTimer(30, 146769)
 local timerFlamesofGalakrondCD		= mod:NewCDCountTimer(6, 147068)
 local timerFlamesofGalakrond		= mod:NewTargetTimer(15, 147029, nil, mod:IsTank())
 
-mod:AddBoolOption("FixateIcon", true)
+mod:AddSetIconOption("FixateIcon", 147068)
 
 local addsCount = 0
 local firstTower = false
@@ -101,10 +102,10 @@ function mod:OnCombatStart(delay)
 end
 
 function mod:SPELL_CAST_START(args)
-	if args.spellId == 147688 and self:checkTankDistance(args.sourceGUID) then
+	if args.spellId == 147688 and self:CheckTankDistance(args:GetSrcCreatureID(), 10) then--Tower Spell, use small range
 		warnArcingSmash:Show()
 		specWarnArcingSmash:Show()
-	elseif args.spellId == 146757 and self:checkTankDistance(args.sourceGUID) then
+	elseif args.spellId == 146757 and self:CheckTankDistance(args.sourceGUID) then
 		local source = args.sourceName
 		warnChainHeal:Show()
 		if source == UnitName("target") or source == UnitName("focus") then 
@@ -114,11 +115,14 @@ function mod:SPELL_CAST_START(args)
 end
 
 function mod:SPELL_CAST_SUCCESS(args)
-	if args.spellId == 146769 and self:checkTankDistance(args.sourceGUID) then
+	if args.spellId == 147824 and self:CheckTankDistance(args:GetSrcCreatureID(), 10) and self:AntiSpam(3, 2) then--Tower Spell, use small range
+		warnMuzzleSpray:Show()
+		specWarnMuzzleSpray:Show()
+	elseif args.spellId == 146769 and self:CheckTankDistance(args:GetSrcCreatureID()) then
 		warnCrushersCall:Show()
 		specWarnCrushersCall:Show()
 		timerCrushersCallCD:Start()
-	elseif args.spellId == 146849 and self:checkTankDistance(args.sourceGUID) then
+	elseif args.spellId == 146849 and self:CheckTankDistance(args:GetSrcCreatureID()) then
 		warnShatteringCleave:Show()
 		timerShatteringCleaveCD:Start()
 	end
@@ -139,10 +143,10 @@ function mod:SPELL_AURA_APPLIED(args)
 		if self.Options.FixateIcon then
 			self:SetIcon(args.destName, 8)
 		end
-	elseif args.spellId == 147328 and self:checkTankDistance(args.sourceGUID) then
+	elseif args.spellId == 147328 and self:CheckTankDistance(args.sourceGUID) then
 		warnWarBanner:Show()
 		specWarnWarBanner:Show()
-	elseif args.spellId == 146899 and self:checkTankDistance(args.sourceGUID, 50) then--Use a bigger range than 40 since npcs tend to stand further out
+	elseif args.spellId == 146899 and self:CheckTankDistance(args.sourceGUID, 50) then--Use a bigger range than 40 since npcs tend to stand further out
 		warnFracture:Show(args.destName)
 		if args:IsPlayer() then
 			specWarnFractureYou:Show()
@@ -212,10 +216,7 @@ function mod:UNIT_DIED(args)
 end
 
 function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
-	if spellId == 147825 and self:AntiSpam(2, 2) then--Muzzle Spray::0:147825
-		warnMuzzleSpray:Show()
-		specWarnMuzzleSpray:Show()
-	elseif spellId == 50630 and self:AntiSpam(2, 3) then--Eject All Passengers:
+	if spellId == 50630 and self:AntiSpam(2, 3) then--Eject All Passengers:
 		timerAddsCD:Cancel()
 		timerProtoCD:Cancel()
 		warnPhase2:Show()
@@ -231,20 +232,21 @@ function mod:CHAT_MSG_MONSTER_YELL(msg)
 	end
 end
 
+function mod:UPDATE_WORLD_STATES()
+	local text = select(4, GetWorldStateUIInfo(4))
+	local percent = tonumber(string.match(text, "%d+"))
+	if percent == 1 and not firstTower and not self:IsDifficulty("heroic10", "heroic25") then
+		firstTower = true
+		timerTowerCD:Start()
+	end
+end
+
 --"<167.7 21:23:40> [CHAT_MSG_RAID_BOSS_EMOTE] CHAT_MSG_RAID_BOSS_EMOTE#Warlord Zaela orders a |cFFFF0404|hKor'kron Demolisher|h|r to assault the tower!
 function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg)
 	if msg:find("cFFFF0404") then--They fixed epiccenter bug (figured they would). Color code should be usuable though. It's only emote on encounter that uses it.
 		warnDemolisher:Show()
 	elseif msg:find(L.tower) then
 		timerDemolisherCD:Start()
-		if not firstTower and not self:IsDifficulty("heroic10", "heroic25") then
-			firstTower = true
-			if self:IsDifficulty("lfr25") then
-				timerTowerCD:Start(166)
-			else
-				timerTowerCD:Start()
-			end
-		end
 	end
 end
 

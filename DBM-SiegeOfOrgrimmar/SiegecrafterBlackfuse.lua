@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(865, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10387 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10424 $"):sub(12, -3))
 mod:SetCreatureID(71504)--71591 Automated Shredder
 mod:SetZone()
 
@@ -75,7 +75,7 @@ local timerPatternRecognition			= mod:NewBuffActiveTimer(60, 144236)
 local timerShockwaveMissileCD			= mod:NewNextCountTimer(15, 143641)
 local timerBreakinPeriod				= mod:NewTargetTimer(60, 145269, nil, false)--Many mines can be up at once so timer off by default do to spam
 
-mod:AddBoolOption("InfoFrame")
+mod:AddInfoFrameOption("ej8202")
 
 local missileCount = 0
 --local laserCount = 0--Fires 3 times

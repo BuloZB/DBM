@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10305 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10424 $"):sub(12, -3))
 mod:SetCreatureID(71529)
 mod:SetZone()
 mod:SetUsedIcons(8)
@@ -89,8 +89,8 @@ local berserkTimer				= mod:NewBerserkTimer(600)
 local soundBloodFrenzy			= mod:NewSound(144067)
 local soundFixate				= mod:NewSound(143445)
 
-mod:AddBoolOption("RangeFrame", true)
-mod:AddBoolOption("FixateIcon", true)
+mod:AddBoolOption("RangeFrame")
+mod:AddSetIconOption("FixateIcon", 143445)
 
 local screechCount = 0
 local corrosiveBloodTargets = {}

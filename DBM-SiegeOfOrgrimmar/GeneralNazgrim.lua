@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(850, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10416 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10434 $"):sub(12, -3))
 mod:SetCreatureID(71515)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 4, 2, 1)
@@ -21,7 +21,7 @@ mod:RegisterEventsInCombat(
 
 --Nazgrim Core Abilities
 local warnSunder					= mod:NewStackAnnounce(143494, 2)--Will add special warnings and such when know cd and stack count needed for swaps
-local warnBonecracker				= mod:NewTargetAnnounce(143638, 2, nil, mod:IsHealer())
+local warnBonecracker				= mod:NewTargetAnnounce(143638, 2, nil, false, nil, nil, nil, nil, 2)
 local warnBattleStance				= mod:NewSpellAnnounce(143589, 2)
 local warnBerserkerStance			= mod:NewSpellAnnounce(143594, 3)
 local warnDefensiveStanceSoon		= mod:NewAnnounce("warnDefensiveStanceSoon", 4, 143593, nil, nil, true)
@@ -33,7 +33,7 @@ local warnHeroicShockwave			= mod:NewSpellAnnounce(143500, 2)
 local warnKorkronBanner				= mod:NewSpellAnnounce(143536, 3)
 local warnRavager					= mod:NewSpellAnnounce(143872, 3)
 local warnWarSong					= mod:NewSpellAnnounce(143503, 4)
-local warnCoolingOff				= mod:NewTargetAnnounce(143484, 1)
+local warnCoolingOff				= mod:NewTargetAnnounce(143484, 1, nil, false, nil, nil, nil, nil, 2)
 --Kor'kron Adds
 local warnIronstorm					= mod:NewSpellAnnounce(143420, 3, nil, mod:IsMelee())
 local warnArcaneShock				= mod:NewSpellAnnounce(143432, 3, nil, false)--Spammy
@@ -50,6 +50,8 @@ local specWarnSunderOther			= mod:NewSpecialWarningTarget(143494, mod:IsTank())
 local specWarnExecute				= mod:NewSpecialWarningSpell(143502, mod:IsTank(), nil, nil, 3)
 local specWarnBerserkerStance		= mod:NewSpecialWarningSpell(143594, mod:IsDps())--In case you want to throttle damage some
 local specWarnDefensiveStance		= mod:NewSpecialWarningSpell(143593, nil, nil, nil, 3)--Definitely OFF DPS
+local specWarnDefensiveStanceAttack	= mod:NewSpecialWarningReflect(143593)
+local specWarnDefensiveStanceEnd	= mod:NewSpecialWarningEnd(143593)
 --Nazgrim Rage Abilities
 local specWarnHeroicShockwave		= mod:NewSpecialWarningSpell(143500, nil, nil, nil, 2)
 local specWarnKorkronBanner			= mod:NewSpecialWarningSwitch(143536, mod:IsDps())
@@ -71,22 +73,22 @@ local timerAddsCD					= mod:NewNextCountTimer(45, "ej7920", nil, nil, nil, 2457)
 local timerSunder					= mod:NewTargetTimer(30, 143494, nil, mod:IsTank() or mod:IsHealer())
 local timerSunderCD					= mod:NewCDTimer(10, 143494, nil, mod:IsTank())
 local timerExecuteCD				= mod:NewCDTimer(18, 143502, nil, mod:IsTank())
-local timerBoneCD					= mod:NewCDTimer(30, 143638, nil, mod:IsHealer())
+local timerBoneCD					= mod:NewCDTimer(30, 143638, nil, false, nil, nil, nil, nil, nil, nil, 2)
+local timerBattleStanceCD			= mod:NewNextTimer(60, 143589)
 local timerBerserkerStanceCD		= mod:NewNextTimer(60, 143594)
 local timerDefensiveStanceCD		= mod:NewNextTimer(60, 143593)
-local timerDefensiveStance			= mod:NewBuffActiveTimer(60, 143593)
 --Nazgrim Rage Abilities
 local timerCoolingOff				= mod:NewBuffFadesTimer(15, 143484)
 --Kor'kron Adds
 local timerEmpoweredChainHealCD		= mod:NewNextSourceTimer(6, 143473)
 
-local countdownAdds					= mod:NewCountdown(45, "ej7920", false)--Confusing with Colling Off. off by default.
+local countdownAdds					= mod:NewCountdown(45, "ej7920", false, nil, nil, nil, nil, 2)--Confusing with Colling Off. off by default.
 local countdownCoolingOff			= mod:NewCountdownFades(15, 143484, nil, nil, nil, nil, true)
 
 local berserkTimer					= mod:NewBerserkTimer(600)
 
-mod:AddBoolOption("SetIconOnAdds", false)
-mod:AddBoolOption("InfoFrame", true)
+mod:AddSetIconOption("SetIconOnAdds", "ej7920", false, true)
+mod:AddInfoFrameOption("ej7909")
 
 local addsCount = 0
 local boneTargets = {}
@@ -94,6 +96,10 @@ local UnitName, UnitExists, UnitGUID, UnitDetailedThreatSituation = UnitName, Un
 local adds = {}
 local scanLimiter = 0
 local scanLimiter2 = 0
+local dotWarned = {}
+local defensiveActive = false
+local allForcesReleased = false
+local sunder = GetSpellInfo(143494)
 
 local function warnBoneTargets()
 	warnBonecracker:Show(table.concat(boneTargets, "<, >"))
@@ -202,12 +208,16 @@ function mod:OnCombatStart(delay)
 	addsCount = 0
 	table.wipe(adds)
 	table.wipe(boneTargets)
+	table.wipe(dotWarned)
+	defensiveActive = false
+	allForcesReleased = false
 	timerAddsCD:Start(-delay, 1)
 	countdownAdds:Start()
 	berserkTimer:Start(-delay)
 end
 
 function mod:OnCombatEnd()
+	self:UnregisterShortTermEvents()
 	if self.Options.InfoFrame then
 		DBM.InfoFrame:Hide()
 	end
@@ -254,6 +264,11 @@ end
 
 function mod:SPELL_CAST_SUCCESS(args)
 	if args.spellId == 143589 then
+		if defensiveActive then
+			defensiveActive = false
+			specWarnDefensiveStanceEnd:Show()
+		end
+		self:UnregisterShortTermEvents()
 		warnBattleStance:Show()
 		timerBerserkerStanceCD:Start()
 		if self.Options.InfoFrame then
@@ -274,9 +289,19 @@ function mod:SPELL_CAST_SUCCESS(args)
 			DBM.InfoFrame:Show(4, "function", updateInfoFrame)
 		end
 	elseif args.spellId == 143593 then
+		defensiveActive = true
+		if not allForcesReleased then
+			self:RegisterShortTermEvents(
+				"SWING_DAMAGE",
+				"RANGE_DAMAGE",
+				"SPELL_DAMAGE",
+				"SPELL_PERIODIC_DAMAGE"
+			)
+			table.wipe(dotWarned)
+		end
 		warnDefensiveStance:Show()
 		specWarnDefensiveStance:Show()
-		timerDefensiveStance:Start()
+		timerBattleStanceCD:Start()
 		if self.Options.InfoFrame then
 			DBM.InfoFrame:SetHeader(GetSpellInfo(143593))
 			DBM.InfoFrame:Show(4, "function", updateInfoFrame)
@@ -306,7 +331,7 @@ function mod:SPELL_AURA_APPLIED(args)
 				specWarnSunder:Show(amount)
 			end
 		else--Taunt as soon as stacks are clear, regardless of stack count.
-			if amount >= 3 and not UnitDebuff("player", GetSpellInfo(143494)) and not UnitIsDeadOrGhost("player") then
+			if amount >= 3 and not UnitDebuff("player", sunder) and not UnitIsDeadOrGhost("player") then
 				specWarnSunderOther:Show(args.destName)
 			end
 		end
@@ -358,6 +383,8 @@ function mod:CHAT_MSG_MONSTER_YELL(msg)
 			scanForMobs()
 		end
 	elseif msg == L.allForces then
+		allForcesReleased = true
+		self:UnregisterShortTermEvents()--Do not warn defensive stance below 10%
 		--Icon setting not put here on purpose, so as not ot mess with existing adds (it's burn boss phase anyawys)
 		specWarnAdds:Show(0)
 	end
@@ -367,5 +394,24 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 	if spellId == 143500 then--Faster than combat log by 0.3-0.5 seconds
 		warnHeroicShockwave:Show()
 		specWarnHeroicShockwave:Show()
+	end
+end
+
+function mod:SPELL_DAMAGE(sourceGUID, _, _, _, destGUID)
+	if (sourceGUID == UnitGUID("player") or sourceGUID == UnitGUID("pet")) and destGUID == UnitGUID("boss1") and self:AntiSpam(8, 1) then
+		if not UnitDebuff("player", sunder) then
+			specWarnDefensiveStanceAttack:Show()
+		end
+	end
+end
+mod.RANGE_DAMAGE = mod.SPELL_DAMAGE
+mod.SWING_DAMAGE = mod.SPELL_DAMAGE
+
+function mod:SPELL_PERIODIC_DAMAGE(sourceGUID, _, _, _, destGUID, _, _, _, spellId)--Prevent spam on DoT
+	if (sourceGUID == UnitGUID("player") or sourceGUID == UnitGUID("pet")) and destGUID == UnitGUID("boss1") and self:AntiSpam(8, 1) then
+		if not UnitDebuff("player", sunder) and not dotWarned[spellId] then
+			dotWarned[spellId] = true
+			specWarnDefensiveStanceAttack:Show()
+		end
 	end
 end

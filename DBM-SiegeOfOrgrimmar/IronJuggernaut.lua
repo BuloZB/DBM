@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10416 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10434 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 mod:SetZone()
 
@@ -20,18 +20,18 @@ mod:RegisterEventsInCombat(
 	"UNIT_SPELLCAST_SUCCEEDED boss1"
 )
 
+local warnDemolisherCanon		= mod:NewSpellAnnounce(144154, 1, nil, false, nil, nil, nil, nil, 2)--This spell uses in both mode.
 --Assault Mode
-local warnBorerDrill			= mod:NewSpellAnnounce(144218, 3)
-local warnLaserBurn				= mod:NewTargetAnnounce(144459, 3, nil, mod:IsHealer())
-local warnMortarCannon			= mod:NewSpellAnnounce(144316, 3, nil, false)--Could not get target scanning working.
+local warnBorerDrill			= mod:NewSpellAnnounce(144218, 4)
+local warnLaserBurn				= mod:NewTargetAnnounce(144459, 2, nil, false, nil, nil, nil, nil, 2)
+local warnMortarCannon			= mod:NewSpellAnnounce(144316, 3, nil, false, nil, nil, nil, nil, 2)--Could not get target scanning working.
 local warnCrawlerMine			= mod:NewSpellAnnounce(144673, 3)
 local warnIgniteArmor			= mod:NewStackAnnounce(144467, 2, nil, mod:IsTank())--Seems redundant to count debuffs and warn for breath, so just do debuffs
 local warnRicochet				= mod:NewSpellAnnounce(144356, 3)
 --Siege Mode
 local warnSeismicActivity		= mod:NewSpellAnnounce(144483, 2)--A mere activation of phase
 local warnExplosiveTar			= mod:NewSpellAnnounce(144492, 3)
-local warnShockPulse			= mod:NewCountAnnounce(144485, 3)
-local warnDemolisherCanon		= mod:NewSpellAnnounce(144154, 3)
+local warnShockPulse			= mod:NewCountAnnounce(144485, 4)
 local warnCutterLaser			= mod:NewTargetAnnounce(146325, 4)--Not holding my breath this shows in combat log.
 local warnMortarBarrage			= mod:NewSpellAnnounce(144555, 4)--Heroic
 
@@ -48,20 +48,19 @@ local specWarnExplosiveTar		= mod:NewSpecialWarningMove(144498)
 local yellCutterLaser			= mod:NewYell(146325)
 local specWarnMortarBarrage		= mod:NewSpecialWarningSpell(144555, nil, nil, nil, 2)
 
+local timerDemolisherCanonCD	= mod:NewCDTimer(8.5, 144154, nil, false, nil, nil, nil, nil, nil, nil, 2)--Spammy. off by default
 --Assault Mode
-local timerAssaultModeCD		= mod:NewNextTimer(64, 141395, nil, "timerAssaultModeCD")--141395 is correct timer text but it's wrong spellid, custom option text for real timer description
+local timerAssaultModeCD		= mod:NewNextTimer(62, 141395, nil, "timerAssaultModeCD")--141395 is correct timer text but it's wrong spellid, custom option text for real timer description
 local timerIgniteArmor			= mod:NewTargetTimer(30, 144467, nil, mod:IsTank() or mod:IsHealer())
 local timerIgniteArmorCD		= mod:NewCDTimer(10, 144467, nil, mod:IsTank())
-local timerLaserBurn			= mod:NewTargetTimer(16, 144459, nil, false)
-local timerLaserBurnCD			= mod:NewCDTimer(12, 144459)
+local timerLaserBurnCD			= mod:NewCDTimer(11.5, 144459, nil, false, nil, nil, nil, nil, nil, nil, 2)--Also off by default(bar spam)
 local timerBorerDrillCD			= mod:NewCDTimer(17, 144218)
 local timerCrawlerMineCD		= mod:NewCDTimer(30, 144673)
 local timerRicochetCD			= mod:NewCDTimer(15, 144356)
 --Siege Mode
-local timerSiegeModeCD			= mod:NewNextTimer(116, 84974, nil, nil, "timerSiegeModeCD")--Wish spell name was a litlte shorter but still better than localizing
+local timerSiegeModeCD			= mod:NewNextTimer(114, 84974, nil, nil, "timerSiegeModeCD")--Wish spell name was a litlte shorter but still better than localizing
 local timerCuttingLaser			= mod:NewTargetTimer(10, 146325)--Spell tooltip says 15 but combat log showed 10
 local timerShockPulseCD			= mod:NewNextCountTimer(16.5, 144485)
-local timerDemolisherCanonCD	= mod:NewCDTimer(8.5, 144154)
 local timerExplosiveTarCD		= mod:NewNextTimer(30, 144492)
 local timerMortarBarrageCD		= mod:NewNextTimer(30, 144555)
 
@@ -69,16 +68,24 @@ local soundCuttingLaser			= mod:NewSound(146325)
 
 local berserkTimer				= mod:NewBerserkTimer(600)
 
-mod:AddBoolOption("RangeFrame", mod:IsRanged())
+mod:AddRangeFrameOption(6, 144154, mod:IsRanged())
 
 local siegeMode = false
 local shockCount = 0
 local firstTar = false
 local firstMortar = false
+local laserBurnTargets = {}
+
+local function warnLaserBurnTargets()
+	warnLaserBurn:Show(table.concat(laserBurnTargets, "<, >"))
+	table.wipe(laserBurnTargets)
+	timerLaserBurnCD:Start()
+end
 
 function mod:OnCombatStart(delay)
 	siegeMode = false
 	shockCount = 0
+	table.wipe(laserBurnTargets)
 	timerIgniteArmorCD:Start(9-delay)
 	timerLaserBurnCD:Start(-delay)
 	timerBorerDrillCD:Start(-delay)
@@ -90,8 +97,8 @@ function mod:OnCombatStart(delay)
 	else
 		berserkTimer:Start(-delay)
 	end
-	if self.Options.RangeFrame then
-		DBM.RangeCheck:Show(8)
+	if self.Options.RangeFrame and not self:IsDifficulty("lfr25") then
+		DBM.RangeCheck:Show(6)
 	end
 end
 
@@ -119,9 +126,6 @@ function mod:SPELL_CAST_START(args)
 			timerMortarBarrageCD:Start(20)
 		end
 		timerAssaultModeCD:Start()
-		if self.Options.RangeFrame then
-			DBM.RangeCheck:Hide()
-		end
 	elseif args.spellId == 144485 then
 		shockCount = shockCount + 1
 		warnShockPulse:Show(shockCount)
@@ -157,9 +161,9 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif args.spellId == 146325 then
 		self:SendSync("LaserTarget", args.destGUID)
 	elseif args.spellId == 144459 then
-		warnLaserBurn:Show(args.destName)
-		timerLaserBurn:Start(args.destName)
-		timerLaserBurnCD:Start()
+		laserBurnTargets[#laserBurnTargets + 1] = args.destName
+		self:Unschedule(warnLaserBurnTargets)
+		self:Schedule(0.5, warnLaserBurnTargets)
 	elseif args.spellId == 144498 and args:IsPlayer() then
 		specWarnExplosiveTar:Show()
 	end
@@ -215,9 +219,6 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		if siegeMode == true then--don't start timer on pull regenerate, pull regenerate is 5 seconds longer than rest of them
 			timerSiegeModeCD:Start()
 			siegeMode = false
-		end
-		if self.Options.RangeFrame then
-			DBM.RangeCheck:Show(8)
 		end
 		--[[if self:IsDifficulty("heroic10", "heroic25") then
 			timerRicochetCD:Start(22)
