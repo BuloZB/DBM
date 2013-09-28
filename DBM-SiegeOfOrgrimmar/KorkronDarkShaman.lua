@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10435 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10438 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 mod:SetZone()
 mod:SetUsedIcons(5, 4, 3, 2, 1)
@@ -140,7 +140,7 @@ function mod:SPELL_CAST_START(args)
 		timerFoulGeyserCD:Start()
 		specWarnFoulGeyser:Show()
 		countdownFoulGeyser:Start()
-	elseif args.spellId == 144070 and self:CheckTankDistance(args:GetSrcCreatureID(), 50) then
+	elseif args.spellId == 144070 and self:CheckTankDistance(args:GetSrcCreatureID(), 30) then
 		warnAshenWall:Show()
 		timerAshenWallCD:Start()
 		countdownAshenWall:Start()
