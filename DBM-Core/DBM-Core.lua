@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10442 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10446 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -4197,7 +4197,6 @@ function DBM:UpdateMapSizes()
 	local dims = DBM.MapSizes[mapName] and DBM.MapSizes[mapName][floor]
 	if dims then
 		currentSizes = dims
---		print(DBM.MapSizes[mapName][floor][1], DBM.MapSizes[mapName][floor][2])
 		return
 	end 
 
@@ -4209,7 +4208,6 @@ function DBM:UpdateMapSizes()
 
 	if not (a1 and b1 and c1 and d1) then return end
 	currentSizes = {abs(c1-a1), abs(d1-b1)}
---	print(abs(c1-a1), abs(d1-b1))
 end
 
 function DBM:GetMapSizes()
@@ -4514,10 +4512,19 @@ function bossModPrototype:CheckTankDistance(cid, distance)
 	local cid = cid or self.creatureId--GetBossTarget supports GUID or CID and it will automatically return correct values with EITHER ONE
 	local distance = distance or 40
 	local _, uId, mobuId = self:GetBossTarget(cid)
+	if mobuId then
+		if uId then
+			print("DBM CheckTankDistance DEBUG uId/mobuId: "..uId.." ("..UnitName(uId).." "..mobuId.." ("..UnitName(mobuId))
+		else
+			print("DBM CheckTankDistance DEBUG mobuId (no valid uId): "..mobuId.." ("..UnitName(mobuId))
+		end
+	end
 	if mobuId and (not uId or (uId and (uId == "boss1" or uId == "boss2" or uId == "boss3" or uId == "boss4" or uId == "boss5"))) then--Mob has no target, or is targeting a UnitID we cannot range check
 		local unitID = (IsInRaid() and "raid") or (IsInGroup() and "party") or "player"
 		for i = 1, DBM:GetNumGroupMembers() do
-			if UnitDetailedThreatSituation(unitID..i, mobuId) then uId = unitID..i end--Found highest threat target, make their uId
+			local tanking, status = UnitDetailedThreatSituation(unitID..i, mobuId)--Tanking may return 0 if npc is temporarily looking at an NPC (IE fracture) but status will still be 3 on true tank
+			if tanking or status == 3 then uId = unitID..i end--Found highest threat target, make their uId
+			print("DBM CheckTankDistance DEBUG Threat uId: "..uId.." ("..UnitName(unitID..i)..")")
 			break
 		end
 	end
@@ -4530,6 +4537,7 @@ function bossModPrototype:CheckTankDistance(cid, distance)
 		end
 		if x == 0 and y == 0 then--Failed to pull coords. This is likely a pet or a guardian or an NPC.
 			local inRange2, checkedRange = UnitInRange(uId)--Use an API that works on pets and some NPCS (npcs that get a party/raid/pet ID)
+			print("DBM CheckTankDistance DEBUG UnitInRange: "..inRange2.." "..checkedRange)
 			if checkedRange and not inRange2 then--checkedRange only returns true if api worked, so if we get false, true then we are not near npc
 				return false
 			else--Its probably a totem or just something we can't assess. Fall back to no filtering
