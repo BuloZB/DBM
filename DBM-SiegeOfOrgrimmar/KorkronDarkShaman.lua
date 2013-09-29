@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10448 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10472 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 mod:SetZone()
 mod:SetUsedIcons(5, 4, 3, 2, 1)
@@ -49,10 +49,10 @@ local specWarnIronTomb				= mod:NewSpecialWarningSpell(144328, nil, nil, nil, 2)
 local specWarnToxicStorm			= mod:NewSpecialWarningYou(144017)--Spellid changed to force an option default reset. melee default was for ptr version that always targeted tank
 local specWarnToxicStormNear		= mod:NewSpecialWarningClose(144005)
 local yellToxicStorm				= mod:NewYell(144005)
-local specWarnFoulGeyser			= mod:NewSpecialWarningSpell(143990)
+local specWarnFoulGeyser			= mod:NewSpecialWarningSpell(143990)--Hard one to perfect. melee need to treat it as a move away, ranged as a switch. Can't really say both in the same message but I don't want to split it into two
 local yellFoulGeyser				= mod:NewYell(143990)
 local specWarnFallingAsh			= mod:NewSpecialWarningPreWarn(143973, nil, 3, nil, 2)
-local specWarnIronPrison			= mod:NewSpecialWarningSoon(144330)--If this generic isn't too clear i'll localize it. this is warning that it's about to expire not that it's just been applied
+local specWarnIronPrison			= mod:NewSpecialWarningPreWarn(144330, nil, 4)--If this generic isn't too clear i'll localize it. this is warning that it's about to expire not that it's just been applied
 local yellIronPrisonFades			= mod:NewYell(144330, L.PrisonYell, false)--Off by default since it's an atypical yell (it's not used for avoiding person it's used to get healer attention to person)
 
 --Earthbreaker Haromm
@@ -218,8 +218,20 @@ function mod:SPELL_AURA_APPLIED(args)
 		if self.Options.SetIconOnToxicMists and args:IsDestTypePlayer() then--Filter further on icons because we don't want to set icons on grounding totems
 			self:SetSortedIcon(0.5, args.destName, 1)
 		end
-	elseif args.spellId == 144330 and self:CheckTankDistance(args:GetSrcCreatureID(), 50) then
-		warnIronPrison:CombinedShow(0.5, args.destName)
+	elseif args.spellId == 144330 then
+		if self:CheckTankDistance(args:GetSrcCreatureID(), 50) then
+			warnIronPrison:CombinedShow(0.5, args.destName)
+			timerIronPrison:Start(args.destName)
+		end
+		if args:IsPlayer() then
+			specWarnIronPrison:Schedule(56)
+			timerIronPrisonSelf:Start()
+			yellIronPrisonFades:Schedule(59, playerName, 1)
+			yellIronPrisonFades:Schedule(58, playerName, 2)
+			yellIronPrisonFades:Schedule(57, playerName, 3)
+			yellIronPrisonFades:Schedule(56, playerName, 4)
+			yellIronPrisonFades:Schedule(55, playerName, 5)
+		end
 	elseif args.spellId == 144215 then
 		local amount = args.amount or 1
 		timerFroststormStrike:Start(args.destName)
@@ -232,17 +244,6 @@ function mod:SPELL_AURA_APPLIED(args)
 			else
 				specWarnFroststormStrikeOther:Show(args.destName)
 			end
-		end
-	elseif args.spellId == 144330 then
-		timerIronPrison:Start(args.destName)
-		if args:IsPlayer() then
-			specWarnIronPrison:Schedule(5)
-			timerIronPrisonSelf:Start()
-			yellIronPrisonFades:Schedule(59, playerName, 1)
-			yellIronPrisonFades:Schedule(58, playerName, 2)
-			yellIronPrisonFades:Schedule(57, playerName, 3)
-			yellIronPrisonFades:Schedule(56, playerName, 4)
-			yellIronPrisonFades:Schedule(55, playerName, 5)
 		end
 	end
 end
