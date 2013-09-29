@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10446 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10464 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -185,6 +185,7 @@ DBM.DefaultOptions = {
 	MovieFilter = "Never",
 	LastRevision = 0,
 	FilterSayAndYell = false,
+	DebugMode = false,
 	ChatFrame = "DEFAULT_CHAT_FRAME",
 }
 
@@ -1212,6 +1213,9 @@ SlashCmdList["DEADLYBOSSMODS"] = function(msg)
 			return DBM:AddMsg(DBM_ERROR_NO_RAID)
 		end
 		DBM:RequestInstanceInfo()
+	elseif cmd:sub(1, 5) == "debug" then
+		DBM.Options.DebugMode = DBM.Options.DebugMode == false and true or false
+		DBM:AddMsg("DebugMode : " .. (DBM.Options.DebugMode and "true" or "false"))
 	else
 		DBM:LoadGUI()
 	end
@@ -2161,7 +2165,7 @@ function DBM:ScenarioCheck()
 	if combatInfo[LastInstanceMapID] then
 		for i, v in ipairs(combatInfo[LastInstanceMapID]) do
 			if (v.type == "scenario") and checkEntry(v.msgs, LastInstanceMapID) then
-				DBM:StartCombat(v.mod, 0)
+				DBM:StartCombat(v.mod, 0, nil, nil, nil, nil, "LOADING_SCREEN_DIASBLED")
 			end
 		end
 	end
@@ -2289,7 +2293,7 @@ do
 		revision = tonumber(revision or 0) or 0
 		startHp = tonumber(startHp or -1) or -1
 		if mod and delay and (not mod.zones or mod.zones[LastInstanceMapID]) and (not mod.minSyncRevision or revision >= mod.minSyncRevision) then
-			DBM:StartCombat(mod, delay + lag, true, startHp)
+			DBM:StartCombat(mod, delay + lag, true, startHp, nil, nil, "SYNC from - ", sender)
 		end
 	end
 
@@ -2929,9 +2933,9 @@ do
 			buildTargetList()
 			if targetList[mob] then
 				if delay > 0 and UnitAffectingCombat(targetList[mob]) then
-					DBM:StartCombat(mod, delay)
-				else
-					DBM:StartCombat(mod, 0, nil, nil, nil, true)
+					DBM:StartCombat(mod, delay, nil, nil, nil, nil, "PLAYER_TARGET")
+				elseif select(2, GetInstanceInfo()) == "none" then
+					DBM:StartCombat(mod, 0, nil, nil, nil, true, "PLAYER_TARGET_AND_YELL")
 				end
 			end
 			clearTargetList()
@@ -2991,7 +2995,7 @@ do
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
 				if v.type == "combat" and isBossEngaged(v.multiMobPullDetection or v.mob) then
-					self:StartCombat(v.mod, 0)
+					self:StartCombat(v.mod, 0, nil, nil, nil, nil, "IEEU")
 				end
 			end
 		end
@@ -3012,7 +3016,7 @@ do
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
 				if v.type == type and checkEntry(v.msgs, msg) or v.type == type .. "_regex" and checkExpressionList(v.msgs, msg) then
-					DBM:StartCombat(v.mod, 0)
+					DBM:StartCombat(v.mod, 0, nil, nil, nil, nil, "MONSTER_MESSAGE")
 				elseif v.type == "combat_" .. type and checkEntry(v.msgs, msg) then
 					scanForCombat(v.mod, v.mob, 0)
 					if v.mod.Options.ReadyCheck and not IsQuestFlaggedCompleted(v.mod.readyCheckQuestId) then
@@ -3104,7 +3108,14 @@ function checkWipe(confirm)
 	end
 end
 
-function DBM:StartCombat(mod, delay, synced, syncedStartHp, noKillRecord, triggered)
+function DBM:StartCombat(mod, delay, synced, syncedStartHp, noKillRecord, triggered, event, sender)
+	if DBM.Options.DebugMode then
+		if event then
+			print("DBM:StartCombat called by : "..event..(sender or ""))
+		else
+			print("DBM:StartCombat called by individual mod or unknown reason.")
+		end
+	end
 	if not checkEntry(inCombat, mod) then
 		if not mod.Options.Enabled then return end
 		-- HACK: makes sure that we don't detect a false pull if the event fires again when the boss dies...
@@ -3236,7 +3247,7 @@ function DBM:UNIT_HEALTH(uId)
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
 				if not v.mod.disableHealthCombat and (v.type == "combat" and v.multiMobPullDetection and checkEntry(v.multiMobPullDetection, cId) or v.mob == cId) then
-					self:StartCombat(v.mod, health > 0.97 and 0.5 or mmin(20, (lastCombatStarted and GetTime() - lastCombatStarted) or 2.1), nil, health, health < 0.90) -- Above 97%, boss pulled during combat, set min delay (0.5) / Below 97%, combat enter detection failure, use normal delay (max 20s) / Do not record kill time below 90% (late combat detection)
+					self:StartCombat(v.mod, health > 0.97 and 0.5 or mmin(20, (lastCombatStarted and GetTime() - lastCombatStarted) or 2.1), nil, health, health < 0.90, nil, "UNIT_HEALTH") -- Above 97%, boss pulled during combat, set min delay (0.5) / Below 97%, combat enter detection failure, use normal delay (max 20s) / Do not record kill time below 90% (late combat detection)
 				end
 			end
 		end
@@ -4245,7 +4256,7 @@ do
 	local modsById = setmetatable({}, {__mode = "v"})
 	local mt = {__index = bossModPrototype}
 
-	function DBM:NewMod(name, modId, modSubTab, instanceId, creatureInfoId)
+	function DBM:NewMod(name, modId, modSubTab, instanceId, creatureInfoId, splitstring)
 		name = tostring(name) -- the name should never be a number of something as it confuses sync handlers that just receive some string and try to get the mod from it
 		if modsById[name] then error("DBM:NewMod(): Mod names are used as IDs and must therefore be unique.", 2) end
 		local obj = setmetatable(
@@ -4286,22 +4297,14 @@ do
 			else
 				t = EJ_GetEncounterInfo(tonumber(name))
 			end
-			obj.localization.general.name = string.split(",", t or name)
-			obj.modelId = select(4, EJ_GetCreatureInfo(1, tonumber(name)))
-		elseif name:match("z%d+") then
-			local t = EJ_GetCreatureInfo(1, 817)(tonumber(name))
-			obj.localization.general.name = string.split(",", t or name)
+			obj.localization.general.name = string.split(splitstring or ",", t or name)
 			obj.modelId = select(4, EJ_GetCreatureInfo(1, tonumber(name)))
 		elseif name:match("z%d+") then
 			local t = GetRealZoneText(string.sub(name, 2))
-			obj.localization.general.name = string.split(",", t or name)
+			obj.localization.general.name = string.split(splitstring or ",", t or name)
 		elseif name:match("d%d+") then
 			local t = GetDungeonInfo(string.sub(name, 2))
-			if modId == "DBM-ProvingGrounds-MoP" then
-				obj.localization.general.name = select(2, string.split(":", t or name))
-			else
-				obj.localization.general.name = string.split(",", t or name)
-			end
+			obj.localization.general.name = select(2, string.split(splitstring or ":", t or name))
 		end
 		tinsert(self.Mods, obj)
 		modsById[name] = obj
@@ -4449,7 +4452,7 @@ function bossModPrototype:GetBossTarget(cid)
 		if self:GetUnitCreatureId(uId) == cid or UnitGUID(uId) == cid then--Accepts CID or GUID
 			bossuid = uId
 			name = DBM:GetUnitFullName(uId.."target")
-			uid = DBM:GetRaidUnitId(name) or uId.."target"--overrride target uid because uid+"target" is variable uid.
+			uid = DBM:GetRaidUnitId(name) or (UnitExists(uId.."target") and uId.."target")--overrride target uid because uid+"target" is variable uid.
 			break
 		end
 	end
@@ -4460,7 +4463,7 @@ function bossModPrototype:GetBossTarget(cid)
 			if self:GetUnitCreatureId("raid"..i.."target") == cid or UnitGUID("raid"..i.."target") == cid then
 				bossuid = "raid"..i.."target"
 				name = DBM:GetUnitFullName("raid"..i.."targettarget")
-				uid = DBM:GetRaidUnitId(name) or "raid"..i.."targettarget"--overrride target uid because uid+"target" is variable uid.
+				uid = DBM:GetRaidUnitId(name) or (UnitExists("raid"..i.."targettarget") and "raid"..i.."targettarget")--overrride target uid because uid+"target" is variable uid.
 				break
 			end
 		end
@@ -4469,7 +4472,7 @@ function bossModPrototype:GetBossTarget(cid)
 			if self:GetUnitCreatureId("party"..i.."target") == cid or UnitGUID("party"..i.."target") == cid then
 				bossuid = "party"..i.."target"
 				name = DBM:GetUnitFullName("party"..i.."targettarget")
-				uid = DBM:GetRaidUnitId(name) or "party"..i.."targettarget"--overrride target uid because uid+"target" is variable uid.
+				uid = DBM:GetRaidUnitId(name) or (UnitExists("party"..i.."targettarget") and "party"..i.."targettarget")--overrride target uid because uid+"target" is variable uid.
 				break
 			end
 		end
@@ -4508,27 +4511,30 @@ function bossModPrototype:BossTargetScanner(cid, returnFunc, scanInterval, scanT
 	end
 end
 
-function bossModPrototype:CheckTankDistance(cid, distance)
+--Now this function works perfectly. But have some limitation due to DBM.RangeCheck:GetDistance() function.
+--Unfortunely, DBM.RangeCheck:GetDistance() function cannot reflects altitude difference. This makes range unreliable.
+--So, we need to cafefully check range in difference altitude (Espcially, tower top and bottom)
+function bossModPrototype:CheckTankDistance(cid, distance, defaultReturn)
 	local cid = cid or self.creatureId--GetBossTarget supports GUID or CID and it will automatically return correct values with EITHER ONE
 	local distance = distance or 40
-	local _, uId, mobuId = self:GetBossTarget(cid)
-	if mobuId then
-		if uId then
-			print("DBM CheckTankDistance DEBUG uId/mobuId: "..uId.." ("..UnitName(uId).." "..mobuId.." ("..UnitName(mobuId))
-		else
-			print("DBM CheckTankDistance DEBUG mobuId (no valid uId): "..mobuId.." ("..UnitName(mobuId))
+	local uId
+	local _, fallbackuId, mobuId = self:GetBossTarget(cid)
+	if mobuId then--Have a valid mob unit ID
+		--First, use trust threat more than fallbackuId and see what we pull from it first.
+		--This is because for CheckTankDistance we want to know who is tanking it, not who it's targeting it.
+		local unitId = (IsInRaid() and "raid") or "party"
+		for i = 0, GetNumGroupMembers() do
+			local id = (i == 0 and "target") or unitId..i
+			local tanking, status = UnitDetailedThreatSituation(id, mobuId)--Tanking may return 0 if npc is temporarily looking at an NPC (IE fracture) but status will still be 3 on true tank
+			if tanking or (status == 3) then uId = id end--Found highest threat target, make them uId
+			if uId then break end
+		end
+		--Did not get anything useful from threat, so use who the boss was looking at, at time of cast (ie fallbackuId)
+		if fallbackuId and not uId then
+			uId = fallbackuId
 		end
 	end
-	if mobuId and (not uId or (uId and (uId == "boss1" or uId == "boss2" or uId == "boss3" or uId == "boss4" or uId == "boss5"))) then--Mob has no target, or is targeting a UnitID we cannot range check
-		local unitID = (IsInRaid() and "raid") or (IsInGroup() and "party") or "player"
-		for i = 1, DBM:GetNumGroupMembers() do
-			local tanking, status = UnitDetailedThreatSituation(unitID..i, mobuId)--Tanking may return 0 if npc is temporarily looking at an NPC (IE fracture) but status will still be 3 on true tank
-			if tanking or status == 3 then uId = unitID..i end--Found highest threat target, make their uId
-			print("DBM CheckTankDistance DEBUG Threat uId: "..uId.." ("..UnitName(unitID..i)..")")
-			break
-		end
-	end
-	if uId then--Now we know who mob is targeting (or highest threat is)
+	if uId then--Now we have a valid uId
 		if UnitIsUnit("player", uId) then return true end--If "player" is target, avoid doing any complicated stuff
 		local x, y = GetPlayerMapPosition(uId)
 		if x == 0 and y == 0 then
@@ -4537,7 +4543,8 @@ function bossModPrototype:CheckTankDistance(cid, distance)
 		end
 		if x == 0 and y == 0 then--Failed to pull coords. This is likely a pet or a guardian or an NPC.
 			local inRange2, checkedRange = UnitInRange(uId)--Use an API that works on pets and some NPCS (npcs that get a party/raid/pet ID)
-			print("DBM CheckTankDistance DEBUG UnitInRange: "..inRange2.." "..checkedRange)
+			if inRange2 and checkedRange then
+			end
 			if checkedRange and not inRange2 then--checkedRange only returns true if api worked, so if we get false, true then we are not near npc
 				return false
 			else--Its probably a totem or just something we can't assess. Fall back to no filtering
@@ -4548,8 +4555,10 @@ function bossModPrototype:CheckTankDistance(cid, distance)
 		if inRange and (inRange > distance) then--You are not near the person tanking boss
 			return false
 		end
+		--Tank in range, return true.
+		return true
 	end
-	return true--When we simply can't figure anything out, always return true and allow warnings using this filter to fire
+	return (defaultReturn == nil) or defaultReturn--When we simply can't figure anything out, return true and allow warnings using this filter to fire. But some spells will prefer not to fire(i.e : Galakras tower spell), we can define it on this function calling. 
 end
 
 function bossModPrototype:Stop(cid)
@@ -4808,7 +4817,6 @@ do
 					pformat(self.text, table.concat(self.combinedtext, "<, >")),
 					(DBM.Options.WarningIconRight and self.icon and textureCode:format(self.icon)) or ""
 				)
-				self.combinedtext = {}
 			else
 				text = ("%s%s%s|r%s"):format(
 					(DBM.Options.WarningIconLeft and self.icon and textureCode:format(self.icon)) or "",
@@ -4817,6 +4825,7 @@ do
 					(DBM.Options.WarningIconRight and self.icon and textureCode:format(self.icon)) or ""
 				)
 			end
+			table.wipe(self.combinedtext)
 			if not cachedColorFunctions[self.color] then
 				local color = self.color -- upvalue for the function to colorize names, accessing self in the colorize closure is not safe as the color of the announce object might change (it would also prevent the announce from being garbage-collected but announce objects are never destroyed)
 				cachedColorFunctions[color] = function(cap)
@@ -4859,10 +4868,10 @@ do
 		end
 	end
 
-	function announcePrototype:CombinedShow(delay, text)
+	function announcePrototype:CombinedShow(delay, text, ...)
 		self.combinedtext[#self.combinedtext + 1] = text or ""
 		unschedule(self.Show, self.mod, self)
-		schedule(delay or 0.5, self.Show, self.mod, self)
+		schedule(delay or 0.5, self.Show, self.mod, self, ...)
 	end
 
 	function announcePrototype:Schedule(t, ...)
@@ -5080,7 +5089,7 @@ do
 			timer = timer < 2 and self.timer or timer
 			count = count or self.count or 5
 			if timer <= count then count = floor(timer) end
-			if DBM.Options.ShowCountdownText and not self.textDisabled then
+			if DBM.Options.ShowCountdownText and not (self.textDisabled or self.alternateVoice) then
 				if timer >= count then 
 					DBM:Schedule(timer-count, showCountdown, count)
 				else
