@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10435 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10481 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 mod:SetZone()
 
@@ -136,12 +136,12 @@ end
 
 function mod:SPELL_AURA_APPLIED(args)
 	if args.spellId == 144467 then
+		timerIgniteArmorCD:Start()
 		local uId = DBM:GetRaidUnitId(args.destName)
 		if self:IsTanking(uId, "boss1") then
 			local amount = args.amount or 1
 			warnIgniteArmor:Show(args.destName, amount)
 			timerIgniteArmor:Start(args.destName)
-			timerIgniteArmorCD:Start()
 			if amount >= 3 then
 				if args:IsPlayer() then
 					specWarnIgniteArmor:Show(amount)

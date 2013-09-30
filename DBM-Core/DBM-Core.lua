@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10479 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10488 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -2283,16 +2283,19 @@ do
 		end
 	end
 
-	syncHandlers["C"] = function(sender, delay, mod, revision, startHp)
+	syncHandlers["C"] = function(sender, delay, mod, modRevision, startHp, dbmRevision)
 		local _, instanceType = GetInstanceInfo()
+		if sender == playerName then return end
 		if instanceType == "pvp" then return end
 		if not IsEncounterInProgress() and instanceType == "raid" and IsPartyLFG() then return end--Ignore syncs if we cannot validate IsEncounterInProgress as true
 		local lag = select(4, GetNetStats()) / 1000
 		delay = tonumber(delay or 0) or 0
 		mod = DBM:GetModByName(mod or "")
-		revision = tonumber(revision or 0) or 0
+		modRevision = tonumber(modRevision or 0) or 0
+		dbmRevision = tonumber(dbmRevision or 0) or 0
 		startHp = tonumber(startHp or -1) or -1
-		if mod and delay and (not mod.zones or mod.zones[LastInstanceMapID]) and (not mod.minSyncRevision or revision >= mod.minSyncRevision) then
+		if dbmRevision < 10481 then return end
+		if mod and delay and (not mod.zones or mod.zones[LastInstanceMapID]) and (not mod.minSyncRevision or modRevision >= mod.minSyncRevision) then
 			DBM:StartCombat(mod, delay + lag, "SYNC from - "..sender, true, startHp)
 		end
 	end
@@ -2483,7 +2486,7 @@ do
 		local accessList = {}
 		local savedSender
 
-		local inspopup = CreateFrame("Frame", "DBMINSTANCEPOPUP", UIParent)
+		local inspopup = CreateFrame("Frame", "DBMPopupLockout", UIParent)
 		inspopup:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
 			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
 			tile = true, tileSize = 16, edgeSize = 16,
@@ -2579,11 +2582,11 @@ do
 		end
 
 		syncHandlers["IRE"] = function(sender)
-			local popup = DBMINSTANCEPOPUP:IsShown()
+			local popup = inspopup:IsShown()
 			if popup and savedSender == sender then -- found the popup with the correct data
 				savedSender = nil
 				DBM:Unschedule(autoDecline)
-				DBMINSTANCEPOPUP:Hide()
+				inspopup:Hide()
 			end
 		end
 
@@ -2976,8 +2979,8 @@ do
 	end
 
 	local function isBossEngaged(cId)
-		-- note that this is designed to work with any number of bosses, but it might be sufficient to check the first 4 unit ids
-		-- TODO: check if the client supports more than 4 boss unit IDs...just because the default boss health frame is limited to 4 doesn't mean there can't be more
+		-- note that this is designed to work with any number of bosses, but it might be sufficient to check the first 5 unit ids
+		-- TODO: check if the client supports more than 5 boss unit IDs...just because the default boss health frame is limited to 5 doesn't mean there can't be more
 		local i = 1
 		repeat
 			local bossUnitId = "boss"..i
@@ -3221,7 +3224,7 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 			mod:OnCombatStart(delay or 0, event == "PLAYER_TARGET_AND_YELL")
 		end
 		if not synced then
-			sendSync("C", (delay or 0).."\t"..mod.id.."\t"..(mod.revision or 0).."\t"..startHp)
+			sendSync("C", (delay or 0).."\t"..mod.id.."\t"..(mod.revision or 0).."\t"..startHp.."\t"..DBM.Revision)
 		end
 		fireEvent("pull", mod, delay, synced, startHp)
 		self:ToggleRaidBossEmoteFrame(1)
