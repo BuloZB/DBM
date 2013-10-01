@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(860, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10466 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10505 $"):sub(12, -3))
 mod:SetCreatureID(71953)
 mod:SetReCombatTime(20)
 mod:SetZone()
@@ -82,7 +82,7 @@ function mod:SPELL_AURA_APPLIED(args)
 				end
 			end
 		end
-	elseif args.spellId == 144631 and not args:IsDestTypePlayer() then
+	elseif args.spellId == 144631 and args:GetDestCreatureID() == 71953 then
 		warnAgility:Show(args.destName)
 		specWarnAgility:Show(args.destName)
 --		timerAgilityCD:Start()
