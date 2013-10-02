@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(825, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10514 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10516 $"):sub(12, -3))
 mod:SetCreatureID(67977)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3)
@@ -110,9 +110,6 @@ function mod:OnCombatStart(delay)
 		berserkTimer:Start(600-delay)
 	else
 		berserkTimer:Start(-delay)
-	end
-	if DBM:GetRaidRank() > 0 and self.Options.SetIconOnTurtles and not DBM.Options.DontSetIcons then--You can set marks and you have icons turned on
-		self:SendSync("IconCheck", UnitGUID("player"), tostring(DBM.Revision))
 	end
 end
 
