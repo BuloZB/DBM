@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10472 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10517 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 mod:SetZone()
 mod:SetUsedIcons(5, 4, 3, 2, 1)
@@ -141,7 +141,11 @@ end
 
 function mod:OnCombatStart(delay)
 	ashCount = 0
-	berserkTimer:Start(-delay)
+	if self:IsDifficulty("lfr25") then
+		berserkTimer:Start(600-delay)
+	else
+		berserkTimer:Start(-delay)
+	end
 end
 
 function mod:OnCombatEnd()
