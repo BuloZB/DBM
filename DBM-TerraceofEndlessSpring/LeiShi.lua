@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(729, "DBM-TerraceofEndlessSpring", nil, 320)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10512 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10514 $"):sub(12, -3))
 mod:SetCreatureID(62983)--62995 Animated Protector
 
 mod:RegisterCombat("combat")
@@ -145,8 +145,8 @@ function mod:SPELL_AURA_APPLIED(args)
 		self:Schedule(0.2, function()
 			timerSpecialCD:Cancel()
 		end)
-	elseif args.spellId == 123505 then
-		self:ScanForMobs(args.destGUID, 8, 0.05, 100)
+	elseif args.spellId == 123505 and self.Options.SetIconOnProtector then
+		self:ScanForMobs(args.destGUID, 0, 8, nil, 0.05, 6)
 	elseif args.spellId == 123461 then
 		specialsCast = specialsCast + 1
 		warnGetAway:Show(specialsCast)

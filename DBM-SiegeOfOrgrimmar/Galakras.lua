@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10512 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10513 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(180, 15)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
@@ -263,7 +263,7 @@ function mod:OnSync(msg)
 			timerAddsCD:Start()
 		end
 		if self.Options.SetIconOnAdds then
-			self:ScanForMobs(72958, 8, 0.2, 40, 2)
+			self:ScanForMobs(72958, 0, 8, 2, 0.2, 8)
 		end
 	end
 end

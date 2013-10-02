@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(846, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10512 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10513 $"):sub(12, -3))
 mod:SetCreatureID(71454)
 mod:SetZone()
 mod:SetUsedIcons(4, 3, 2, 1)
@@ -140,7 +140,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 			timerSeismicSlamCD:Start(nil, seismicSlamCount+1)
 		end
 		if self.Options.SetIconOnAdds and self:IsDifficulty("heroic10", "heroic25") then
-			self:ScanForMobs(71644, 8, 0.2, 30)
+			self:ScanForMobs(71644, 0, 8, nil, 0.2, 6)
 		end
 	elseif args.spellId == 143913 then--May not be right spell event
 		--5 rage gained from Essence of Y'Shaarj would progress timer about 2.5 seconds

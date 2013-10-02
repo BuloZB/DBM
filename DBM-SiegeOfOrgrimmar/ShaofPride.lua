@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10512 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10515 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -80,7 +80,8 @@ local countdownReflection		= mod:NewCountdown(25, 144800, false, nil, nil, nil, 
 
 mod:AddInfoFrameOption("ej8255")
 mod:AddSetIconOption("SetIconOnMark", 144351, false)
-mod:AddSetIconOption("SetIconOnFragment", 146823, false, true)--This does not get along with SetIconOnMark though
+mod:AddBoolOption("SetIconOnFragment", false)--This does not get along with SetIconOnMark though
+mod.findFastestComputer = "SetIconOnFragment" -- for set icon stuff.
 
 local UnitPower, UnitPowerMax, UnitIsDeadOrGhost, UnitGUID = UnitPower, UnitPowerMax, UnitIsDeadOrGhost, UnitGUID
 local prideLevel = EJ_GetSectionInfo(8255)
@@ -190,7 +191,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		warnSelfReflection:Show()
 		specWarnSelfReflection:Show()
 	elseif args.spellId == 146823 and self.Options.SetIconOnFragment then--Banishment cast. Not want to use applied for add mark scheduling
-		self:ScanForMobs(72569, 8, 0.2, 40, 3)
+		self:ScanForMobs(72569, 0, 8, 3, 0.2, 8)
 	end
 end
 
