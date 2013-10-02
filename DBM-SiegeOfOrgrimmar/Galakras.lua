@@ -1,12 +1,12 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10455 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10512 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(180, 15)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
 mod:SetZone()
-mod:SetUsedIcons(8)
+mod:SetUsedIcons(8, 7, 2)
 
 mod:RegisterCombat("combat")
 
@@ -86,6 +86,7 @@ local timerFlamesofGalakrondCD		= mod:NewCDCountTimer(6, 147068)
 local timerFlamesofGalakrond		= mod:NewTargetTimer(15, 147029, nil, mod:IsTank())
 
 mod:AddSetIconOption("FixateIcon", 147068)
+mod:AddSetIconOption("SetIconOnAdds", "ej8556", false, true)
 
 local addsCount = 0
 local firstTower = false
@@ -141,7 +142,7 @@ function mod:SPELL_AURA_APPLIED(args)
 			specWarnFlamesofGalakrond:Show(flamesCount)
 		end
 		if self.Options.FixateIcon then
-			self:SetIcon(args.destName, 8)
+			self:SetIcon(args.destName, 2)
 		end
 	elseif args.spellId == 147328 and UnitPower("player", ALTERNATE_POWER_INDEX) == 0 then
 		warnWarBanner:Show()
@@ -260,6 +261,9 @@ function mod:OnSync(msg)
 			timerAddsCD:Start(110)
 		else
 			timerAddsCD:Start()
+		end
+		if self.Options.SetIconOnAdds then
+			self:ScanForMobs(72958, 8, 0.2, 40, 2)
 		end
 	end
 end

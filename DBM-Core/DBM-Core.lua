@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10505 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10512 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -2284,8 +2284,8 @@ do
 	end
 
 	syncHandlers["C"] = function(sender, delay, mod, modRevision, startHp, dbmRevision)
-		local _, instanceType = GetInstanceInfo()
 		if sender == playerName then return end
+		local _, instanceType = GetInstanceInfo()
 		if instanceType == "pvp" then return end
 		if not IsEncounterInProgress() and instanceType == "raid" and IsPartyLFG() then return end--Ignore syncs if we cannot validate IsEncounterInProgress as true
 		local lag = select(4, GetNetStats()) / 1000
@@ -2297,6 +2297,9 @@ do
 		if dbmRevision < 10481 then return end
 		if mod and delay and (not mod.zones or mod.zones[LastInstanceMapID]) and (not mod.minSyncRevision or modRevision >= mod.minSyncRevision) then
 			DBM:StartCombat(mod, delay + lag, "SYNC from - "..sender, true, startHp)
+			if DBM:GetRaidRank() > 0 and mod.findFastestComputer and mod.Options[mod.findFastestComputer] and not DBM.Options.DontSetIcons then
+				mod:ReceiveIconSetPerson(DBM:GetUnitFullName(sender), dbmRevision)
+			end
 		end
 	end
 
@@ -3225,6 +3228,9 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 		end
 		if not synced then
 			sendSync("C", (delay or 0).."\t"..mod.id.."\t"..(mod.revision or 0).."\t"..startHp.."\t"..DBM.Revision)
+			if DBM:GetRaidRank() > 0 and mod.findFastestComputer and mod.Options[mod.findFastestComputer] and not DBM.Options.DontSetIcons then
+				mod:ReceiveIconSetPerson(playerName, DBM.Revision)
+			end
 		end
 		fireEvent("pull", mod, delay, synced, startHp)
 		self:ToggleRaidBossEmoteFrame(1)
@@ -4549,6 +4555,104 @@ function bossModPrototype:BossTargetScanner(cid, returnFunc, scanInterval, scanT
 	end
 end
 
+local canSetIcons = false
+local iconSetRevision = 0
+local lastIconSetElected = 0
+local addsTable = {}--This is wiped on combat end at mod level, not function level
+local scanLimiter = 0
+local scanIcon = nil
+local addsFound = 0
+
+function bossModPrototype:SetIconSetPerson(name)
+	if name and GetTime() - lastIconSetElected > 10 then--Whoever sends this sync first wins all. They have highest version and probably the lowest ping. Do not use self:AntiSpam here not to break mod:AntiSpam()
+		-- note: this assumes that everyone sees chat/addon-messages in the same order which seems to be true at the moment; can be changed to use GetNetStats() if this changes
+		lastIconSetElected = GetTime()
+		self:UnscheduleMethod("SetIconSetPerson")
+		if name == playerName then
+			canSetIcons = true
+		else
+			canSetIcons = false
+		end
+	end
+end
+
+function bossModPrototype:ReceiveIconSetPerson(name, ver)
+	if ver > iconSetRevision then
+		iconSetRevision = ver--Keep bumping highest version to highest we Receive from the icon setters
+		if name == playerName then--Check if that highest version was from ourself
+			canSetIcons = true
+			self:UnscheduleMethod("SetIconSetPerson")
+			self:ScheduleMethod(5, "SetIconSetPerson", name)
+		else--Not from self, it means someone with a higher version than us probably sent it
+			canSetIcons = false
+			self:UnscheduleMethod("SetIconSetPerson")
+		end
+	end
+end
+
+function bossModPrototype:ScanForMobs(creatureID, startIcon, scanInterval, scanTimes, mobTotal, reverse)
+	if canSetIcons then
+		--declare variables
+		local creatureID = creatureID--This function must not be used to boss, so remove self.creatureId.
+		if not scanIcon then scanIcon = startIcon or 1 end--Set our scan icon, its first scan
+		local scanInterval = scanInterval or 0.2
+		local scanTimes = scanTimes or 40
+		local mobTotal = mobTotal or 99
+		--do scan
+		scanLimiter = scanLimiter + 1
+		for uId in DBM:GetGroupMembers() do
+			local unitid = uId.."target"
+			local guid = UnitGUID(unitid)
+			local cid = self:GetCIDFromGUID(guid)
+			if guid and ((guid == creatureID) or (cid == creatureID)) and not addsTable[guid] then--support guid or cid
+				SetRaidTarget(unitid, scanIcon)
+				addsTable[guid] = true
+				if reverse then
+					scanIcon = scanIcon + 1
+				else
+					scanIcon = scanIcon - 1
+				end
+				addsFound = addsFound + 1
+				if addsFound > mobTotal then--stop scan immidately to save cpu
+					--clear variables
+					scanLimiter = 0
+					addsFound = 0
+					scanIcon = nil
+					return
+				end
+			end
+		end
+		local guid2 = UnitGUID("mouseover")
+		local cid2 = self:GetCIDFromGUID(guid2)
+		if guid2 and ((guid2 == creatureID) or (cid2 == creatureID)) and not addsTable[guid2] then--support guid or cid
+			SetRaidTarget("mouseover", scanIcon)
+			addsTable[guid2] = true
+			if reverse then
+				scanIcon = scanIcon + 1
+			else
+				scanIcon = scanIcon - 1
+			end
+			addsFound = addsFound + 1
+			if addsFound > mobTotal then--stop scan immidately to save cpu
+				--clear variables
+				scanLimiter = 0
+				addsFound = 0
+				scanIcon = nil
+				return
+			end
+		end
+		if scanLimiter < scanTimes then--scan for limited times.
+			self:ScheduleMethod(scanInterval, "ScanForMobs", creatureID, startIcon, scanInterval, scanTimes, mobTotal, reverse)
+		else
+			--clear variables
+			scanLimiter = 0
+			addsFound = 0
+			scanIcon = nil
+			--Do not wipe adds GUID table here, it's wiped by :Stop() which is called by EndCombat
+		end
+	end
+end
+
 --Now this function works perfectly. But have some limitation due to DBM.RangeCheck:GetDistance() function.
 --Unfortunely, DBM.RangeCheck:GetDistance() function cannot reflects altitude difference. This makes range unreliable.
 --So, we need to cafefully check range in difference altitude (Espcially, tower top and bottom)
@@ -4607,6 +4711,10 @@ function bossModPrototype:Stop(cid)
 		v:Stop()
 	end
 	self:Unschedule()
+	canSetIcons = false--Wiped here when mod stop is called by CombatEnd
+	iconSetRevision = 0
+	twipe(addsTable)
+	scanIcon = nil--For good measure, in cast stop is called in a way that prevents clearing this icon.
 end
 
 function bossModPrototype:IsDifficulty(...)
@@ -6249,6 +6357,7 @@ function bossModPrototype:AddSetIconOption(name, spellId, default, isHostile)
 	self.Options[name] = (default == nil) or default
 	self:SetOptionCategory(name, "misc")
 	if isHostile then
+		self.findFastestComputer = name
 		self.localization.options[name] = DBM_CORE_AUTO_ICONS_OPTION_TEXT2:format(spellId)
 	else
 		self.localization.options[name] = DBM_CORE_AUTO_ICONS_OPTION_TEXT:format(spellId)
