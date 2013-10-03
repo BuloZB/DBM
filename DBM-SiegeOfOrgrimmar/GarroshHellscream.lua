@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10516 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10531 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetZone()
 mod:SetUsedIcons(8, 7)
@@ -217,7 +217,7 @@ function mod:SPELL_AURA_APPLIED(args)
 			if shamanAlive == 1 then
 				self:ScanForMobs(71983, 2, 8, 1, 0.2, 8)
 			else--Only go up to 2 at once. if 3 are up at once, this is a doomed wipe
-				self:ScanForMobs(71983, 2, 8, 1, 0.2, 8)
+				self:ScanForMobs(71983, 2, 7, 1, 0.2, 8)
 			end
 		end
 	end

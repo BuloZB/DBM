@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(726, "DBM-MogushanVaults", nil, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10514 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10518 $"):sub(12, -3))
 mod:SetCreatureID(60410)--Energy Charge (60913), Emphyreal Focus (60776), Cosmic Spark (62618), Celestial Protector (60793)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3)
@@ -140,7 +140,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 			DBM.BossHealth:AddBoss(args.sourceGUID, args.sourceName)
 		end
 		if self.Options.SetIconOnCreature then
-			self:ScanForMobs(args.sourceGUID, 0, 8, 6, 0,5, 6)
+			self:ScanForMobs(args.sourceGUID, 0, 8, 6, 0.5, 10)
 		end
 		if focusActivated == 6 then
 			timerDespawnFloor:Start()

@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10517 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10532 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -1215,7 +1215,7 @@ SlashCmdList["DEADLYBOSSMODS"] = function(msg)
 		DBM:RequestInstanceInfo()
 	elseif cmd:sub(1, 5) == "debug" then
 		DBM.Options.DebugMode = DBM.Options.DebugMode == false and true or false
-		DBM:AddMsg("DebugMode : " .. (DBM.Options.DebugMode and "true" or "false"))
+		DBM:AddMsg("DebugMode : " .. (DBM.Options.DebugMode and "on" or "off"))
 	else
 		DBM:LoadGUI()
 	end
@@ -2229,6 +2229,26 @@ function DBM:LoadMod(mod)
 				--Not the new stand alone pvp mods these are old ones and user needs to remove them or install updated package
 				self:AddMsg(DBM_CORE_OUTDATED_PVP_MODS)
 			end
+		elseif instanceType ~="pvp" and #inCombat == 0 and IsInGroup() then--do timer recovery only mod load
+			local doRequest = false
+			if IsEncounterInProgress() then
+				doRequest = true
+			else
+				local uId = (IsInRaid() and "raid") or "party"
+				for i = 0, GetNumGroupMembers() do
+					local id = (i == 0 and "player") or uId..i
+					if UnitAffectingCombat(id) and not UnitIsDeadOrGhost(id) then
+						doRequest = true
+						break
+					end
+				end
+			end
+			if doRequest then
+				-- Request timer to 3 person to prevent failure.
+				DBM:Schedule(2, DBM.RequestTimers, DBM)
+				DBM:Schedule(4, DBM.RequestTimers, DBM)
+				DBM:Schedule(6, DBM.RequestTimers, DBM)
+			end
 		end
 		if not InCombatLockdown() then--We loaded in combat because a raid boss was in process, but lets at least delay the garbage collect so at least load mod is half as bad, to do our best to avoid "script ran too long"
 			collectgarbage("collect")
@@ -2778,11 +2798,11 @@ do
 		DBM:SendTimers(sender)
 	end
 
-	whisperSyncHandlers["CI"] = function(sender, mod, time)
+	whisperSyncHandlers["CI"] = function(sender, mod, time, isIEEU)
 		mod = DBM:GetModByName(mod or "")
 		time = tonumber(time or 0)
 		if mod and time then
-			DBM:ReceiveCombatInfo(sender, mod, time)
+			DBM:ReceiveCombatInfo(sender, mod, time, isIEEU)
 		end
 	end
 
@@ -3080,29 +3100,27 @@ function checkWipe(isIEEU, confirm)
 			savedDifficulty, difficultyText = DBM:GetCurrentInstanceDifficulty()
 		end
 		local wipe = 1 -- 0: no wipe, 1: normal wipe, 2: wipe by UnitExists check.
-		if IsInScenarioGroup() then -- do not wipe in Scenario Group even player is ghost.
+		if IsInScenarioGroup() then -- Scenario mod uses special combat start and must be enabled before sceniro end. So do not wipe.
 			wipe = 0
-		elseif IsEncounterInProgress() then
+		elseif IsEncounterInProgress() then -- Encounter Progress marked, you obiously combat whth boss. So do not Wipe
 			wipe = 0
-		elseif InCombatLockdown() then
+		elseif savedDifficulty == "worldboss" and UnitIsDeadOrGhost("player") then -- On dead or ghost, unit combat status detection would be fail. If you ghost in instance, that means wipe. But in worldboss, ghost means not wipe. So do not wipe.
 			wipe = 0
-			if isIEEU then--Due to SoO combat locking on bug, do one more step on wipe check.
-				wipe = 2
-				for i = 1, 5 do
-					if UnitExists("boss"..i) then
-						wipe = 0 
-						break
-					end
+		elseif isIEEU then -- Combat started by IEEU and no boss exist and no EncounterProgress marked, that means wipe
+			wipe = 2
+			for i = 1, 5 do
+				if UnitExists("boss"..i) then
+					wipe = 0 -- Boss found. No wipe
+					break
 				end
 			end
-		elseif savedDifficulty == "worldboss" and UnitIsDeadOrGhost("player") then -- do not wipe on player dead or ghost while worldboss encounter.
-			wipe = 0
-		else
+		else -- Unit combat status detection. No combat unit in your party and no EncounterProgress marked, that means wipe
+			wipe = 1
 			local uId = (IsInRaid() and "raid") or "party"
 			for i = 0, GetNumGroupMembers() do
 				local id = (i == 0 and "player") or uId..i
 				if UnitAffectingCombat(id) and not UnitIsDeadOrGhost(id) then
-					wipe = 0
+					wipe = 0 -- Someone still in combat. No wipe
 					break
 				end
 			end
@@ -3112,13 +3130,13 @@ function checkWipe(isIEEU, confirm)
 		elseif confirm then
 			for i = #inCombat, 1, -1 do
 				if DBM.Options.DebugMode then
-					local reason = (wipe == 1 and "Normal Wipe" or "Cannot found BossN uId")
+					local reason = (wipe == 1 and "No combat unit found in your party." or "No boss found")
 					print("You wiped. Reason : "..reason)
 				end
 				DBM:EndCombat(inCombat[i], true)
 			end
 		else
-			local maxDelayTime = (savedDifficulty == "worldboss" and 30) or (wipe == 2 and 20) or 5 --wait 25s more on worldboss do actual wipe, 15 sec more for UnitExists check.
+			local maxDelayTime = (savedDifficulty == "worldboss" and 30) or 5 --wait 25s more on worldboss do actual wipe.
 			for i, v in ipairs(inCombat) do
 				maxDelayTime = v.combatInfo and v.combatInfo.wipeTimer and v.combatInfo.wipeTimer > maxDelayTime and v.combatInfo.wipeTimer or maxDelayTime
 			end
@@ -3126,6 +3144,8 @@ function checkWipe(isIEEU, confirm)
 		end
 	end
 end
+
+local combatStartedByIEEU = false
 
 function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 	if DBM.Options.DebugMode then
@@ -3184,7 +3204,8 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 		mod.inCombat = true
 		mod.blockSyncs = nil
 		mod.combatInfo.pull = GetTime() - (delay or 0)
-		self:Schedule(mod.minCombatTime or 3, checkWipe, (event or "") == "IEEU")
+		combatStartedByIEEU = (event or "") == "IEEU"
+		self:Schedule(mod.minCombatTime or 3, checkWipe, combatStartedByIEEU)
 		if (DBM.Options.AlwaysShowHealthFrame or mod.Options.HealthFrame) and not mod.inScenario then
 			DBM.BossHealth:Show(mod.localization.general.name)
 			if mod.bossHealthInfo then
@@ -3242,6 +3263,10 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 			end
 		end
 		self:StartLogging(0, nil)
+		if DBM.Options.HideWatchFrame and WatchFrame:IsVisible() and not (mod.type == "SCENARIO") then
+			WatchFrame:Hide()
+			watchFrameRestore = true
+		end
 		if DBM.Options.ShowEngageMessage then
 			if mod.ignoreBestkill and mod:IsDifficulty("worldboss") then--Should only be true on in progress field bosses, not in progress raid bosses we did timer recovery on.
 				self:AddMsg(DBM_CORE_COMBAT_STARTED_IN_PROGRESS:format(difficultyText..mod.combatInfo.name))
@@ -3253,9 +3278,12 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 				end
 			end
 		end
-		if DBM.Options.HideWatchFrame and WatchFrame:IsVisible() and not (mod.type == "SCENARIO") then
-			WatchFrame:Hide()
-			watchFrameRestore = true
+		local dummyMod = self:GetModByName("PullTimerCountdownDummy")
+		if dummyMod then--stop pull timer, warning, countdowns
+			dummyMod.countdown:Cancel()
+			dummyMod.text:Cancel()
+			DBM.Bars:CancelBar(DBM_CORE_TIMER_PULL) 
+			TimerTracker_OnEvent(TimerTracker, "PLAYER_ENTERING_WORLD")
 		end
 	end
 end
@@ -3687,7 +3715,7 @@ do
 		SendAddonMessage("D4", "RT", "WHISPER", bestClient.name)
 	end
 
-	function DBM:ReceiveCombatInfo(sender, mod, time)
+	function DBM:ReceiveCombatInfo(sender, mod, time, isIEEU)
 		if sender == requestedFrom and (GetTime() - requestTime) < 5 and #inCombat == 0 then
 			if not mod.Options.Enabled then return end
 			local lag = select(4, GetNetStats()) / 1000
@@ -3711,18 +3739,20 @@ do
 			mod.inCombat = true
 			mod.blockSyncs = nil
 			mod.combatInfo.pull = GetTime() - time + lag
-			local isIEEU
-			--Hack for wipe function working correctly on timer recovery.
-			for i = 1, 5 do
-				if UnitExists("boss"..i) then
-					isIEEU = true
-					break
+			local isIEEU = isIEEU
+			--hack for no iEEU information provided.
+			if not isIEEU then
+				for i = 1, 5 do
+					if UnitExits("boss"..i) then
+						isIEEU = "true"
+						break
+					end
 				end
 			end
 			if mod.minCombatTime then
-				self:Schedule(mmax((mod.minCombatTime - time - lag), 3), checkWipe, isIEEU)
+				self:Schedule(mmax((mod.minCombatTime - time - lag), 3), checkWipe, isIEEU == "true")
 			else
-				self:Schedule(3, checkWipe, isIEEU)
+				self:Schedule(3, checkWipe, isIEEU == "true")
 			end
 			if (DBM.Options.AlwaysShowHealthFrame or mod.Options.HealthFrame) and not mod.inSecnario then
 				DBM.BossHealth:Show(mod.localization.general.name)
@@ -3818,7 +3848,7 @@ function DBM:SendBGTimers(target)
 end
 
 function DBM:SendCombatInfo(mod, target)
-	return SendAddonMessage("D4", ("CI\t%s\t%s"):format(mod.id, GetTime() - mod.combatInfo.pull), "WHISPER", target)
+	return SendAddonMessage("D4", ("CI\t%s\t%s\t%s"):format(mod.id, GetTime() - mod.combatInfo.pull, tostring(combatStartedByIEEU)), "WHISPER", target)
 end
 
 function DBM:SendTimerInfo(mod, target)
@@ -3839,28 +3869,8 @@ function DBM:SendTimerInfo(mod, target)
 end
 
 do
-	local function requestTimers()
-		if #inCombat == 0 then
-			if IsEncounterInProgress() then
-				DBM:RequestTimers()
-			else
-				local uId = (IsInRaid() and "raid") or "party"
-				for i = 0, GetNumGroupMembers() do
-					local id = (i == 0 and "player") or uId..i
-					if UnitAffectingCombat(id) and not UnitIsDeadOrGhost(id) then
-						DBM:RequestTimers()
-						break
-					end
-				end
-			end
-		end
-	end
 
 	function DBM:PLAYER_ENTERING_WORLD()
-		self:Schedule(6, requestTimers) -- Time recovery. 3.5 sec too early if you have slow machine. try multiple check
-		self:Schedule(10, requestTimers)
-		self:Schedule(14, requestTimers)
-		self:Schedule(18, requestTimers)
 --		self:Schedule(10, function() if not DBM.Options.HelpMessageShown then DBM.Options.HelpMessageShown = true DBM:AddMsg(DBM_CORE_NEED_SUPPORT) end end)
 		self:Schedule(10, function() if not DBM.Options.SettingsMessageShown then DBM.Options.SettingsMessageShown = true self:AddMsg(DBM_HOW_TO_USE_MOD) end end)
 		self:Schedule(16, function() if not DBM.Options.ForumsMessageShown then DBM.Options.ForumsMessageShown = DBM.ReleaseRevision self:AddMsg(DBM_FORUMS_MESSAGE) end end)
@@ -4707,7 +4717,7 @@ function bossModPrototype:ScanForMobs(creatureID, iconSetMethod, mobIcon, maxIco
 				return
 			end
 		end
-		if timeNow < scanExpires then--scan for limited times.
+		if timeNow < scanExpires[scanID] then--scan for limited times.
 			self:ScheduleMethod(scanInterval, "ScanForMobs", creatureID, iconSetMethod, mobIcon, maxIcon, scanInterval, scanningTime)
 		else
 			--clear variables
