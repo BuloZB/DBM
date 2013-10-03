@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10533 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10536 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -2373,7 +2373,7 @@ do
 			end
 		end
 		if not DBM.Options.DontShowPTText then
-			dummyMod.text:Show(DBM_CORE_ANNOUNCE_PULL:format(timer))
+			dummyMod.text:Show(DBM_CORE_ANNOUNCE_PULL:format(timer, sender))
 			dummyMod.text:Schedule(timer, DBM_CORE_ANNOUNCE_PULL_NOW)
 		end
 		DBM:StartLogging(timer, checkForActualPull)
