@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(850, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10521 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10537 $"):sub(12, -3))
 mod:SetCreatureID(71515)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 4, 2, 1)
@@ -98,6 +98,14 @@ local dotWarned = {}
 local defensiveActive = false
 local allForcesReleased = false
 local sunder = GetSpellInfo(143494)
+
+local addsTable = {
+	[71519] = 7,--Shaman
+	[71517] = 6,--Arcweaver
+	[71518] = 1,--Assassin
+	[71516] = 2,--Iron Blade
+	[71556] = 4,--Sniper (Heroic)
+}
 
 local function updateInfoFrame()
 	local lines = {}
@@ -296,11 +304,7 @@ function mod:CHAT_MSG_MONSTER_YELL(msg)
 		timerAddsCD:Start(nil, addsCount+1)
 		countdownAdds:Start()
 		if self.Options.SetIconOnAdds then
-			self:ScanForMobs(71519, 2, 7, 1, 0.2, 10)--Shaman
-			self:ScanForMobs(71517, 2, 6, 1, 0.2, 10)--Arcweaver
-			self:ScanForMobs(71518, 2, 1, 1, 0.2, 10)--Assassin
-			self:ScanForMobs(71516, 2, 2, 1, 0.2, 10)--Iron Blade
-			self:ScanForMobs(71556, 2, 4, 1, 0.2, 10)--Sniper (Heroic)
+			self:ScanForMobs(addsTable, 2, 7, 5, 0.2, 10)
 		end
 	elseif msg == L.allForces then
 		allForcesReleased = true
