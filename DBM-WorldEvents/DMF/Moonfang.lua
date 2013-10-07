@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("Moonfang", "DBM-WorldEvents", 2)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10556 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10564 $"):sub(12, -3))
 mod:SetCreatureID(71992)
 --mod:SetModelID(328)
 mod:SetZone()
@@ -20,7 +20,6 @@ local warnMoonfangCurse		= mod:NewSpellAnnounce(144590, 4)
 
 local specWarnLeap			= mod:NewSpecialWarningYou(144546)
 local yellLeap				= mod:NewYell(144546)
-local specWarnLeapNear		= mod:NewSpecialWarningClose(144546)
 local specWarnCallPack		= mod:NewSpecialWarningSwitch(144602, mod:IsTank())
 local specWarnTears			= mod:NewSpecialWarningSpell(144702, nil, nil, nil, 2)
 local specWarnMoonfangCurse	= mod:NewSpecialWarningRun(144590, mod:IsMelee())
@@ -38,25 +37,13 @@ function mod:LeapTarget(targetname, uId)
 	if targetname == UnitName("player") then
 		specWarnLeap:Show()
 		yellLeap:Yell()
-	else
-		if uId then
-			local x, y = GetPlayerMapPosition(uId)
-			if x == 0 and y == 0 then
-				SetMapToCurrentZone()
-				x, y = GetPlayerMapPosition(uId)
-			end
-			local inRange = DBM.RangeCheck:GetDistance("player", x, y)
-			if inRange and inRange < 8 then--Range guesswork
-				specWarnLeapNear:Show(targetname)
-			end
-		end
 	end
 end
 
 function mod:SPELL_CAST_START(args)
 	if args.spellId == 144546 then
 		timerLeapCD:Start()
-		self:BossTargetScanner(71992, "LeapTarget", 0.05, 16)
+		self:BossTargetScanner(71992, "LeapTarget", 0.02, 40)
 	elseif args.spellId == 144590 then
 		warnMoonfangCurse:Show()
 		specWarnMoonfangCurse:Show()

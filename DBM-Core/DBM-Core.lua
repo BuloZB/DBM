@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10556 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10564 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -2334,9 +2334,6 @@ do
 		if dbmRevision < 10481 then return end
 		if mod and delay and (not mod.zones or mod.zones[LastInstanceMapID]) and (not mod.minSyncRevision or modRevision >= mod.minSyncRevision) then
 			DBM:StartCombat(mod, delay + lag, "SYNC from - "..sender, true, startHp)
-			if DBM:GetRaidRank() > 0 and mod.findFastestComputer and mod.Options[mod.findFastestComputer] and not DBM.Options.DontSetIcons then
-				mod:ReceiveIconSetPerson(DBM:GetUnitFullName(sender), dbmRevision)
-			end
 		end
 	end
 
