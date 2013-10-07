@@ -177,7 +177,7 @@ L:SetGeneralLocalization({
 L = DBM:GetModLocalization("Moonfang")
 
 L:SetGeneralLocalization({
-	name = "Moonfang"
+	name = "Лунная волчица"
 })
 
 --------------------------
