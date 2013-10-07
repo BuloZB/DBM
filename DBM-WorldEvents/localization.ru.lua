@@ -171,6 +171,15 @@ L:SetGeneralLocalization({
 	name = "Кролик ярмарки Новолуния"
 })
 
+-------------------------
+--  Darkmoon Moonfang  --
+-------------------------
+L = DBM:GetModLocalization("Moonfang")
+
+L:SetGeneralLocalization({
+	name = "Moonfang"
+})
+
 --------------------------
 --  Plants Vs. Zombies  --
 --------------------------
