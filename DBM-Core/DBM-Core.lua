@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10569 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10571 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -2148,7 +2148,7 @@ do
 		LastInstanceMapID = mapID
 		if instanceType == "none" and not forceloadmapIds[mapID] then return end
 		-- You entered instance duing worldboss combat. Force end worldboss mod.
-		if inscanceType ~= "none" and savedDifficulty == "worldboss" then
+		if instanceType ~= "none" and savedDifficulty == "worldboss" then
 			for i = #inCombat, 1, -1 do
 				DBM:EndCombat(inCombat[i], true)
 			end
@@ -3154,7 +3154,7 @@ end
 local combatStartedByIEEU = false
 
 function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
-	if DBM.Options.DebugMode then
+	if DBM.Options.DebugMode and not mod.inCombat then
 		if event then
 			print("DBM:StartCombat called by : "..event)
 		else
@@ -3751,7 +3751,7 @@ do
 			--hack for no iEEU information provided.
 			if not isIEEU then
 				for i = 1, 5 do
-					if UnitExits("boss"..i) then
+					if UnitExists("boss"..i) then
 						isIEEU = "true"
 						break
 					end
@@ -4653,7 +4653,7 @@ function bossModPrototype:ScanForMobs(creatureID, iconSetMethod, mobIcon, maxIco
 				end
 				addsGUIDs[guid] = true
 				addsIconSet[scanID] = addsIconSet[scanID] + 1
-				if addsIconSet[scanID] >= maxIcon then--stop scan immidately to save cpu
+				if addsIconSet[scanID] >= maxIcon then--stop scan immediately to save cpu
 					--clear variables
 					scanExpires[scanID] = nil
 					addsIcon[scanID] = nil
@@ -4673,7 +4673,7 @@ function bossModPrototype:ScanForMobs(creatureID, iconSetMethod, mobIcon, maxIco
 				end
 				addsGUIDs[guid] = true
 				addsIconSet[scanID] = addsIconSet[scanID] + 1
-				if addsIconSet[scanID] >= maxIcon then--stop scan immidately to save cpu
+				if addsIconSet[scanID] >= maxIcon then--stop scan immediately to save cpu
 					--clear variables
 					scanExpires[scanID] = nil
 					addsIcon[scanID] = nil
@@ -4697,7 +4697,7 @@ function bossModPrototype:ScanForMobs(creatureID, iconSetMethod, mobIcon, maxIco
 			end
 			addsGUIDs[guid2] = true
 			addsIconSet[scanID] = addsIconSet[scanID] + 1
-			if addsIconSet[scanID] >= maxIcon then--stop scan immidately to save cpu
+			if addsIconSet[scanID] >= maxIcon then--stop scan immediately to save cpu
 				--clear variables
 				scanExpires[scanID] = nil
 				addsIcon[scanID] = nil
@@ -4717,7 +4717,7 @@ function bossModPrototype:ScanForMobs(creatureID, iconSetMethod, mobIcon, maxIco
 			end
 			addsGUIDs[guid2] = true
 			addsIconSet[scanID] = addsIconSet[scanID] + 1
-			if addsIconSet[scanID] >= maxIcon then--stop scan immidately to save cpu
+			if addsIconSet[scanID] >= maxIcon then--stop scan immediately to save cpu
 				--clear variables
 				scanExpires[scanID] = nil
 				addsIcon[scanID] = nil
@@ -4799,7 +4799,6 @@ function bossModPrototype:Stop(cid)
 	iconSetRevision = 0
 	lastIconSetElected = 0
 	twipe(addsGUIDs)
-	scanIcon = nil--For good measure, in cast stop is called in a way that prevents clearing this icon.
 end
 
 function bossModPrototype:IsDifficulty(...)
