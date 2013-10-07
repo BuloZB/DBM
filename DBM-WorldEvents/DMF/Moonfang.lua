@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("Moonfang", "DBM-WorldEvents", 2)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10564 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10565 $"):sub(12, -3))
 mod:SetCreatureID(71992)
 --mod:SetModelID(328)
 mod:SetZone()
@@ -43,7 +43,7 @@ end
 function mod:SPELL_CAST_START(args)
 	if args.spellId == 144546 then
 		timerLeapCD:Start()
-		self:BossTargetScanner(71992, "LeapTarget", 0.02, 40)
+		self:BossTargetScanner(71992, "LeapTarget", 0.05, 16)
 	elseif args.spellId == 144590 then
 		warnMoonfangCurse:Show()
 		specWarnMoonfangCurse:Show()
