@@ -180,6 +180,11 @@ L:SetGeneralLocalization({
 	name = "Лунная волчица"
 })
 
+L:SetWarningLocalization({
+	specWarnCallPack		= "Call the Pack - Run > 40 yards from Moonfang!",
+	specWarnMoonfangCurse	= "Moonfang's Curse - Run > 10 yards from Moonfang!"
+})
+
 --------------------------
 --  Plants Vs. Zombies  --
 --------------------------
