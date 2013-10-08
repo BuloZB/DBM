@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10513 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10574 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetReCombatTime(180, 15)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
 mod:SetMainBossID(72249)
@@ -34,7 +34,7 @@ mod:RegisterEventsInCombat(
 ----TODO, don't want this mod to register events in entire zone so it can warn for prelude trash.
 ----I'll put duplicate events in trash mod instead since trash mod will be disabled during encounters
 local warnWarBanner					= mod:NewSpellAnnounce(147328, 3)
-local warnFracture					= mod:NewTargetAnnounce(146899, 3)--TODO: see if target scanning works with one of earlier events
+local warnFracture					= mod:NewTargetAnnounce(146899, 3)
 local warnChainHeal					= mod:NewCastAnnounce(146757, 4)
 local warnDemolisher				= mod:NewSpellAnnounce("ej8562", 3, 116040)
 ----Master Cannoneer Dragryn (Tower)
@@ -52,8 +52,6 @@ local warnFlamesofGalakrond			= mod:NewStackAnnounce(147029, 2, nil, mod:IsTank(
 
 --Stage 2: Bring Her Down!
 local specWarnWarBanner				= mod:NewSpecialWarningSwitch(147328, not mod:IsHealer())
-local specWarnFractureYou			= mod:NewSpecialWarningYou(146899)
-local yellFracture					= mod:NewYell(146899)
 local specWarnFracture				= mod:NewSpecialWarningTarget(146899, mod:IsHealer())
 local specWarnChainheal				= mod:NewSpecialWarningInterrupt(146757)
 local specWarnFlameArrow			= mod:NewSpecialWarningMove(146764)
@@ -149,12 +147,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		specWarnWarBanner:Show()
 	elseif args.spellId == 146899 and UnitPower("player", ALTERNATE_POWER_INDEX) == 0 then
 		warnFracture:Show(args.destName)
-		if args:IsPlayer() then
-			specWarnFractureYou:Show()
-			yellFracture:Yell()
-		else
-			specWarnFracture:Show(args.destName)
-		end
+		specWarnFracture:Show(args.destName)
 	end
 end
 
