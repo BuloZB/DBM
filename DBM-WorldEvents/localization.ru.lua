@@ -181,8 +181,8 @@ L:SetGeneralLocalization({
 })
 
 L:SetWarningLocalization({
-	specWarnCallPack		= "Call the Pack - Run > 40 yards from Moonfang!",
-	specWarnMoonfangCurse	= "Moonfang's Curse - Run > 10 yards from Moonfang!"
+	specWarnCallPack		= "Призыв стаи - Отбегите на > 40 метров от Лунной волчицы!",
+	specWarnMoonfangCurse	= "Проклятие Лунной волчицы - Отбегите на > 10 метров от Лунной волчицы!"
 })
 
 --------------------------
