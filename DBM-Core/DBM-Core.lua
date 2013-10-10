@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10586 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10587 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -1744,7 +1744,8 @@ do
 
 	--Joined lfr during combat, many unit shows "Somewhat" and invisiable, and break class coloring temporarly. So update roster table again when unit name successfully updated.
 	function DBM:UNIT_NAME_UPDATE_UNFILTERED()
-		self:Schedule(0.5, updateAllRoster)
+		self:Unschedule(updateAllRoster)
+		self:Schedule(1.5, updateAllRoster)
 	end
 
 	function DBM:GetRaidRank(name)
