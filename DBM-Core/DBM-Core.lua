@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10587 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10589 $"):sub(12, -3)),
 	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
@@ -5413,10 +5413,11 @@ do
 			},
 			mt
 		)
-		obj.option = obj.id
 		if optionName then
+			obj.option = obj.id
 			self:AddBoolOption(obj.option, optionDefault, "misc")
 		elseif not (optionName == false) then
+			obj.option = obj.id
 			self:AddBoolOption(obj.option, optionDefault, "misc")
 			self.localization.options[obj.option] = DBM_CORE_AUTO_COUNTDOWN_OPTION_TEXT:format(spellId)
 		end
@@ -5453,10 +5454,11 @@ do
 			},
 			mt
 		)
-		obj.option = obj.id
 		if optionName then
+			obj.option = obj.id
 			self:AddBoolOption(obj.option, optionDefault, "misc")
 		elseif not (optionName == false) then
+			obj.option = obj.id
 			self:AddBoolOption(obj.option, optionDefault, "misc")
 			self.localization.options[obj.option] = DBM_CORE_AUTO_COUNTDOWN_OPTION_TEXT2:format(spellId)
 		end
@@ -6336,7 +6338,7 @@ do
 	function bossModPrototype:NewCombatTimer(timer, text, barText, barIcon)
 		timer = timer or 10
 		local bar = self:NewTimer(timer, barText or DBM_CORE_GENERIC_TIMER_COMBAT, barIcon or 2457, nil, "timer_combat")
-		local countdown = self:NewCountdown(2457, 0, nil, false, nil, true)
+		local countdown = self:NewCountdown(0, 0, nil, false, nil, true)
 		local obj = setmetatable(
 			{
 				bar = bar,
