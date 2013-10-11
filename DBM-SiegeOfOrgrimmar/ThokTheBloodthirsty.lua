@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10588 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10597 $"):sub(12, -3))
 mod:SetCreatureID(71529)
 mod:SetZone()
 mod:SetUsedIcons(8)
@@ -39,12 +39,12 @@ local warnFrozenSolid				= mod:NewTargetAnnounce(143777, 4)--This only thing wor
 --Infusion of Fire
 local warnFirePustules				= mod:NewSpellAnnounce(143970, 2)
 local warnScorchingBreath			= mod:NewStackAnnounce(143767, 2, nil, mod:IsTank())
-local warnBurningBlood				= mod:NewTargetAnnounce(143783, 3)
+local warnBurningBlood				= mod:NewTargetAnnounce(143783, 3, nil, false, nil, nil, nil, nil, 2)
 
 --Stage 1: A Cry in the Darkness
 local specWarnFearsomeRoar			= mod:NewSpecialWarningStack(143766, mod:IsTank(), 2)
 local specWarnFearsomeRoarOther		= mod:NewSpecialWarningTarget(143766, mod:IsTank())
-local specWarnDeafeningScreech		= mod:NewSpecialWarningSpell(143343, nil, nil, nil, 2)--Too late to give a stop casting warning, so it's spell now.
+local specWarnDeafeningScreech		= mod:NewSpecialWarningSpell(143343, nil, nil, nil, 2)
 --Stage 2: Frenzy for Blood!
 local specWarnBloodFrenzy			= mod:NewSpecialWarningSpell(143440, nil, nil, nil, 2)
 local specWarnFixate				= mod:NewSpecialWarningRun(143445, nil, nil, nil, 3)
@@ -134,12 +134,12 @@ function mod:OnCombatStart(delay)
 	table.wipe(bloodTargets)
 	timerFearsomeRoarCD:Start(-delay)
 	if self:IsDifficulty("lfr25") then
-		timerDeafeningScreechCD:Start(18-delay, 1)
+		timerDeafeningScreechCD:Start(19-delay, 1)
 	else
 		timerDeafeningScreechCD:Start(-delay, 1)
 	end
 	berserkTimer:Start(-delay)
-	if self.Options.RangeFrame then
+	if self.Options.RangeFrame and not self:IsDifficulty("lfr25") then
 		if self:IsDifficulty("normal10", "heroic10") then
 			DBM.RangeCheck:Show(10, nil, nil, 4)
 		else
@@ -240,8 +240,10 @@ function mod:SPELL_AURA_APPLIED(args)
 		timerBloodFrenzyCD:Start()
 	elseif args.spellId == 143442 then
 		local amount = args.amount or 1
-		warnBloodFrenzy:Show(args.destName, amount)
 		timerBloodFrenzyCD:Start()
+		if amount % 2 == 0 then
+			warnBloodFrenzy:Show(args.destName, amount)
+		end
 	elseif args.spellId == 143445 then
 		warnFixate:Show(args.destName)
 		timerFixate:Start(args.destName)
@@ -288,11 +290,11 @@ function mod:SPELL_AURA_REMOVED(args)
 		timerBloodFrenzyCD:Cancel()
 		screechCount = 0
 		if self:IsDifficulty("lfr25") then
-			timerDeafeningScreechCD:Start(18, 1)
+			timerDeafeningScreechCD:Start(19, 1)
 		else
 			timerDeafeningScreechCD:Start(nil, 1)
 		end
-		if self.Options.RangeFrame then
+		if self.Options.RangeFrame and not self:IsDifficulty("lfr25") then
 			if self:IsDifficulty("normal10", "heroic10") then
 				DBM.RangeCheck:Show(10, nil, nil, 4)
 			else
@@ -340,10 +342,11 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		timerAcidBreathCD:Cancel()
 		timerFrostBreathCD:Cancel()
 		timerScorchingBreathCD:Cancel()
+		timerDeafeningScreechCD:Cancel()
 		timerTailLashCD:Cancel()
 		specWarnBloodFrenzy:Show()
 		soundBloodFrenzy:Play()
-		if self.Options.RangeFrame then
+		if self.Options.RangeFrame and not self:IsDifficulty("lfr25") then
 			DBM.RangeCheck:Hide()
 		end
 	--He retains/casts "blood" abilities through Blood frenzy, and only stops them when he changes to different Pustles

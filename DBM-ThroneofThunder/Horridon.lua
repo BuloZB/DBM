@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(819, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10516 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10600 $"):sub(12, -3))
 mod:SetCreatureID(68476)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 1)
@@ -81,7 +81,7 @@ local soundDireFixate			= mod:NewSound(140946)
 mod:AddBoolOption("RangeFrame")
 mod:AddBoolOption("SetIconOnCharge")
 mod:AddBoolOption("SetIconOnAdds", false) -- use custom string.
-mod.findFastestComputer = "SetIconOnAdds" -- for set icon stuff.
+mod.findFastestComputer = {"SetIconOnAdds"} -- for set icon stuff.
 
 local doorNumber = 0
 local direNumber = 0
