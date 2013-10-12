@@ -39,18 +39,18 @@ L:SetOptionLocalization({
 L= DBM:GetModLocalization(868)
 
 L:SetWarningLocalization({
-	warnTowerGrunt		= "Tower Grunt"
+	warnTowerGrunt		= "Рубака у башни"
 })
 
 L:SetTimerLocalization({
 	timerTowerCD		= "След. башня",
-	timerTowerGruntCD	= "След. tower grunt"
+	timerTowerGruntCD	= "След. Рубака у башни"
 })
 
 L:SetOptionLocalization({
-	warnTowerGrunt		= "Объявлять когда появляется новый tower grunt",
+	warnTowerGrunt		= "Объявлять когда появляется новый Рубака у башни",
 	timerTowerCD		= "Отсчет времени до следующего нападения на башню",
-	timerTowerGruntCD	= "Отсчет времени до следующего tower grunt"
+	timerTowerGruntCD	= "Отсчет времени до следующего Рубаки у башни"
 })
 
 L:SetMiscLocalization({
