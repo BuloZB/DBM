@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(870, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10604 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10613 $"):sub(12, -3))
 mod:SetCreatureID(73720, 71512)
 mod:SetZone()
 
@@ -18,7 +18,7 @@ mod:RegisterEventsInCombat(
 	"SPELL_DAMAGE",
 	"SPELL_MISSED",
 	"UNIT_DIED",
-	"CHAT_MSG_MONSTER_YELL"
+	"UPDATE_WORLD_STATES"
 )
 
 local warnSuperNova				= mod:NewCastAnnounce(146815, 4)--Heroic
@@ -75,7 +75,6 @@ local specWarnPathOfBlossoms	= mod:NewSpecialWarningMove(146257)
 --Crate of Pandaren Relics
 local specWarnGustingCraneKick	= mod:NewSpecialWarningSpell(146180, nil, nil, nil, 2)
 
---local timerArmageddonCD			= mod:NewCastTimer(270, 145864, (GetSpellInfo(20479)))--145864 will never fly as timer text, it's like bajillion characters long. use 20479 for timertext
 --Massive Crate of Goods
 local timerReturnToStoneCD		= mod:NewNextTimer(12, 145489)
 local timerSetToBlowCD			= mod:NewNextTimer(9.6, 145996)
@@ -99,12 +98,16 @@ local timerGustingCraneKickCD	= mod:NewCDTimer(18, 146180)
 local timerPathOfBlossomsCD		= mod:NewCDTimer(15, 146253)
 
 local countdownSetToBlow		= mod:NewCountdownFades(29, 145996)
---local countdownArmageddon		= mod:NewCountdown(270, 145864, nil, nil, nil, nil, true)
+local countdownArmageddon		= mod:NewCountdown(270, 145864, nil, nil, nil, nil, true)
+
+local berserkTimer				= mod:NewBerserkTimer(480)
 
 mod:AddRangeFrameOption(10, 145987)
 
+local select, tonumber, GetPlayerMapPosition, GetWorldStateUIInfo = select, tonumber, GetPlayerMapPosition, GetWorldStateUIInfo
 local point1 = {0.488816, 0.208129}
 local point2 = {0.562330, 0.371684}
+local worldTimer = 0
 
 local function isPlayerInMantid()
 	local x, y = GetPlayerMapPosition("player")
@@ -132,13 +135,7 @@ local function hideRangeFrame()
 end
 
 function mod:OnCombatStart(delay)
---[[	if self:IsDifficulty("lfr25") then
-		timerArmageddonCD:Start(297.5-delay)
-		countdownArmageddon:Start(297.5-delay)
-	else
-		timerArmageddonCD:Start(267.5-delay)--May variate by 1 second, my world state stata is showing osmetimes it's 167 and somtimes it's 168 when IEEU fires. may have to just do shitty world state stuff to make it more accurate
-		countdownArmageddon:Start(267.5-delay)
-	end--]]
+	worldTimer = 0
 end
 
 function mod:OnCombatEnd()
@@ -295,26 +292,15 @@ function mod:UNIT_DIED(args)
 	end
 end
 
---[[
-"<270.3 23:27:32> [CHAT_MSG_MONSTER_YELL] CHAT_MSG_MONSTER_YELL#Module 1's all prepared for system reset.#Secured Stockpile of Pandaren Spoils###Omegal
-"<270.3 23:27:33> [WORLD_STATE_UI_TIMER_UPDATE] |0#0#true#Defense systems activating in 17 seconds.###Time remaining until the GB-11010 \"Armageddon\"-class defense systems activate.###0#0#0", -- [49218]
-"<270.4 23:27:33> [UPDATE_WORLD_STATES] |0#0#true#Defense systems activating in 286 seconds.###Time remaining until the GB-11010 \"Armageddon\"-class defense systems activate.###0#0#0", -- [49221]
-----------------
-"<283.7 22:31:28> [WORLD_STATE_UI_TIMER_UPDATE] |0#0#false#Defense systems activating in 2 seconds.###Time remaining until the GB-11010 \"Armageddon\"-class defense systems activate.###0#0#0", -- [45259]
-"<283.7 22:31:28> [CHAT_MSG_MONSTER_YELL] CHAT_MSG_MONSTER_YELL#Module 1's all prepared for system reset.#Secured Stockpile of Pandaren Spoils###Daltin##0#0##0#31#nil#0#false#false", -- [45267]
-"<284.7 22:31:29> [UPDATE_WORLD_STATES] |0#0#false#Defense systems activating in 271 seconds.###Time remaining until the GB-11010 \"Armageddon\"-class defense systems activate.###0#0#0", -- [45333]
-
-function mod:CHAT_MSG_MONSTER_YELL(msg)
-	if msg == L.Module1 or msg:find(L.Module1) then
-		local elapsed, total = timerArmageddonCD:GetTime()
-		local remaining = total - elapsed
+function mod:UPDATE_WORLD_STATES()
+	local text = select(4, GetWorldStateUIInfo(5))
+	local time = tonumber(string.match(text or "", "%d+"))
+	if time > worldTimer then
+		local newTime = time + (time/100) + 1 -- bliz timer litte slow. wtf? If this correction is not right, need to timer update every 30s or 1m.
+		berserkTimer:Cancel()
 		countdownArmageddon:Cancel()
-		if self:IsDifficulty("lfr25") then
-			timerArmageddonCD:Start(300+remaining)
-			countdownArmageddon:Start(300+remaining)
-		else
-			timerArmageddonCD:Start(270+remaining)
-			countdownArmageddon:Start(270+remaining)
-		end
+		berserkTimer:Start(newTime)
+		countdownArmageddon:Start(newTime)
 	end
-end--]]
+	worldTimer = time
+end
