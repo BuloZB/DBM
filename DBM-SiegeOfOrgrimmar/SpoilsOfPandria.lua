@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(870, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10617 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10625 $"):sub(12, -3))
 mod:SetCreatureID(73720, 71512)
 mod:SetZone()
 
@@ -21,7 +21,7 @@ mod:RegisterEventsInCombat(
 	"UPDATE_WORLD_STATES"
 )
 
-local warnSuperNova				= mod:NewCastAnnounce(146815, 4)--Heroic
+local warnSuperNova				= mod:NewCastAnnounce(146815, 4, nil, false, nil, nil, nil, nil, 2)--Heroic
 --Massive Crate of Goods
 ----Mogu
 local warnReturnToStone			= mod:NewSpellAnnounce(145489, 2)
@@ -49,7 +49,7 @@ local warnSparkofLife			= mod:NewSpellAnnounce(142694, 3, nil, false)
 local warnBreathofFire			= mod:NewSpellAnnounce(146222, 3)--Do not have timer for this yet, add not alive long enough.
 local warnGustingCraneKick		= mod:NewSpellAnnounce(146180, 3)
 
-local specWarnSuperNova			= mod:NewSpecialWarningSpell(146815, nil, nil, nil, 2)
+local specWarnSuperNova			= mod:NewSpecialWarningSpell(146815, false, nil, nil, 2, 2)
 --Massive Crate of Goods
 local specWarnSetToBlowYou		= mod:NewSpecialWarningYou(145987)
 local specWarnSetToBlow			= mod:NewSpecialWarningPreWarn(145996, nil, 4, nil, 3)
@@ -103,6 +103,7 @@ local countdownArmageddon		= mod:NewCountdown(270, 145864, nil, nil, nil, nil, t
 local berserkTimer				= mod:NewBerserkTimer(480)
 
 mod:AddRangeFrameOption(10, 145987)
+mod:AddInfoFrameOption("ej8350")--Eh, "overview" works.
 
 local select, tonumber, GetPlayerMapPosition, GetWorldStateUIInfo = select, tonumber, GetPlayerMapPosition, GetWorldStateUIInfo
 local point1 = {0.488816, 0.208129}
@@ -136,12 +137,18 @@ end
 
 function mod:OnCombatStart(delay)
 	worldTimer = 0
+	if self.Options.InfoFrame then--Will just call it "infoframe" that's good enough
+		 DBM.InfoFrame:Show(2, "enemypower", 2, ALTERNATE_POWER_INDEX)
+	end
 end
 
 function mod:OnCombatEnd()
 	self:UnregisterShortTermEvents()
 	if self.Options.RangeFrame then
 		DBM.RangeCheck:Hide()
+	end
+	if self.Options.InfoFrame then
+		DBM.InfoFrame:Hide()
 	end
 end
 
@@ -296,7 +303,7 @@ function mod:UPDATE_WORLD_STATES()
 	local text = select(4, GetWorldStateUIInfo(5))
 	local time = tonumber(string.match(text or "", "%d+"))
 	if time > worldTimer then
-		local newTime = time + (time/100) + 1 -- bliz timer litte slow. wtf? If this correction is not right, need to timer update every 30s or 1m.
+		local newTime = time - (time/100) - 1 -- bliz timer litte fast. wtf?
 		berserkTimer:Cancel()
 		countdownArmageddon:Cancel()
 		berserkTimer:Start(newTime)

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10602 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10618 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--I think garrosh will cap at 7 in most cases for minions on 25 man but show all 8 in case some real crap group has 8 shaman up? lol
@@ -234,7 +234,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		end
 	elseif args.spellId == 147209 then
 		warnMalice:CombinedShow(0.5, args.destName)
-		timerMalice:DelayedStart(0.5)
+		timerMaliceCD:DelayedStart(0.5)
 		if args:IsPlayer() then
 			specWarnMaliceYou:Show()
 			yellMalice:Yell()
