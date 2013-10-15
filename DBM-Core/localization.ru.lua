@@ -248,7 +248,7 @@ DBM_CORE_AUTO_TIMER_OPTIONS.achievement = "Отсчет времени для %s
 
 
 DBM_CORE_AUTO_ICONS_OPTION_TEXT			= "Устанавливать метки на цели заклинания $spell:%s"
-DBM_CORE_AUTO_ICONS_OPTION_TEXT2		= "Устанавливать метки на $spell:%s (рекомендуется включить только одному)"
+DBM_CORE_AUTO_ICONS_OPTION_TEXT2		= "Устанавливать метки на $spell:%s"
 DBM_CORE_AUTO_SOUND_OPTION_TEXT			= "Звуковой сигнал \"бегите\" для $spell:%s"
 DBM_CORE_AUTO_COUNTDOWN_OPTION_TEXT		= "Звуковой отсчет до восстановления $spell:%s"
 DBM_CORE_AUTO_COUNTDOWN_OPTION_TEXT2	= "Звуковой отсчет до спадения $spell:%s"
