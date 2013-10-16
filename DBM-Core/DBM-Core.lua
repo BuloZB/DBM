@@ -50,10 +50,10 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10633 $"):sub(12, -3)),
-	DisplayVersion = "5.4.3 alpha", -- the string that is shown as version
-	DisplayReleaseVersion = "5.4.2", -- Needed to work around bigwigs sending improper version information
-	ReleaseRevision = 10395 -- the revision of the latest stable version that is available
+	Revision = tonumber(("$Revision: 10642 $"):sub(12, -3)),
+	DisplayVersion = "5.4.4 alpha", -- the string that is shown as version
+	DisplayReleaseVersion = "5.4.3", -- Needed to work around bigwigs sending improper version information
+	ReleaseRevision = 10638 -- the revision of the latest stable version that is available
 }
 
 -- Legacy crap; that stupid "Version" field was never a good idea.
@@ -2340,6 +2340,15 @@ do
 			DBM:StartCombat(mod, delay + lag, "SYNC from - "..sender, true, startHp)
 		end
 	end
+	
+	syncHandlers["HF"] = function(sender, mod, modRevision)
+		mod = DBM:GetModByName(mod or "")
+		modRevision = tonumber(modRevision or 0) or 0
+		if mod and (mod.revision < modRevision) then
+			--TODO, maybe require at least 2 senders? this doesn't disable mod or make a popup though, just warn in chat that mod may have invalid timers/warnings do to a blizzard hotfix
+			DBM:AddMsg(DBM_CORE_UPDATEREMINDER_HOTFIX)
+		end
+	end
 
 	syncHandlers["IS"] = function(sender, guid, ver, optionName)
 		ver = tonumber(ver)
@@ -3329,6 +3338,9 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 			dummyMod.text:Cancel()
 			DBM.Bars:CancelBar(DBM_CORE_TIMER_PULL) 
 			TimerTracker_OnEvent(TimerTracker, "PLAYER_ENTERING_WORLD")
+		end
+		if mod.hotfixNoticeRev then
+			sendSync("HF", mod.id.."\t"..mod.hotfixNoticeRev)
 		end
 	end
 end
@@ -6708,6 +6720,10 @@ end
 
 function bossModPrototype:SetMinSyncRevision(revision)
 	self.minSyncRevision = revision
+end
+
+function bossModPrototype:SetHotfixNoticeRev(revision)
+	self.hotfixNoticeRev = revision
 end
 
 
