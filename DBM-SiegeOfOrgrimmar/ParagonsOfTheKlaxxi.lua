@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10672 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10685 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetZone()
 mod:SetUsedIcons(1)
@@ -145,12 +145,12 @@ local timerCalculated				= mod:NewBuffFadesTimer(6, 144095)
 local timerInsaneCalculationCD		= mod:NewCDTimer(25, 142416)--25 is minimum but variation is wild (25-50 second variation)
 --Ka'roz the Locust
 local timerFlashCD					= mod:NewCDTimer(62, 143709)
-local timerWhirling					= mod:NewBuffFadesTimer(5, 143701)
+local timerWhirling					= mod:NewBuffFadesTimer(5, 143701, nil, false, nil, nil, nil, nil, nil, 2)
 local timerHurlAmberCD				= mod:NewCDTimer(62, 143759)--TODO< verify cd on spell itself. in my logs he died after only casting it once every time.
 --Skeer the Bloodseeker
 local timerBloodlettingCD			= mod:NewCDTimer(35, 143280)--35-65 variable. most of the time it's around 42 range
 --Rik'kal the Dissector
-local timerMutate					= mod:NewBuffFadesTimer(20, 143337)
+local timerMutate					= mod:NewBuffFadesTimer(20, 143337, nil, false, nil, nil, nil, nil, nil, 2)
 local timerMutateCD					= mod:NewCDTimer(45, 143337)
 local timerInjectionCD				= mod:NewNextTimer(9.5, 143339, nil, mod:IsTank())
 --Hisek the Swarmkeeper
