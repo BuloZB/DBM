@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10685 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10689 $"):sub(12, -3)),
 	DisplayVersion = "5.4.5 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.4", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10680 -- the revision of the latest stable version that is available
@@ -111,7 +111,7 @@ DBM.DefaultOptions = {
 	BlockVersionUpdateNotice = false,
 	ShowSpecialWarnings = true,
 	ShowFlashFrame = true,
-	ShowAdvSWSounds = false,
+	ShowAdvSWSound = true,
 	AlwaysShowHealthFrame = false,
 	ShowBigBrotherOnCombatStart = false,
 	AutologBosses = false,
@@ -4949,6 +4949,16 @@ function bossModPrototype:IsTank()
 	or (class == "PALADIN" and (GetSpecialization() == 2))
 	or (class == "DRUID" and (GetSpecialization() == 3))
 	or (class == "MONK" and (GetSpecialization() == 1))
+end
+
+function bossModPrototype:IsSpellCaster(includePal)
+	return class == "MAGE"
+	or class == "WARLOCK"
+	or class == "PRIEST"
+	or (class == "MONK" and (GetSpecialization() == 2))
+    or (class == "SHAMAN" and (GetSpecialization() ~= 2))
+	or (class == "DRUID" and (GetSpecialization() == 1 or GetSpecialization() == 4))
+	or (class == "PALADIN" and (GetSpecialization() == 1 or (includePal or false)))
 end
 
 function bossModPrototype:IsTanking(unit, boss)
