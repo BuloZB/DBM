@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10688 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10692 $"):sub(12, -3))
 mod:SetCreatureID(71529)
 mod:SetZone()
 mod:SetUsedIcons(8)
@@ -30,15 +30,15 @@ local warnFixate					= mod:NewTargetAnnounce(143445, 4)
 local warnEnrage					= mod:NewTargetAnnounce(145974, 3, nil, mod:IsTank() or mod:CanRemoveEnrage())
 local warnKey						= mod:NewTargetAnnounce(146589, 2)
 --Infusion of Acid
-local warnAcidPustules				= mod:NewSpellAnnounce(143971, 2)
+local warnAcidPustules				= mod:NewSpellAnnounce(143971, 2, 143791)
 local warnAcidBreath				= mod:NewStackAnnounce(143780, 2, nil, mod:IsTank())
 local warnCorrosiveBlood			= mod:NewTargetAnnounce(143791, 2, nil, false)--Spammy, CD was reduced to 2 seconds
 --Infusion of Frost
-local warnFrostPustules				= mod:NewSpellAnnounce(143968, 3)
+local warnFrostPustules				= mod:NewSpellAnnounce(143968, 3, 143777)
 local warnFrostBreath				= mod:NewStackAnnounce(143773, 2, nil, mod:IsTank())
 local warnFrozenSolid				= mod:NewTargetAnnounce(143777, 4)--This only thing worth announcing. the stacks of Icy Blood cast SUPER often and not useful
 --Infusion of Fire
-local warnFirePustules				= mod:NewSpellAnnounce(143970, 2)
+local warnFirePustules				= mod:NewSpellAnnounce(143970, 2, 143783)
 local warnScorchingBreath			= mod:NewStackAnnounce(143767, 2, nil, mod:IsTank())
 local warnBurningBlood				= mod:NewTargetAnnounce(143783, 3, nil, false, nil, nil, nil, nil, 2)
 
@@ -52,6 +52,7 @@ local specWarnBloodFrenzy			= mod:NewSpecialWarningSpell(143440, nil, nil, nil, 
 local specWarnFixate				= mod:NewSpecialWarningRun(143445, nil, nil, nil, 3)
 local yellFixate					= mod:NewYell(143445)
 local specWarnEnrage				= mod:NewSpecialWarningTarget(145974, mod:IsTank() or mod:CanRemoveEnrage())
+local specWarnBloodFrenzyOver		= mod:NewSpecialWarningEnd(143440)
 --Infusion of Acid
 local specWarnAcidBreath			= mod:NewSpecialWarningStack(143780, mod:IsTank(), 2)
 local specWarnAcidBreathOther		= mod:NewSpecialWarningTarget(143780, mod:IsTank())
@@ -354,15 +355,18 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		warnAcidPustules:Show()
 		timerCorrosiveBloodCD:Start(6)
 		timerAcidBreathCD:Start()
+		specWarnBloodFrenzyOver:Show()
 	elseif spellId == 143968 then
 		timerBurningBloodCD:Cancel()
 		timerCorrosiveBloodCD:Cancel()
 		warnFrostPustules:Show()
 		timerFrostBreathCD:Start(6)
+		specWarnBloodFrenzyOver:Show()
 	elseif spellId == 143970 then
 		timerCorrosiveBloodCD:Cancel()
 		warnFirePustules:Show()
 		timerBurningBloodCD:Start(8)
 		timerScorchingBreathCD:Start()
+		specWarnBloodFrenzyOver:Show()
 	end
 end
