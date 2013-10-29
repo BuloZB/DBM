@@ -1,7 +1,7 @@
 package-as: DBM-Core
 externals:
-      DBM-Core/DBM-Core/Libs/LibChatAnims:
- 	     url: svn://svn.wowace.com/wow/libchatanims/mainline/trunk/LibChatAnims/
+    DBM-Core/Libs/LibChatAnims:
+        url: svn://svn.wowace.com/wow/libchatanims/mainline/trunk/LibChatAnims/
 move-folders:
     DBM-Core/DBM-DefaultSkin: DBM-DefaultSkin
     DBM-Core/DBM-HeartofFear: DBM-HeartofFear
