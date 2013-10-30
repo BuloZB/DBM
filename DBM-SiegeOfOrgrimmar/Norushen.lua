@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10685 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10694 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetZone()
 
@@ -77,8 +77,8 @@ local timerHurlCorruptionCD				= mod:NewNextTimer(20, 144649)
 local berserkTimer						= mod:NewBerserkTimer(418)
 
 local countdownLookWithin				= mod:NewCountdownFades(59, "ej8220")
-local countdownLingeringCorruption		= mod:NewCountdown(15.5, 144514, nil, nil, nil, nil, true)
-local countdownHurlCorruption			= mod:NewCountdown(20, 144649, nil, nil, nil, nil, true)
+local countdownLingeringCorruption		= mod:NewCountdown("Alt15.5", 144514)
+local countdownHurlCorruption			= mod:NewCountdown("Alt20", 144649)
 
 mod:AddInfoFrameOption("ej8252", false)--May still be buggy but it's needed for heroic.
 
