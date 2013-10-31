@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(865, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10694 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10698 $"):sub(12, -3))
 mod:SetCreatureID(71504)--71591 Automated Shredder
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--Not sure how many mines spawn on 25 man, even more of them on heroic 25, so maybe all 8 used?
@@ -82,8 +82,8 @@ local countdownAssemblyLine				= mod:NewCountdown(40, "ej8202", false)
 local countdownShredder					= mod:NewCountdown(60, "ej8199", mod:IsTank())
 local countdownElectroStatic			= mod:NewCountdown("Alt17", 143385, mod:IsTank())
 
-local soundMineFixate					= mod:NewSound("ej8212", nil, mod:IsMelee())--No strat involves ranged moving for these, they should die before reaching ranged. But melee must run out.
-local soundLaserFixate					= mod:NewSound(143828, nil, false)
+local soundMineFixate					= mod:NewSound("ej8212", mod:IsMelee())--No strat involves ranged moving for these, they should die before reaching ranged. But melee must run out.
+local soundLaserFixate					= mod:NewSound(143828, false)
 
 mod:AddInfoFrameOption("ej8202")
 mod:AddSetIconOption("SetIconOnMines", "ej8212", false, true)

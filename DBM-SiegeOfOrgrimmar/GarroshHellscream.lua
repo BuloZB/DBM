@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10694 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10700 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--I think garrosh will cap at 7 in most cases for minions on 25 man but show all 8 in case some real crap group has 8 shaman up? lol
@@ -69,6 +69,7 @@ local specWarnEmpDesecrate			= mod:NewSpecialWarningCount(144749, nil, nil, nil,
 --Starge Four: Heroic Hidden Phase
 local specWarnMaliceYou				= mod:NewSpecialWarningYou(147209)
 local yellMalice					= mod:NewYell(147209)
+local specWarnBombardment			= mod:NewSpecialWarningSpell(147120, nil, nil, nil, 2)
 
 --Stage 1: A Cry in the Darkness
 local timerDesecrateCD				= mod:NewCDCountTimer(35, 144748)
@@ -90,7 +91,7 @@ local timerMaliceCD					= mod:NewNextTimer(29.5, 147209)
 local timerBombardmentCD			= mod:NewNextTimer(55, 147120)
 local timerBombardment				= mod:NewBuffActiveTimer(13, 147120)
 
-local soundWhirlingCorrpution		= mod:NewSound("OptionVersion2", 144985, nil, false)--Depends on strat. common one on 25 man is to never run away from it
+local soundWhirlingCorrpution		= mod:NewSound("OptionVersion2", 144985, false)--Depends on strat. common one on 25 man is to never run away from it
 local countdownPowerIronStar		= mod:NewCountdown(15, 144616)
 local countdownWhirlingCorruption	= mod:NewCountdown(49.5, 144985)
 local countdownTouchOfYShaarj		= mod:NewCountdown("Alt45", 145071, false)--Off by default only because it's a cooldown and it does have a 45-48sec variation
@@ -165,8 +166,11 @@ function mod:SPELL_CAST_START(args)
 		soundWhirlingCorrpution:Play()
 	elseif args.spellId == 147120 then
 		warnBombardment:Show()
+		specWarnBombardment:Show()
 		timerBombardment:Start()
 		timerBombardmentCD:Start()
+	elseif args.spellId == 147011 then
+		warnManifestRage:Show()
 	end
 end
 
@@ -331,7 +335,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		countdownWhirlingCorruption:Cancel()
 		warnPhase4:Show()
 		timerMaliceCD:Start(30)
-		timerBombardmentCD:Start(69)
+		timerBombardmentCD:Start(70)
 	end
 end
 
@@ -350,7 +354,5 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg, _, _, _, target)
 		countdownPowerIronStar:Start()
 		warnFireUnstableIronStar:Schedule(15)
 		specWarnFireUnstableIronStar:Schedule(15)
-	elseif msg:find("spell:147011") then--may be need to change if we get combatlog.
-		warnManifestRage:Show()
 	end
 end

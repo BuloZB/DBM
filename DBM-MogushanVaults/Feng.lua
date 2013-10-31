@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(689, "DBM-MogushanVaults", nil, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9663 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10698 $"):sub(12, -3))
 mod:SetCreatureID(60009)--60781 Soul Fragment
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6)
@@ -101,7 +101,7 @@ local timerReversalLightningFists	= mod:NewBuffFadesTimer(20, 118302)
 local timerNullBarrier				= mod:NewBuffFadesTimer(6, 115817)
 local timerNullBarrierCD			= mod:NewCDTimer(55, 115817)
 
-local soundEpicenter				= mod:NewSound(116018, nil, false)
+local soundEpicenter				= mod:NewSound(116018, false)
 local soundWildSpark				= mod:NewSound(116784)
 
 mod:AddBoolOption("SetIconOnWS", true)
