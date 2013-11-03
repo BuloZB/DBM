@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10701 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10705 $"):sub(12, -3)),
 	DisplayVersion = "5.4.5 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.4", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10680 -- the revision of the latest stable version that is available
@@ -694,6 +694,10 @@ do
 			elseif event == "DAMAGE_SPLIT" then
 				args.spellId, args.spellName, args.spellSchool = select(1, ...)
 				args.amount, args.school, args.resisted, args.blocked, args.absorbed, args.critical, args.glancing, args.crushing = select(4, ...)
+			elseif DBM.Options.DebugMode and event == "ENCOUNTER_START" then--5.4.2 prep
+				print("DBM Debug: ENCOUNTER_START fired. args are "..select(1,...))
+			elseif DBM.Options.DebugMode and event == "ENCOUNTER_END" then--5.4.2 prep
+				print("DBM Debug: ENCOUNTER_END fired. args are "..select(1,...))
 			end
 			return handleEvent(nil, event, args)
 		end

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10658 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10705 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetZone()
 mod:SetUsedIcons(7)
@@ -148,10 +148,10 @@ function mod:OnCombatStart(delay)
 	timerGougeCD:Start(23-delay)
 	timerCalamityCD:Start(31-delay)
 	timerClashCD:Start(45-delay)
-	if self:IsDifficulty("lfr25") then--Might also be flex as well
-		berserkTimer:Start(900-delay)--15min confirmed
-	else
+	if self:IsDifficulty("heroic10", "heroic25") then
 		berserkTimer:Start(-delay)
+	else
+		berserkTimer:Start(900-delay)--15min confirmed in LFR, flex, normal
 	end
 	if self.Options.RangeFrame then
 		DBM.RangeCheck:Show(5)
