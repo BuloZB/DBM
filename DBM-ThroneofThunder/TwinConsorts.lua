@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(829, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10408 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10709 $"):sub(12, -3))
 mod:SetCreatureID(68905, 68904)--Lu'lin 68905, Suen 68904
 mod:SetZone()
 mod:SetBossHPInfoToHighest()
@@ -268,10 +268,13 @@ function mod:OnSync(msg)
 		)
 	elseif msg == "Phase3Yell" and not phase3Started then -- Split from phase3 sync to prevent who running older version not to show bad timers.
 		phase3Started = true
+		cosmicCount = 0
+		infernoCount = 0
 		warnDusk:Show()
 		timerIceCometCD:Start(17)--This seems to reset, despite what last CD was (this can be a bad thing if it was do any second)
 		timerTidalForceCD:Start(26)
 		if self:IsDifficulty("heroic10", "heroic25") then
+			timerNuclearInfernoCD:Cancel()
 			timerNuclearInfernoCD:Start(63, 1)
 		end
 		timerCosmicBarrageCD:Start(54, cosmicCount+1)--I want to analyze a few logs and readd this once I know for certain this IS the minimum time.
@@ -281,9 +284,12 @@ function mod:OnSync(msg)
 		if not phase3Started then
 			warnDusk:Show()
 			phase3Started = true
+			cosmicCount = 0
+			infernoCount = 0
 			timerIceCometCD:Start(11)--This seems to reset, despite what last CD was (this can be a bad thing if it was do any second)
 			timerTidalForceCD:Start(20)
 			if self:IsDifficulty("heroic10", "heroic25") then
+				timerNuclearInfernoCD:Cancel()
 				timerNuclearInfernoCD:Start(57, infernoCount+1)
 			end
 			timerCosmicBarrageCD:Start(48, cosmicCount+1)--I want to analyze a few logs and readd this once I know for certain this IS the minimum time.
