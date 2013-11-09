@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(865, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10701 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10710 $"):sub(12, -3))
 mod:SetCreatureID(71504)--71591 Automated Shredder
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--Not sure how many mines spawn on 25 man, even more of them on heroic 25, so maybe all 8 used?
@@ -213,7 +213,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		warnProtectiveFrenzy:Show(args.destName)
 		specWarnProtectiveFrenzy:Show(args.destName)
 		timerProtectiveFrenzy:Start()
-	elseif args.spellId == 143385 then
+	elseif args.spellId == 143385 and args:IsDestTypePlayer() then
 		local amount = args.amount or 1
 		warnElectroStaticCharge:Show(args.destName, amount)
 		timerElectroStaticCharge:Start(args.destName)
