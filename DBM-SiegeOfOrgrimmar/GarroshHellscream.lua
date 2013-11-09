@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10700 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10711 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--I think garrosh will cap at 7 in most cases for minions on 25 man but show all 8 in case some real crap group has 8 shaman up? lol
@@ -63,6 +63,7 @@ local specWarnWhirlingCorruption	= mod:NewSpecialWarningCount(144985)--Two optio
 local specWarnGrippingDespair		= mod:NewSpecialWarningStack(145183, mod:IsTank(), 3)--Unlike whirling and desecrate, doesn't need two options, distinction isn't important for tank swaps.
 local specWarnGrippingDespairOther	= mod:NewSpecialWarningTarget(145183, mod:IsTank())
 local specWarnTouchOfYShaarj		= mod:NewSpecialWarningSwitch("OptionVersion3", 145071, not mod:IsHealer())
+local specWarnTouchInterrupt		= mod:NewSpecialWarningInterrupt(145599, false)
 --Starge Three: MY WORLD
 local specWarnEmpWhirlingCorruption	= mod:NewSpecialWarningCount(145037)--Two options important, for distinction and setting custom sounds for empowered one vs non empowered one, don't merge
 local specWarnEmpDesecrate			= mod:NewSpecialWarningCount(144749, nil, nil, nil, 2)--^^
@@ -171,6 +172,9 @@ function mod:SPELL_CAST_START(args)
 		timerBombardmentCD:Start()
 	elseif args.spellId == 147011 then
 		warnManifestRage:Show()
+	elseif args.spellId == 145599 then
+		warnBombardment:Show()
+		specWarnTouchInterrupt:Show(args.sourceName)
 	end
 end
 
