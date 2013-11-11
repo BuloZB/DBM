@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10712 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10719 $"):sub(12, -3)),
 	DisplayVersion = "5.4.5 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.4", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10680 -- the revision of the latest stable version that is available
@@ -270,6 +270,7 @@ local IsInInstance = IsInInstance
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitExists = UnitExists
 local UnitIsDead = UnitIsDead
+local UnitIsFriend = UnitIsFriend
 local GetSpellInfo = GetSpellInfo
 local EJ_GetSectionInfo = EJ_GetSectionInfo
 local GetInstanceInfo = GetInstanceInfo
@@ -4561,7 +4562,6 @@ local bossTargetuIds = {
 	"target", "focus", "boss1", "boss2", "boss3", "boss4", "boss5"
 }
 
--- leave this function for older mods compatiblity.
 function bossModPrototype:GetBossTarget(cid)
 	cid = cid or self.creatureId
 	local name, uid, bossuid
