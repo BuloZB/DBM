@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10722 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10725 $"):sub(12, -3)),
 	DisplayVersion = "5.4.5 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.4", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10680 -- the revision of the latest stable version that is available
@@ -5227,7 +5227,6 @@ do
 
 	-- new constructor (auto-localized warnings and options, yay!)
 	local function newAnnounce(self, announceType, spellId, color, icon, optionDefault, optionName, castTime, preWarnTime, noSound, optionVersion)
-		local spellId, color, icon, optionDefault, optionName, castTime, preWarnTime, noSound, optionVersion = spellId, color, icon, optionDefault, optionName, castTime, preWarnTime, noSound, optionVersion
 		if not spellId then
 			error("newAnnounce: you must provide spellId", 2)
 			return
@@ -6278,7 +6277,6 @@ do
 	-- problem: heroic/normal achievements :[
 	-- local achievementTimers = {}
 	local function newTimer(self, timerType, timer, spellId, timerText, optionDefault, optionName, texture, r, g, b, countdownDefault, optionVersion)--countdownDefault should be a number, such as 5 or 10 hard coded in boss mod to say "audio countdown is on by default for this timer and default count start point is 5 or 10
-		local timer, spellId, timerText, optionDefault, optionName, texture, r, g, b, countdownDefault, optionVersion = timer, spellId, timerText, optionDefault, optionName, texture, r, g, b, countdownDefault, optionVersion
 		if type(timer) == "string" and timer:match("OptionVersion") then
 			local temp = optionVersion
 			optionVersion = string.sub(timer, 14)

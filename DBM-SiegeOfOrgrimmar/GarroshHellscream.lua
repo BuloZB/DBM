@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10712 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10723 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--I think garrosh will cap at 7 in most cases for minions on 25 man but show all 8 in case some real crap group has 8 shaman up? lol
@@ -157,9 +157,9 @@ function mod:SPELL_CAST_START(args)
 		else
 			warnEmpWhirlingCorruption:Show(whirlCount)
 			specWarnEmpWhirlingCorruption:Show(whirlCount)
-			if self.Options.SetIconOnMinions then
-				self:ScanForMobs(72272, 0, 8, nil, 0.2, 12, "SetIconOnMinions")--I think max adds is 7 on 25 man, TODO is confirm this and set max icon to 7 instead of nil/8. Long scan time because of slow spawn
-			end
+		end
+		if self.Options.SetIconOnMinions then--TODO, figure out why this only marks 1-2 mobs then stops.
+			self:ScanForMobs(72272, 0, 8, nil, 0.2, 12, "SetIconOnMinions")--I think max adds is 7 on 25 man, TODO is confirm this and set max icon to 7 instead of nil/8. Long scan time because of slow spawn
 		end
 		timerWhirlingCorruption:Start()
 		timerWhirlingCorruptionCD:Start(nil, whirlCount+1)
