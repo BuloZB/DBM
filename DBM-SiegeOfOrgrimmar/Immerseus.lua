@@ -1,8 +1,9 @@
 local mod	= DBM:NewMod(852, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10708 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10726 $"):sub(12, -3))
 mod:SetCreatureID(71543)
+mod:SetEncounterID(1602)
 mod:SetReCombatTime(45)--Lets just assume he has same bug as tsulong in advance and avoid problems
 mod:SetZone()
 

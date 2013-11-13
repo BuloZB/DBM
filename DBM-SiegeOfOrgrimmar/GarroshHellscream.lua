@@ -1,8 +1,9 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10723 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10726 $"):sub(12, -3))
 mod:SetCreatureID(71865)
+mod:SetEncounterID(1623)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--I think garrosh will cap at 7 in most cases for minions on 25 man but show all 8 in case some real crap group has 8 shaman up? lol
 
