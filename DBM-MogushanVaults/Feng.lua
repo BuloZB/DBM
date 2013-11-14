@@ -1,8 +1,9 @@
 local mod	= DBM:NewMod(689, "DBM-MogushanVaults", nil, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10698 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
 mod:SetCreatureID(60009)--60781 Soul Fragment
+mod:SetEncounterID(1390)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6)
 
