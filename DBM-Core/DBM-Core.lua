@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10728 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10729 $"):sub(12, -3)),
 	DisplayVersion = "5.4.5 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.4", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10680 -- the revision of the latest stable version that is available
@@ -3173,7 +3173,7 @@ function checkWipe(isIEEU, confirm)
 			wipe = 0
 		elseif savedDifficulty == "worldboss" and UnitIsDeadOrGhost("player") then -- On dead or ghost, unit combat status detection would be fail. If you ghost in instance, that means wipe. But in worldboss, ghost means not wipe. So do not wipe.
 			wipe = 0
-		elseif isIEEU then -- Combat started by IEEU and no boss exist and no EncounterProgress marked, that means wipe
+		elseif isIEEU and IsInRaid() then -- Combat started by IEEU and no boss exist and no EncounterProgress marked, that means wipe
 			wipe = 2
 			for i = 1, 5 do
 				if UnitExists("boss"..i) then
