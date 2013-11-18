@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(819, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10732 $"):sub(12, -3))
 mod:SetCreatureID(68476)
 mod:SetEncounterID(1575)
 mod:SetZone()
@@ -278,7 +278,7 @@ function mod:UNIT_DIED(args)
 end
 
 function mod:OnSync(msg, targetname)
-	if msg == "ChargeTo" and targetname then
+	if msg == "ChargeTo" and targetname and self:AntiSpam(5, 4) then
 		local target = DBM:GetUnitFullName(targetname)
 		if target then
 			warnCharge:Show(target)

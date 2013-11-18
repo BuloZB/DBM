@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(817, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10732 $"):sub(12, -3))
 mod:SetCreatureID(68078, 68079, 68080, 68081)--Ro'shak 68079, Quet'zal 68080, Dam'ren 68081, Iron Qon 68078
 mod:SetEncounterID(1559)
 mod:SetMainBossID(68078)
@@ -425,7 +425,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		specWarnFistSmash:Show()
 		timerFistSmash:Start()
 		if self:IsDifficulty("heroic10", "heroic25") then
-			timerFistSmashCD:Start(30, fistSmashCount+1) -- heroic cd longer.
+			timerFistSmashCD:Start(28, fistSmashCount+1) -- heroic cd longer.
 		else
 			timerFistSmashCD:Start(nil, fistSmashCount+1)
 		end
