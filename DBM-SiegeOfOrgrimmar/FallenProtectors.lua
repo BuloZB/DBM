@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10726 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10737 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetEncounterID(1598)
 mod:SetZone()
@@ -129,6 +129,7 @@ function mod:BrewTarget(targetname, uId)
 	end
 end
 
+--[[
 function mod:InfernoStrikeTarget(targetname, uId)
 	if not targetname then return end
 	warnInfernoStrike:Show(targetname)
@@ -139,7 +140,7 @@ function mod:InfernoStrikeTarget(targetname, uId)
 		specWarnInfernoStrike:Show()
 		yellInfernoStrike:Yell()
 	end
-end
+end--]]
 
 function mod:OnCombatStart(delay)
 	timerVengefulStrikesCD:Start(7-delay)
