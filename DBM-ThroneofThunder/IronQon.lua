@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(817, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10732 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10736 $"):sub(12, -3))
 mod:SetCreatureID(68078, 68079, 68080, 68081)--Ro'shak 68079, Quet'zal 68080, Dam'ren 68081, Iron Qon 68078
 mod:SetEncounterID(1559)
 mod:SetMainBossID(68078)
@@ -70,7 +70,7 @@ local timerFreezeCD						= mod:NewCDTimer(7, 135145, nil, false)
 local timerDeadZoneCD					= mod:NewCDTimer(15, 137229)
 local timerRisingAngerCD				= mod:NewNextTimer(15, 136323, nil, false)
 local timerFistSmash					= mod:NewBuffActiveTimer(8, 136146)
-local timerFistSmashCD					= mod:NewNextCountTimer(20, 136146)
+local timerFistSmashCD					= mod:NewCDCountTimer(20, 136146)
 local timerWhirlingWindsCD				= mod:NewCDTimer(30, 139167)--Heroic Phase 1
 local timerFrostSpikeCD					= mod:NewCDTimer(11, 139180)--Heroic Phase 2
 
