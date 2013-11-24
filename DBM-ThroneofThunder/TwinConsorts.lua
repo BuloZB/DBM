@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(829, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10732 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10741 $"):sub(12, -3))
 mod:SetCreatureID(68905, 68904)--Lu'lin 68905, Suen 68904
 mod:SetEncounterID(1560)
 mod:SetZone()
@@ -48,7 +48,8 @@ local warnTidalForce					= mod:NewCastAnnounce(137531, 3, 2)
 --Darkness
 local specWarnCosmicBarrage				= mod:NewSpecialWarningCount(136752, true, nil, nil, 2)--better as a cosmic barrage warning with cast bar being stars. Also good as count warning for cooldowns
 local specWarnTearsOfSun				= mod:NewSpecialWarningSpell(137404, nil, nil, nil, 2)
-local specWarnBeastOfNightmares			= mod:NewSpecialWarningSpell("OptionVersion2", 137375, mod:IsTank() or mod:IsHealer())
+local specWarnBeastOfNightmares			= mod:NewSpecialWarningTarget(137375, mod:IsTank() or mod:IsHealer())
+local specWarnCorruptedHealing			= mod:NewSpecialWarningStack(137360, mod:IsHealer())
 --Light
 local specWarnFanOfFlames				= mod:NewSpecialWarningStack(137408, mod:IsTank(), 2)
 local specWarnFanOfFlamesOther			= mod:NewSpecialWarningTarget(137408, mod:IsTank())
@@ -142,7 +143,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		end
 	elseif args.spellId == 137375 then
 		warnBeastOfNightmares:Show(args.destName)
-		specWarnBeastOfNightmares:Show()
+		specWarnBeastOfNightmares:Show(args.destName)
 		if timerDayCD:GetTime() < 135 then
 			timerBeastOfNightmaresCD:Start()
 		end
@@ -162,6 +163,8 @@ function mod:SPELL_AURA_APPLIED(args)
 		end
 	elseif args.spellId == 137417 and args:IsPlayer() and self:AntiSpam(3, 4) then
 		specWarnFlamesofPassionMove:Show()
+	elseif args.spellId == 137360 and args:IsPlayer() then
+		specWarnCorruptedHealing:Show(args.amount or 1)
 	end
 end
 mod.SPELL_AURA_APPLIED_DOSE = mod.SPELL_AURA_APPLIED
@@ -221,6 +224,7 @@ function mod:UNIT_DIED(args)
 		--timerFlamesOfPassionCD:Cancel()
 		timerBeastOfNightmaresCD:Start(64)
 		timerNuclearInfernoCD:Cancel()
+		timerDuskCD:Cancel()
 		warnNight:Show()
 		phase3Started = true
 	end

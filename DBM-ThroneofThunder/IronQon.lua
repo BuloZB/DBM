@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(817, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10736 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10740 $"):sub(12, -3))
 mod:SetCreatureID(68078, 68079, 68080, 68081)--Ro'shak 68079, Quet'zal 68080, Dam'ren 68081, Iron Qon 68078
 mod:SetEncounterID(1559)
 mod:SetMainBossID(68078)
@@ -360,6 +360,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 			timerUnleashedFlameCD:Cancel()
 			timerMoltenOverload:Cancel()
 			timerWhirlingWindsCD:Cancel()
+			timerImpaleCD:Cancel()
 			warnPhase2:Show()
 			self:Schedule(25, checkSpear)
 			if self:IsDifficulty("heroic10", "heroic25") then
@@ -380,6 +381,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 			warnWindStorm:Cancel()
 			specWarnWindStorm:Cancel()
 			timerFrostSpikeCD:Cancel()
+			timerImpaleCD:Cancel()
 			warnPhase3:Show()
 			self:Schedule(25, checkSpear)
 			timerDeadZoneCD:Start(8.5)
@@ -388,6 +390,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 			--confirmed, dam'ren's abilities do NOT reset in phase 4, cds from phase 3 carry over.
 			phase = 4
 			updateHealthFrame()
+			timerImpaleCD:Cancel()
 			warnPhase4:Show()
 			timerRisingAngerCD:Start(15)
 			timerFistSmashCD:Start(62, 1)
@@ -449,6 +452,7 @@ function mod:UNIT_DIED(args)
 			end
 			phase = 2
 			updateHealthFrame()
+			timerImpaleCD:Cancel()
 			timerLightningStormCD:Start(17)
 			self:Unschedule(checkSpear)
 			self:Schedule(25, checkSpear)
@@ -477,6 +481,7 @@ function mod:UNIT_DIED(args)
 		else
 			phase = 3
 			updateHealthFrame()
+			timerImpaleCD:Cancel()
 			warnPhase3:Show()
 			timerDeadZoneCD:Start(6)
 			self:Unschedule(checkSpear)
@@ -491,8 +496,9 @@ function mod:UNIT_DIED(args)
 		else
 			phase = 4
 			updateHealthFrame()
-			self:Unschedule(checkSpear)
+			timerImpaleCD:Cancel()
 			timerThrowSpearCD:Cancel()
+			self:Unschedule(checkSpear)
 			self:UnregisterShortTermEvents()
 			warnPhase4:Show()
 			timerRisingAngerCD:Start()
