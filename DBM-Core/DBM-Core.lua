@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10742 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10743 $"):sub(12, -3)),
 	DisplayVersion = "5.4.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10737 -- the revision of the latest stable version that is available
@@ -4439,7 +4439,7 @@ do
 			else--default name modify
 				t = string.split(",", t or name)
 			end
-			obj.localization.general.name = t
+			obj.localization.general.name = t or name
 			obj.modelId = select(4, EJ_GetCreatureInfo(1, tonumber(name)))
 		elseif name:match("z%d+") then
 			local t = GetRealZoneText(string.sub(name, 2))
@@ -4449,7 +4449,7 @@ do
 			else--default name modify
 				t = string.split(",", t or name)
 			end
-			obj.localization.general.name = t
+			obj.localization.general.name = t or name
 		elseif name:match("d%d+") then
 			local t = GetDungeonInfo(string.sub(name, 2))
 			if type(nameModifier) == "number" then--do nothing
@@ -4458,7 +4458,9 @@ do
 			else--default name modify
 				t = string.split(",", t or name)
 			end
-			obj.localization.general.name = t
+			obj.localization.general.name = t or name
+		else
+			obj.localization.general.name = name
 		end
 		tinsert(self.Mods, obj)
 		modsById[name] = obj
