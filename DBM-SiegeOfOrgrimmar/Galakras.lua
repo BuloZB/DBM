@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10752 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10753 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetEncounterID(1622)
 mod:SetReCombatTime(180, 15)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
@@ -69,7 +69,7 @@ local specWarnFlamesofGalakrondStack= mod:NewSpecialWarningStack("OptionVersion4
 local specWarnFlamesofGalakrondOther= mod:NewSpecialWarningTarget(147029, mod:IsTank())
 
 --Stage 2: Bring Her Down!
-local timerCombatStarts				= mod:NewCombatTimer(14.5)
+local timerCombatStarts				= mod:NewCombatTimer(35.5)
 local timerAddsCD					= mod:NewNextTimer(55, "ej8553", nil, nil, nil, 2457)
 local timerTowerCD					= mod:NewNextTimer(99, 81232, nil, nil, nil, 88852)
 local timerTowerGruntCD				= mod:NewTimer(60, "timerTowerGruntCD", 89253)
@@ -231,6 +231,8 @@ TODO, see if one of these earlier says are a pull say (not sure if they are part
 function mod:CHAT_MSG_MONSTER_SAY(msg)
 	if msg == L.wasteOfTime then
 		self:SendSync("prepull")
+	elseif msg == L.wasteOfTime2 then
+		self:SendSync("prepull2")
 	end
 end
 
@@ -283,7 +285,9 @@ function mod:OnSync(msg)
 		if self.Options.SetIconOnAdds then
 			self:ScanForMobs(72958, 0, 8, 2, 0.2, 8)
 		end
-	elseif msg == "prepull" then
+	elseif msg == "prepull" then--Alliance
 		timerCombatStarts:Start()
+	elseif msg == "prepull2" then--Horde
+		timerCombatStarts:Start(31.5)
 	end
 end
