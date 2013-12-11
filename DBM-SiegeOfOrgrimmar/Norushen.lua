@@ -1,12 +1,13 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10756 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10762 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
+mod:SetMinSyncRevision(10761)
 mod:SetZone()
 
-mod:RegisterCombat("ES")
+mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
 	"SPELL_CAST_START",
@@ -106,8 +107,8 @@ function mod:OnCombatStart(delay)
 	playerInside = false
 	previousPower = nil
 	timerBlindHatredCD:Start(25-delay)
-	if self:IsDifficulty("lfr25") then--Might also be flex as well
-		berserkTimer:Start(600-delay)--No log to confirm 8 min, only one report, so changing back to 10 min for now.
+	if self:IsDifficulty("lfr25") then
+		berserkTimer:Start(600-delay)
 	else
 		berserkTimer:Start(-delay)
 	end

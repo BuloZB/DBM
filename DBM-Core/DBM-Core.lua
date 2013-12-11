@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10756 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10762 $"):sub(12, -3)),
 	DisplayVersion = "5.4.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10737 -- the revision of the latest stable version that is available
@@ -240,6 +240,7 @@ local currentSizes = nil
 local bossHealth = {}
 local savedDifficulty
 local difficultyText
+local wowBuild = tonumber((select(2, GetBuildInfo())))
 
 local enableIcons = true -- set to false when a raid leader or a promoted player has a newer version of DBM
 local guiRequested = false
@@ -3072,7 +3073,7 @@ do
 	function DBM:INSTANCE_ENCOUNTER_ENGAGE_UNIT()
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
-				if v.type == "combat" and isBossEngaged(v.multiMobPullDetection or v.mob) then
+				if (v.type == "combat" or (v.type == "ES" and wowBuild < 17658)) and isBossEngaged(v.multiMobPullDetection or v.mob) then
 					self:StartCombat(v.mod, 0, "IEEU")
 				end
 			end
@@ -3085,6 +3086,7 @@ do
 		end
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
+				if not v.type == "ES" then break end
 				if v.multiEncounterPullDetection then
 					for _, encounter in ipairs(v.multiEncounterPullDetection) do
 						if encounterID == encounter then
@@ -3107,8 +3109,8 @@ do
 		for i = #inCombat, 1, -1 do
 			local v = inCombat[i]
 			if not v.combatInfo then return end
-			if encounterID == v.encounter then
-				local wipe = nil
+			if encounterID == v.combatInfo.encounter then
+				local wipe = false
 				if success == 0 then wipe = true end
 				self:EndCombat(v, wipe)
 				return
@@ -3290,7 +3292,9 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 		mod.blockSyncs = nil
 		mod.combatInfo.pull = GetTime() - (delay or 0)
 		combatStartedByIEEU = (event or "") == "IEEU"
-		if not mod.combatInfo.type == "ES" then
+		if mod.combatInfo.type == "ES" and wowBuild >= 17658 then
+			--Do nothing
+		else
 			self:Schedule(mod.minCombatTime or 3, checkWipe, combatStartedByIEEU)
 		end
 		if (DBM.Options.AlwaysShowHealthFrame or mod.Options.HealthFrame) and not mod.inScenario then
@@ -3867,7 +3871,9 @@ do
 					end
 				end
 			end
-			if not mod.combatInfo.type == "ES" then
+			if mod.combatInfo.type == "ES" and wowBuild >= 17658 then
+				--Do nothing
+			else
 				if mod.minCombatTime then
 					self:Schedule(mmax((mod.minCombatTime - time - lag), 3), checkWipe, isIEEU == "true")
 				else
