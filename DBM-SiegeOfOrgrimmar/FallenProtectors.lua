@@ -1,13 +1,13 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10737 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10756 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetEncounterID(1598)
 mod:SetZone()
 mod:SetUsedIcons(7)
 
-mod:RegisterCombat("combat")
+mod:RegisterCombat("ES")
 
 mod:RegisterEventsInCombat(
 	"SPELL_CAST_START",

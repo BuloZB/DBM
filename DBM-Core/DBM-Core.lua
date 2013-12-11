@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10754 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10756 $"):sub(12, -3)),
 	DisplayVersion = "5.4.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10737 -- the revision of the latest stable version that is available
@@ -121,6 +121,7 @@ DBM.DefaultOptions = {
 	LFDEnhance = true,
 	SetPlayerRole = true,
 	HideWatchFrame = false,
+	HideTooltips = false,
 	EnableModels = true,
 	RangeFrameFrames = "radar",
 	RangeFrameUpdates = "Average",
@@ -3080,7 +3081,7 @@ do
 	
 	function DBM:ENCOUNTER_START(encounterID, name, difficulty, size)
 		if DBM.Options.DebugMode then
-			print("ENCOUNTER_START EVENT Fired", encounterID, name, difficulty, size)
+			print("ENCOUNTER_START event fired:", encounterID, name, difficulty, size)
 		end
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
@@ -3101,7 +3102,7 @@ do
 	
 	function DBM:ENCOUNTER_END(encounterID, name, difficulty, size, success)
 		if DBM.Options.DebugMode then
-			print("ENCOUNTER_END EVENT Fired", encounterID, name, difficulty, size, success)
+			print("ENCOUNTER_END event fired:", encounterID, name, difficulty, size, success)
 		end
 		for i = #inCombat, 1, -1 do
 			local v = inCombat[i]
@@ -3289,7 +3290,9 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 		mod.blockSyncs = nil
 		mod.combatInfo.pull = GetTime() - (delay or 0)
 		combatStartedByIEEU = (event or "") == "IEEU"
-		self:Schedule(mod.minCombatTime or 3, checkWipe, combatStartedByIEEU)
+		if not mod.combatInfo.type == "ES" then
+			self:Schedule(mod.minCombatTime or 3, checkWipe, combatStartedByIEEU)
+		end
 		if (DBM.Options.AlwaysShowHealthFrame or mod.Options.HealthFrame) and not mod.inScenario then
 			DBM.BossHealth:Show(mod.localization.general.name)
 			if mod.bossHealthInfo then
@@ -3369,6 +3372,10 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 		if DBM.Options.HideWatchFrame and WatchFrame:IsVisible() and not (mod.type == "SCENARIO") then
 			WatchFrame:Hide()
 			watchFrameRestore = true
+		end
+		if DBM.Options.HideTooltips then
+			--Better or cleaner way?
+			GameTooltip.Temphide = function() GameTooltip:Hide() end; GameTooltip:SetScript("OnShow", GameTooltip.Temphide)
 		end
 		if DBM.Options.ShowEngageMessage then
 			if mod.ignoreBestkill and mod:IsDifficulty("worldboss") then--Should only be true on in progress field bosses, not in progress raid bosses we did timer recovery on.
@@ -3686,6 +3693,10 @@ function DBM:EndCombat(mod, wipe)
 			WatchFrame:Show()
 			watchFrameRestore = false
 		end
+		if DBM.Options.HideTooltips then
+			--Better or cleaner way?
+			GameTooltip:SetScript("OnShow", GameTooltip.Show)
+		end
 		savedDifficulty = nil
 		difficultyText = nil
 	end
@@ -3856,10 +3867,12 @@ do
 					end
 				end
 			end
-			if mod.minCombatTime then
-				self:Schedule(mmax((mod.minCombatTime - time - lag), 3), checkWipe, isIEEU == "true")
-			else
-				self:Schedule(3, checkWipe, isIEEU == "true")
+			if not mod.combatInfo.type == "ES" then
+				if mod.minCombatTime then
+					self:Schedule(mmax((mod.minCombatTime - time - lag), 3), checkWipe, isIEEU == "true")
+				else
+					self:Schedule(3, checkWipe, isIEEU == "true")
+				end
 			end
 			if (DBM.Options.AlwaysShowHealthFrame or mod.Options.HealthFrame) and not mod.inSecnario then
 				DBM.BossHealth:Show(mod.localization.general.name)

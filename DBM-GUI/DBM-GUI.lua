@@ -44,7 +44,7 @@
 
 
 
-local revision =("$Revision: 10687 $"):sub(12, -3)
+local revision =("$Revision: 10755 $"):sub(12, -3)
 local FrameTitle = "DBM_GUI_Option_"	-- all GUI frames get automatically a name FrameTitle..ID
 
 local PanelPrototype = {}
@@ -2366,9 +2366,10 @@ local function CreateOptionsMenu()
 	
 	do
 		local hideBlizzPanel = DBM_GUI_Frame:CreateNewPanel(L.Panel_HideBlizzard, "option")
-		local hideBlizzArea = hideBlizzPanel:CreateArea(L.Area_HideBlizzard, nil, 140, true)
+		local hideBlizzArea = hideBlizzPanel:CreateArea(L.Area_HideBlizzard, nil, 160, true)
 		hideBlizzArea:CreateCheckButton(L.HideBossEmoteFrame, true, nil, "HideBossEmoteFrame")
 		hideBlizzArea:CreateCheckButton(L.HideWatchFrame, true, nil, "HideWatchFrame")
+		hideBlizzArea:CreateCheckButton(L.HideTooltips, true, nil, "HideTooltips")
 		local filterYell	= hideBlizzArea:CreateCheckButton(L.SpamBlockSayYell, true, nil, "FilterSayAndYell")
 		
 		local movieOptions = {

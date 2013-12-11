@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10753 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10756 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetEncounterID(1622)
 mod:SetReCombatTime(180, 15)--fix combat re-starts after killed. Same issue as tsulong. Fires TONS of IEEU for like 1-2 minutes after fight ends.
@@ -9,10 +9,9 @@ mod:SetMainBossID(72249)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 2)
 
-mod:RegisterCombat("combat")
+mod:RegisterCombat("ES")
 
 mod:RegisterEvents(
-	"CHAT_MSG_MONSTER_YELL",
 	"CHAT_MSG_MONSTER_SAY"
 )
 
@@ -239,8 +238,6 @@ end
 function mod:CHAT_MSG_MONSTER_YELL(msg)
 	if msg == L.newForces1 or msg == L.newForces1H or msg == L.newForces2 or msg == L.newForces3 or msg == L.newForces4 then
 		self:SendSync("Adds")
-	elseif msg == L.Pull and not self:IsInCombat() then
-		DBM:StartCombat(self, 0)
 	end
 end
 

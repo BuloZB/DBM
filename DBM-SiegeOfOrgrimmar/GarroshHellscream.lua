@@ -1,13 +1,13 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10742 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10756 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetEncounterID(1623)
 mod:SetZone()
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
 
-mod:RegisterCombat("combat")
+mod:RegisterCombat("ES")
 
 mod:RegisterEventsInCombat(
 	"SPELL_CAST_START",
@@ -356,9 +356,16 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg, _, _, _, target)
 		else
 			timerSiegeEngineerCD:Start()
 		end
-		timerPowerIronStar:Start()
-		countdownPowerIronStar:Start()
-		warnFireUnstableIronStar:Schedule(15)
-		specWarnFireUnstableIronStar:Schedule(15)
+		if self:IsDifficulty("heroic10", "heroic25") then
+			timerPowerIronStar:Start(10)
+			countdownPowerIronStar:Start(10)
+			warnFireUnstableIronStar:Schedule(10)
+			specWarnFireUnstableIronStar:Schedule(10)
+		else
+			timerPowerIronStar:Start()
+			countdownPowerIronStar:Start()
+			warnFireUnstableIronStar:Schedule(15)
+			specWarnFireUnstableIronStar:Schedule(15)
+        end
 	end
 end
