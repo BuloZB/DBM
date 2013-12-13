@@ -1,10 +1,12 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10762 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10785 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
-mod:SetMinSyncRevision(10761)
+mod:DisableESCombatDectection()
+mod:SetMinSyncRevision(10768)
+mod:SetHotfixNoticeRev(10768)
 mod:SetZone()
 mod:SetUsedIcons(3, 1)
 mod:SetBossHPInfoToHighest()
@@ -101,7 +103,7 @@ local specWarnMesmerizeOther		= mod:NewSpecialWarningTarget(142671, false)--Pers
 local yellMesmerize					= mod:NewYell(142671, nil, false)
 local specWarnKunchongs				= mod:NewSpecialWarningSwitch("ej8043", mod:IsDps())
 --Korven the Prime
-local specWarnShieldBash			= mod:NewSpecialWarningSpell(143974)
+local specWarnShieldBash			= mod:NewSpecialWarningSpell("OptionVersion2", 143974, mod:IsTank())
 local specWarnShieldBashOther		= mod:NewSpecialWarningTarget(143974, mod:IsTank() or mod:IsHealer())
 local specWarnEncaseInAmber			= mod:NewSpecialWarningTarget(142564, mod:IsDps())--Better than switch because on heroic, you don't actually switch to amber, you switch to a NON amber target. Plus switch gives no targetname
 --Iyyokuk the Lucid

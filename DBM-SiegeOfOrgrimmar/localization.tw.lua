@@ -20,10 +20,6 @@ L= DBM:GetModLocalization(849)
 ---------------------------
 L= DBM:GetModLocalization(866)
 
-L:SetMiscLocalization({
-	wasteOfTime	= "很好，我會創造一個力場隔離你們的腐化。"
-})
-
 ------------------
 -- Sha of Pride --
 ------------------
@@ -54,13 +50,15 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	Pull		= "龍喉氏族，奪回碼頭，把他們推進海裡!以地獄吼及正統部落之名!",
-	newForces1	= "他們來了!",
-	newForces1H	= "趕快把她弄下來，讓我用手掐死她。",
-	newForces2	= "龍喉氏族，前進!",
-	newForces3	= "為了地獄吼!",
-	newForces4	= "下一隊，前進!",
-	tower		= "的門已經遭到破壞!"
+	wasteOfTime		= "做得好!登陸小隊，集合!步兵打前鋒!",
+	wasteOfTime2	= "很好，第一梯隊已經登陸。",
+	Pull			= "龍喉氏族，奪回碼頭，把他們推進海裡!以地獄吼及正統部落之名!",
+	newForces1		= "他們來了!",
+	newForces1H		= "趕快把她弄下來，讓我用手掐死她。",
+	newForces2		= "龍喉氏族，前進!",
+	newForces3		= "為了地獄吼!",
+	newForces4		= "下一隊，前進!",
+	tower			= "的門已經遭到破壞!"
 })
 
 --------------------

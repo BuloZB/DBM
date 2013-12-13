@@ -1,10 +1,12 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10762 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10768 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
-mod:SetMinSyncRevision(10761)
+mod:DisableESCombatDectection()
+mod:SetMinSyncRevision(10768)
+mod:SetHotfixNoticeRev(10768)
 mod:SetZone()
 
 mod:RegisterCombat("combat")
@@ -20,7 +22,7 @@ mod:RegisterEventsInCombat(
 )
 
 mod:RegisterEvents(
-	"CHAT_MSG_MONSTER_YELL"
+	"ENCOUNTER_START"
 )
 
 local boss = EJ_GetSectionInfo(8216)
@@ -219,8 +221,8 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 	end
 end
 
-function mod:CHAT_MSG_MONSTER_YELL(msg)
-	if msg == L.wasteOfTime then
+function mod:ENCOUNTER_START(id)
+	if id == 1624 then
 		self:SendSync("prepull")
 	end
 end
