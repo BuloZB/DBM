@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10765 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10789 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetEncounterID(1623)
 mod:SetZone()
@@ -54,7 +54,7 @@ local yellDesecrate					= mod:NewYell(144748)
 local specWarnHellscreamsWarsong	= mod:NewSpecialWarningSpell(144821, mod:IsTank() or mod:IsHealer())
 local specWarnFireUnstableIronStar	= mod:NewSpecialWarningSpell(147047, nil, nil, nil, 3)
 local specWarnFarseerWolfRider		= mod:NewSpecialWarningSwitch("ej8294", not mod:IsHealer())
-local specWarnSiegeEngineer			= mod:NewSpecialWarningSwitch("ej8298", false)--Only 1 person on 10 man and 2 on 25 needed, so should be off for most of raid
+local specWarnSiegeEngineer			= mod:NewSpecialWarningPreWarn("ej8298", false, 4)
 local specWarnChainHeal				= mod:NewSpecialWarningInterrupt(144583)
 local specWarnChainLightning		= mod:NewSpecialWarningInterrupt(144584, false)
 --Intermission: Realm of Y'Shaarj
@@ -78,7 +78,7 @@ local timerDesecrateCD				= mod:NewCDCountTimer(35, 144748)
 local timerHellscreamsWarsongCD		= mod:NewNextTimer(42.2, 144821, nil, mod:IsTank() or mod:IsHealer())
 local timerFarseerWolfRiderCD		= mod:NewNextTimer(50, "ej8294", nil, nil, nil, 144585)--EJ says they come faster as phase progresses but all i saw was 3 spawn on any given pull and it was 30 50 50
 local timerSiegeEngineerCD			= mod:NewNextTimer(40, "ej8298", nil, nil, nil, 144616)
-local timerPowerIronStar			= mod:NewCastTimer(15, 144616)
+local timerPowerIronStar			= mod:NewCastTimer(16.5, 144616)
 --Intermission: Realm of Y'Shaarj
 local timerEnterRealm				= mod:NewNextTimer(145.5, 144866, nil, nil, nil, 144945)
 local timerYShaarjsProtection		= mod:NewBuffActiveTimer(61, "ej8305", nil, nil, nil, 144945)--May be too long, but intermission makes more sense than protection buff which actually fades before intermission ends if you do it right.
@@ -94,7 +94,7 @@ local timerBombardmentCD			= mod:NewNextTimer(55, 147120)
 local timerBombardment				= mod:NewBuffActiveTimer(13, 147120)
 
 local soundWhirlingCorrpution		= mod:NewSound("OptionVersion2", 144985, false)--Depends on strat. common one on 25 man is to never run away from it
-local countdownPowerIronStar		= mod:NewCountdown(15, 144616)
+local countdownPowerIronStar		= mod:NewCountdown(16.5, 144616)
 local countdownWhirlingCorruption	= mod:NewCountdown(49.5, 144985)
 local countdownTouchOfYShaarj		= mod:NewCountdown("Alt45", 145071, false)--Off by default only because it's a cooldown and it does have a 45-48sec variation
 
@@ -129,6 +129,7 @@ function mod:OnCombatStart(delay)
 	mindControlCount = 0
 	shamanAlive = 0
 	timerDesecrateCD:Start(10.5-delay, 1)
+	specWarnSiegeEngineer:Schedule(16-delay)
 	timerSiegeEngineerCD:Start(20-delay)
 	timerHellscreamsWarsongCD:Start(22-delay)
 	timerFarseerWolfRiderCD:Start(30-delay)
@@ -289,6 +290,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		timerFarseerWolfRiderCD:Cancel()
 		timerDesecrateCD:Cancel()
 		timerHellscreamsWarsongCD:Cancel()
+		specWarnSiegeEngineer:Cancel()
 		timerEnterRealm:Start(25)
 	elseif spellId == 144866 then--Enter Realm of Y'Shaarj
 		timerPowerIronStar:Cancel()
@@ -349,7 +351,8 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg, _, _, _, target)
 	if msg:find("spell:144616") then
 		engineerDied = 0
 		warnSiegeEngineer:Show()
-		specWarnSiegeEngineer:Show()
+		specWarnSiegeEngineer:Cancel()
+		specWarnSiegeEngineer:Schedule(41)
 		if not firstIronStar then
 			firstIronStar = true
 			timerSiegeEngineerCD:Start(45)
@@ -357,15 +360,15 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg, _, _, _, target)
 			timerSiegeEngineerCD:Start()
 		end
 		if self:IsDifficulty("heroic10", "heroic25") then
-			timerPowerIronStar:Start(10)
-			countdownPowerIronStar:Start(10)
-			warnFireUnstableIronStar:Schedule(10)
-			specWarnFireUnstableIronStar:Schedule(10)
+			timerPowerIronStar:Start(11.5)
+			countdownPowerIronStar:Start(11.5)
+			warnFireUnstableIronStar:Schedule(11.5)
+			specWarnFireUnstableIronStar:Schedule(11.5)
 		else
 			timerPowerIronStar:Start()
 			countdownPowerIronStar:Start()
-			warnFireUnstableIronStar:Schedule(15)
-			specWarnFireUnstableIronStar:Schedule(15)
+			warnFireUnstableIronStar:Schedule(16.5)
+			specWarnFireUnstableIronStar:Schedule(16.5	)
         end
 	end
 end
