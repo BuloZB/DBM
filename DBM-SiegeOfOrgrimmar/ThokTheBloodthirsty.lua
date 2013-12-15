@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(851, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10765 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10797 $"):sub(12, -3))
 mod:SetCreatureID(71529)
 mod:SetEncounterID(1599)
 mod:SetZone()
@@ -65,7 +65,6 @@ local specWarnFrozenSolid			= mod:NewSpecialWarningTarget(143777, mod:IsDps())
 --Infusion of Fire
 local specWarnScorchingBreath		= mod:NewSpecialWarningStack(143767, mod:IsTank(), 3)
 local specWarnScorchingBreathOther	= mod:NewSpecialWarningTarget(143767, mod:IsTank())
-local specWarnBurningBlood			= mod:NewSpecialWarningYou(143783)
 local specWarnBurningBloodMove		= mod:NewSpecialWarningMove(143784)
 local yellBurningBlood				= mod:NewYell(143783, nil, false)
 
@@ -317,7 +316,6 @@ function mod:SPELL_DAMAGE(_, _, _, _, destGUID, destName, _, _, spellId)
 		self:Unschedule(clearBloodTargets)
 		self:Schedule(3, clearBloodTargets)
 		if destGUID == UnitGUID("player") then
-			specWarnBurningBlood:Show()
 			yellBurningBlood:Yell()
 		end
 	end
