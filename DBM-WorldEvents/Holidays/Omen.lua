@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("Omen", "DBM-WorldEvents", 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9843 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10805 $"):sub(12, -3))
 mod:SetCreatureID(15467)
 mod:SetModelID(15879)
 mod:SetReCombatTime(10)
@@ -38,7 +38,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 	end
 end
 
-function mod:SPELL_PERIODIC_DAMAGE(sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId)
+function mod:SPELL_PERIODIC_DAMAGE(_, _, _, _, destGUID, _, _, _, spellId)
 	if spellId == 26540 and destGUID == UnitGUID("player") and self:AntiSpam(3) then
 		specWarnStarfall:Show()
 	end
