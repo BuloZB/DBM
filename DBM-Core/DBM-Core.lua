@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10808 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10809 $"):sub(12, -3)),
 	DisplayVersion = "5.4.6 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.5", -- Needed to work around bigwigs sending improper version information
 	ReleaseRevision = 10737 -- the revision of the latest stable version that is available
@@ -6754,14 +6754,14 @@ function bossModPrototype:SetEncounterID(...)
 	end
 end
 
-function bossModPrototype:DisableESCombatDectection()
+function bossModPrototype:DisableESCombatDetection()
 	self.noESDetection = true
 	if self.combatInfo then
 		self.combatInfo.noESDetection = true
 	end
 end
 
-function bossModPrototype:DisableEEKillDectection()
+function bossModPrototype:DisableEEKillDetection()
 	self.noEEDetection = true
 	if self.combatInfo then
 		self.combatInfo.noEEDetection = true
