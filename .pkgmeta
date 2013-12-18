@@ -4,6 +4,7 @@ externals:
         url: svn://svn.wowace.com/wow/libchatanims/mainline/trunk/LibChatAnims/
 move-folders:
     DBM-Core/DBM-DefaultSkin: DBM-DefaultSkin
+    DBM-Core/DBM-DMF: DBM-DMF
     DBM-Core/DBM-HeartofFear: DBM-HeartofFear
     DBM-Core/DBM-MogushanVaults: DBM-MogushanVaults
     DBM-Core/DBM-Pandaria: DBM-Pandaria
