@@ -51,7 +51,7 @@ L:SetOptionLocalization({
 
 L:SetMiscLocalization({
 	wasteOfTime		= "Well done! Landing parties, form up! Footmen to the front!",--Alliance Version
-	wasteOfTime2	= "Well done. The first brigade has made landfall.",--Horde Version
+	wasteOfTime2	= "Отлично, первый отряд высадился.",--Horde Version
 	Pull			= "Воины Драконьей Пасти! Отбейте пристань и сбросьте врага в море! Во имя Истинной Орды!",
 	newForces1		= "Вот и они!",--Jaina's line, horde may not be same
 	newForces1H		= "Сбейте ее скорее, не терпится взять ее за глотку.",--Sylva's line, horde
@@ -164,7 +164,7 @@ L:SetMiscLocalization({
 	KorvenFlavor		= "Конец древней империи",--http://ptr.wowhead.com/quest=31232
 	KorvenFlavor2		= "Забери свои гуртанские таблички и подавись ими",--http://ptr.wowhead.com/quest=31232
 	IyyokukFlavor		= "Видишь возможности. Используй их!",--Does not have quests, http://ptr.wowhead.com/npc=65305
-	KarozFlavor			= "Ты больше не будешь прыгать!",---Does not have questst, http://ptr.wowhead.com/npc=65303
+	KarozFlavor			= "Ты больше не будешь прыгать!",---Does not have quests, http://ptr.wowhead.com/npc=65303
 	SkeerFlavor			= "Кровавое удовольствие!",--http://ptr.wowhead.com/quest=31178
 	RikkalFlavor		= "Запрос образцов выполнен"--http://ptr.wowhead.com/quest=31508
 })
@@ -173,6 +173,10 @@ L:SetMiscLocalization({
 -- Garrosh Hellscream --
 ------------------------
 L= DBM:GetModLocalization(869)
+
+L:SetOptionLocalization({
+	RangeFrame	= "Показывать динамическое окно проверки дистанции (8)<br/>(Это умное окно проверки дистанции, которое появляется когда вы достигаете порога $spell:147126)"
+})
 
 -------------
 --  Trash  --
