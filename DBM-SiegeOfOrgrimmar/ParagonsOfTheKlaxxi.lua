@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10809 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10819 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -84,12 +84,12 @@ local specWarnCausticBlood			= mod:NewSpecialWarningSpell(142315, mod:IsTank())
 local specWarnToxicBlue				= mod:NewSpecialWarningYou(142532)
 local specWarnToxicRed				= mod:NewSpecialWarningYou(142533)
 local specWarnToxicYellow			= mod:NewSpecialWarningYou(142534)
-local specWarnCatalystBlue			= mod:NewSpecialWarningYou(142725, nil, nil, nil, 3)
-local specWarnCatalystRed			= mod:NewSpecialWarningYou(142726, nil, nil, nil, 3)
-local specWarnCatalystYellow		= mod:NewSpecialWarningYou(142727, nil, nil, nil, 3)
-local specWarnCatalystOrange		= mod:NewSpecialWarningYou(142728, nil, nil, nil, 3)--Heroic
-local specWarnCatalystPurple		= mod:NewSpecialWarningYou(142729, nil, nil, nil, 3)--Heroic
-local specWarnCatalystGreen			= mod:NewSpecialWarningYou(142730, nil, nil, nil, 3)--Heroic
+local specWarnCatalystBlue			= mod:NewSpecialWarningYou(142725, nil, nil, nil, 3)--Only one you don't move away from others for. This one you need to move TO others (although we cannot tell you who since multiple blues go out and you must use multiple stack groups, not just 1.
+local specWarnCatalystRed			= mod:NewSpecialWarningMoveAway(142726, nil, nil, nil, 3)
+local specWarnCatalystYellow		= mod:NewSpecialWarningMoveAway(142727, nil, nil, nil, 3)
+local specWarnCatalystOrange		= mod:NewSpecialWarningMoveAway(142728, nil, nil, nil, 3)--Heroic
+local specWarnCatalystPurple		= mod:NewSpecialWarningMoveAway(142729, nil, nil, nil, 3)--Heroic
+local specWarnCatalystGreen			= mod:NewSpecialWarningMoveAway(142730, nil, nil, nil, 3)--Heroic
 mod:AddBoolOption("yellToxicCatalyst", true, "misc")--And lastly, combine yells
 local yellCatalystBlue				= mod:NewYell(142725, nil, nil, false)
 local yellCatalystRed				= mod:NewYell(142726, nil, nil, false)

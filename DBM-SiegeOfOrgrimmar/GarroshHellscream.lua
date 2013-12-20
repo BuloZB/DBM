@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10807 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10828 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetEncounterID(1623)
 mod:SetZone()
@@ -77,7 +77,7 @@ local specWarnBombardment			= mod:NewSpecialWarningCount(147120, nil, nil, nil, 
 local specWarnISFixate				= mod:NewSpecialWarningYou(147665)
 local specWarnIronStarSpawn			= mod:NewSpecialWarningSpell(147047, false)
 local specWarnManifestRage			= mod:NewSpecialWarningInterrupt(147011, nil, nil, nil, 3)
-local specWarnMaliciousBlast		= mod:NewSpecialWarningStack(147235, nil, 3)
+local specWarnMaliciousBlast		= mod:NewSpecialWarningStack(147235, nil, 2)
 
 --Stage 1: A Cry in the Darkness
 local timerDesecrateCD				= mod:NewCDCountTimer(35, 144748)
@@ -109,6 +109,7 @@ local countdownTouchOfYShaarj		= mod:NewCountdown("Alt45", 145071, false)--Off b
 mod:AddSetIconOption("SetIconOnShaman", "ej8294", false, true)
 mod:AddSetIconOption("SetIconOnMC", 145071, false)
 mod:AddSetIconOption("SetIconOnMalice", 147209, false)
+mod:AddBoolOption("RangeFrame")
 
 local firstIronStar = false
 local engineerDied = 0
@@ -147,6 +148,18 @@ function mod:OnCombatStart(delay)
 	timerFarseerWolfRiderCD:Start(30-delay)
 end
 
+function mod:OnCombatEnd()
+	if self.Options.RangeFrame then
+		DBM.RangeCheck:Hide()
+	end
+end
+
+local function hideRangeDelay()
+	if mod.Options.RangeFrame then
+		DBM.RangeCheck:Hide()
+	end
+end
+
 function mod:SPELL_CAST_START(args)
 	if args.spellId == 144583 then
 		local source = args.sourceName
@@ -183,6 +196,14 @@ function mod:SPELL_CAST_START(args)
 		timerBombardment:Start()
 		timerBombardmentCD:Start(bombardCD[bombardCount] or 15, bombardCount+1)
 		timerClumpCheck:Start()
+		if self.Options.RangeFrame then
+			if self:IsDifficulty("heroic10") then
+				DBM.RangeCheck:Show(8, nil, nil, 2)--Number is a guess
+			else
+				DBM.RangeCheck:Show(8, nil, nil, 6)--Number is a guess
+			end
+			self:Schedule(13, hideRangeDelay)
+		end
 	elseif args.spellId == 147011 then
 		warnManifestRage:Show()
 		if UnitDebuff("player", GetSpellInfo(147665)) then--Kiting an Unstable Iron Star
@@ -234,7 +255,13 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif args:IsSpellID(145065, 145171) then
 		warnTouchOfYShaarj:CombinedShow(0.5, args.destName)
 		if self.Options.SetIconOnMC then
-			self:SetSortedIcon(0.5, args.destName, 1)
+			if self:IsDifficulty("normal25", "heroic25", "lfr25") then
+				self:SetSortedIcon(1, args.destName, 1, 4)
+			elseif self:IsDifficulty("normal10", "heroic10") then
+				self:SetSortedIcon(1, args.destName, 1, 2)
+			else
+				self:SetSortedIcon(1, args.destName, 1)
+			end
 		end
 	elseif args.spellId == 145171 then
 		warnEmpTouchOfYShaarj:CombinedShow(0.5, args.destName)
@@ -279,7 +306,7 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif args.spellId == 147235 and args:IsPlayer() then
 		local amount = args.amount or 1
 		timerGrippingDespair:Start(args.destName)
-		if amount >= 3 then
+		if amount >= 2 then
 			specWarnMaliciousBlast:Show(amount)
 			timerMaliciousBlast:Start()
 		end

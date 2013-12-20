@@ -46,14 +46,15 @@
 --
 
 
+
 -------------------------------
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10814 $"):sub(12, -3)),
-	DisplayVersion = "5.4.6 alpha", -- the string that is shown as version
-	DisplayReleaseVersion = "5.4.5", -- Needed to work around bigwigs sending improper version information
-	ReleaseRevision = 10737 -- the revision of the latest stable version that is available
+	Revision = tonumber(("$Revision: 10838 $"):sub(12, -3)),
+	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
+	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
+	ReleaseRevision = 10835-- the revision of the latest stable version that is available
 }
 
 -- Legacy crap; that stupid "Version" field was never a good idea.
@@ -170,6 +171,7 @@ DBM.DefaultOptions = {
 	DontSetIcons = false,
 	DontShowRangeFrame = false,
 	DontShowInfoFrame = false,
+	DontShowHealthFrame = false,
 	DontShowPT = true,
 	DontShowPTCountdownText = false,
 	DontPlayPTCountdown = false,
@@ -518,7 +520,7 @@ do
 	end
 
 
-	-- UNIT_* events are special: they can take 'parameters' like this: "UNIT_HEALTH boss1 boss" which only trigger the event for the given unit ids
+	-- UNIT_* events are special: they can take 'parameters' like this: "UNIT_HEALTH boss1 boss2" which only trigger the event for the given unit ids
 	function DBM:RegisterEvents(...)
 		for i = 1, select("#", ...) do
 			local event = select(i, ...)
@@ -678,15 +680,6 @@ do
 				elseif event == "SPELL_CAST_FAILED" then
 					args.missType = select(4, ...)
 				end
-			elseif event == "DAMAGE_SHIELD" then
-				args.spellId, args.spellName, args.spellSchool = select(1, ...)
-				args.amount, args.school, args.resisted, args.blocked, args.absorbed, args.critical, args.glancing, args.crushing = select(4, ...)
-			elseif event == "DAMAGE_SHIELD_MISSED" then
-				args.spellId, args.spellName, args.spellSchool = select(1, ...)
-				args.missType = select(4, ...)
-			elseif event == "ENCHANT_APPLIED" or event == "ENCHANT_REMOVED" then
-				args.spellName = select(1,...)
-				args.itemId, args.itemName = select(2,...)
 			elseif event == "UNIT_DIED" or event == "UNIT_DESTROYED" then
 				args.sourceName = args.destName
 				args.sourceGUID = args.destGUID
@@ -696,9 +689,6 @@ do
 				args.amount, args.overkill, args.school, args.resisted, args.blocked, args.absorbed, args.critical, args.glancing, args.crushing = select(2, ...)
 				args.spellName = _G["ACTION_"..event.."_"..args.environmentalType]
 				args.spellSchool = args.school
-			elseif event == "DAMAGE_SPLIT" then
-				args.spellId, args.spellName, args.spellSchool = select(1, ...)
-				args.amount, args.school, args.resisted, args.blocked, args.absorbed, args.critical, args.glancing, args.crushing = select(4, ...)
 			end
 			return handleEvent(nil, event, args)
 		end
@@ -2529,7 +2519,7 @@ do
 						else
 							DBM:AddMsg(DBM_CORE_UPDATEREMINDER_HEADER:match("([^\n]*)"))
 							DBM:AddMsg(DBM_CORE_UPDATEREMINDER_HEADER:match("\n(.*)"):format(displayVersion, version))
-							DBM:AddMsg(("|HDBM:update:%s:%s|h|cff3588ff[http://www.deadlybossmods.com]"):format(displayVersion, version))
+							DBM:AddMsg(("|HDBM:update:%s:%s|h|cff3588ff[%s]"):format(displayVersion, version, DBM_CORE_UPDATEREMINDER_URL or "http://www.deadlybossmods.com"))
 						end
 						--The following code requires at least THREE people to send that higher revision (I just upped it from 2). That should be more than adaquate, especially since there is also a display version validator now too (that had to be writen when bigwigs was sending bad revisions few versions back)
 						if secondfound and revDifference > 400 then--WTF? Sorry but your DBM is being turned off until you update. Grossly out of date mods cause fps loss, freezes, lua error spam, or just very bad information, if mod is not up to date with latest changes. All around undesirable experience to put yourself or other raid mates through
@@ -2968,10 +2958,10 @@ do
 		editBox:SetFontObject("GameFontHighlight")
 		editBox:SetTextInsets(0, 0, 0, 1)
 		editBox:SetFocus()
-		editBox:SetText("http://www.deadlybossmods.com")
+		editBox:SetText(DBM_CORE_UPDATEREMINDER_URL or "http://www.deadlybossmods.com")
 		editBox:HighlightText()
 		editBox:SetScript("OnTextChanged", function(self)
-			editBox:SetText("http://www.deadlybossmods.com")
+			editBox:SetText(DBM_CORE_UPDATEREMINDER_URL or "http://www.deadlybossmods.com")
 			editBox:HighlightText()
 		end)
 		fontstringFooter = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -3357,6 +3347,11 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 		local startHp = (syncedStartHp and (tonumber(syncedStartHp))) or mod:GetBossHP(mod.mainBossId or mod.combatInfo.mob) or -1
 		if (savedDifficulty == "worldboss" and startHp < 0.98) or (event == "UNIT_HEALTH" and startHp < 0.90) or event == "TIMER_RECOVERY" then--Boss was not full health when engaged, disable combat start timer and kill record
 			mod.ignoreBestkill = true
+		elseif mod.inScenario then
+			local _, currentStage, numStages = C_Scenario.GetInfo()
+			if currentStage > 1 and numStages > 1 then
+				mod.ignoreBestkill = true
+			end
 		else--Reset ignoreBestkill after wipe
 			mod.ignoreBestkill = false
 		end
@@ -3445,6 +3440,8 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 			if DBM.Options.ShowEngageMessage then
 				if mod.ignoreBestkill and savedDifficulty == "worldboss" then--Should only be true on in progress field bosses, not in progress raid bosses we did timer recovery on.
 					self:AddMsg(DBM_CORE_COMBAT_STARTED_IN_PROGRESS:format(difficultyText..mod.combatInfo.name))
+				elseif mod.ignoreBestkill and mod.inScenario then
+					self:AddMsg(DBM_CORE_SCENARIO_STARTED_IN_PROGRESS:format(difficultyText..mod.combatInfo.name))
 				else
 					if mod.type == "SCENARIO" then
 						self:AddMsg(DBM_CORE_SCENARIO_STARTED:format(difficultyText..mod.combatInfo.name))
@@ -3465,7 +3462,7 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 			if mod.hotfixNoticeRev then
 				sendSync("HF", mod.id.."\t"..mod.hotfixNoticeRev)
 			end
-		else--show timer recovery message
+		elseif DBM.Options.ShowRecoveryMessage then--show timer recovery message
 			self:AddMsg(DBM_CORE_COMBAT_STATE_RECOVERED:format(difficultyText..mod.combatInfo.name, strFromTime(delay)))
 		end
 	end
@@ -3595,7 +3592,11 @@ function DBM:EndCombat(mod, wipe)
 						self:AddMsg(DBM_CORE_BOSS_DOWN:format(difficultyText..mod.combatInfo.name, DBM_CORE_UNKNOWN))
 					end
 				elseif mod.ignoreBestkill then--Should never happen in a scenario so no need for scenario check.
-					self:AddMsg(DBM_CORE_BOSS_DOWN_I:format(difficultyText..mod.combatInfo.name, totalKills))
+					if scenario then
+						self:AddMsg(DBM_CORE_SCENARIO_COMPLETE_I:format(difficultyText..mod.combatInfo.name, totalKills))
+					else
+						self:AddMsg(DBM_CORE_BOSS_DOWN_I:format(difficultyText..mod.combatInfo.name, totalKills))
+					end
 				elseif not lastTime then
 					if scenario then
 						self:AddMsg(DBM_CORE_SCENARIO_COMPLETE:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime)))
@@ -3710,7 +3711,7 @@ do
 			if not LoggingCombat() then
 				autoLog = true
 				self:AddMsg("|cffffff00"..COMBATLOGENABLED.."|r")
-				LoggingCombat(1)
+				LoggingCombat(true)
 				if checkFunc then
 					self:Unschedule(checkFunc)
 					self:Schedule(timer+10, checkFunc)--But if pull was canceled and we don't have a boss engaged within 10 seconds of pull timer ending, abort log
@@ -3734,7 +3735,7 @@ do
 		if DBM.Options.AutologBosses and LoggingCombat() and autoLog then
 			autoLog = false
 			DBM:AddMsg("|cffffff00"..COMBATLOGDISABLED.."|r")
-			LoggingCombat(0)
+			LoggingCombat(false)
 		end
 		if DBM.Options.AdvancedAutologBosses and Transcriptor and autoTLog then
 			if Transcriptor:IsLogging() then
@@ -4114,6 +4115,8 @@ do
 	local testMod
 	local testWarning1, testWarning2, testWarning3
 	local testTimer
+	local testCount1
+	local testCount2
 	local testSpecialWarning1
 	local testSpecialWarning2
 	local testSpecialWarning3
@@ -4125,6 +4128,8 @@ do
 			testWarning2 = testMod:NewAnnounce("%s", 2, "Interface\\Icons\\Spell_Shadow_ShadesOfDarkness")
 			testWarning3 = testMod:NewAnnounce("%s", 3, "Interface\\Icons\\Spell_Fire_SelfDestruct")
 			testTimer = testMod:NewTimer(20, "%s")
+			testCount1 = testMod:NewCountdown(0, 0, nil, nil, nil, true)
+			testCount2 = testMod:NewCountdown(0, 0, nil, nil, nil, true, true)
 			testSpecialWarning1 = testMod:NewSpecialWarning("%s")
 			testSpecialWarning2 = testMod:NewSpecialWarning(" %s ", nil, nil, nil, true)
 			testSpecialWarning3 = testMod:NewSpecialWarning("  %s  ", nil, nil, nil, 3) -- hack: non auto-generated special warnings need distinct names (we could go ahead and give them proper names with proper localization entries, but this is much easier)
@@ -4134,8 +4139,12 @@ do
 		testTimer:Start(10, "Test Bar")
 		testTimer:UpdateIcon("Interface\\Icons\\Spell_Nature_WispSplode", "Test Bar")
 		testTimer:Start(43, "Evil Spell")
+		testCount1:Cancel()
+		testCount1:Start(43)
 		testTimer:UpdateIcon("Interface\\Icons\\Spell_Shadow_ShadesOfDarkness", "Evil Spell")
 		testTimer:Start(60, "Boom!")
+		testCount2:Cancel()
+		testCount2:Start(60)
 		testTimer:UpdateIcon("Interface\\Icons\\Spell_Fire_SelfDestruct", "Boom!")
 		testWarning1:Cancel()
 		testWarning2:Cancel()
@@ -5960,6 +5969,14 @@ do
 	function bossModPrototype:NewSpecialWarningMove(text, optionDefault, ...)
 		return newSpecialWarning(self, "move", text, nil, optionDefault, ...)
 	end
+	
+	function bossModPrototype:NewSpecialWarningMoveAway(text, optionDefault, ...)
+		return newSpecialWarning(self, "moveaway", text, nil, optionDefault, ...)
+	end
+	
+	function bossModPrototype:NewSpecialWarningMoveTo(text, optionDefault, ...)
+		return newSpecialWarning(self, "moveto", text, nil, optionDefault, ...)
+	end
 
 	function bossModPrototype:NewSpecialWarningRun(text, optionDefault, ...)
 		return newSpecialWarning(self, "run", text, nil, optionDefault, ...)
@@ -6892,51 +6909,56 @@ function bossModPrototype:SetIcon(target, icon, timer)
 	end
 end
 
-local iconSortTable = {}
-local iconSet = 0
+do
+	local iconSortTable = {}
+	local iconSet = 0
 
-local function sort_by_group(v1, v2)
-	return DBM:GetRaidSubgroup(DBM:GetUnitFullName(v1)) < DBM:GetRaidSubgroup(DBM:GetUnitFullName(v2))
-end
+	local function sort_by_group(v1, v2)
+		return DBM:GetRaidSubgroup(DBM:GetUnitFullName(v1)) < DBM:GetRaidSubgroup(DBM:GetUnitFullName(v2))
+	end
 
-local function clearSortTable()
-	table.wipe(iconSortTable)
-	iconSet = 0
-end
-
-function bossModPrototype:SetIconBySortedTable(startIcon, reverseIcon, returnFunc)
-	table.sort(iconSortTable, sort_by_group)
-	local icon = startIcon or 1
-	for i, v in ipairs(iconSortTable) do
-		SetRaidTarget(v, icon)--do not use SetIcon function again. It already checked in SetSortedIcon function.
-		if reverseIcon then
-			icon = icon - 1
-		else
-			icon = icon + 1
-		end
-		if returnFunc then
-			self:ScheduleMethod(0, returnFunc, v, icon)--Send icon and target to returnFunc. (Generally used by announce icon targets to raid chat feature)
+	local function clearSortTable()
+		table.wipe(iconSortTable)
+		iconSet = 0
+		if DBM.Options.DebugMode then
+			print("iconSortTable cleared")
 		end
 	end
-	self:Schedule(1.5, clearSortTable)--Table wipe delay so if icons go out too early do to low fps or bad latency, when they get new target on table, resort and reapplying should auto correct teh icon within .2-.4 seconds at most.
-end
 
-function bossModPrototype:SetSortedIcon(delay, target, startIcon, maxIcon, reverseIcon, returnFunc)
-	if not target then return end
-	if DBM.Options.DontSetIcons or not enableIcons or (DBM:GetRaidRank(playerName) == 0 and IsInGroup()) then
-		return
+	function bossModPrototype:SetIconBySortedTable(startIcon, reverseIcon, returnFunc)
+		table.sort(iconSortTable, sort_by_group)
+		local icon = startIcon or 1
+		for i, v in ipairs(iconSortTable) do
+			SetRaidTarget(v, icon)--do not use SetIcon function again. It already checked in SetSortedIcon function.
+			if reverseIcon then
+				icon = icon - 1
+			else
+				icon = icon + 1
+			end
+			if returnFunc then
+				self[returnFunc](self, v, icon)--Send icon and target to returnFunc. (Generally used by announce icon targets to raid chat feature)
+			end
+		end
+		self:Schedule(1.5, clearSortTable)--Table wipe delay so if icons go out too early do to low fps or bad latency, when they get new target on table, resort and reapplying should auto correct teh icon within .2-.4 seconds at most.
 	end
-	if not startIcon then startIcon = 1 end
-	startIcon = startIcon and startIcon >= 0 and startIcon <= 8 and startIcon or 8
-	local uId = DBM:GetRaidUnitId(target)
-	if not uId then uId = target end
-	iconSet = iconSet + 1
-	table.insert(iconSortTable, uId)
-	self:UnscheduleMethod("SetIconBySortedTable")
-	if maxIcon and iconSet == maxIcon then
-		self:SetIconBySortedTable(startIcon, reverseIcon, returnFunc)
-	elseif self:LatencyCheck() then--lag can fail the icons so we check it before allowing.
-		self:ScheduleMethod(delay or 0.5, "SetIconBySortedTable", startIcon, maxIcon, returnFunc)
+
+	function bossModPrototype:SetSortedIcon(delay, target, startIcon, maxIcon, reverseIcon, returnFunc)
+		if not target then return end
+		if DBM.Options.DontSetIcons or not enableIcons or (DBM:GetRaidRank(playerName) == 0 and IsInGroup()) then
+			return
+		end
+		if not startIcon then startIcon = 1 end
+		startIcon = startIcon and startIcon >= 0 and startIcon <= 8 and startIcon or 8
+		local uId = DBM:GetRaidUnitId(target)
+		if not uId then uId = target end
+		iconSet = iconSet + 1
+		table.insert(iconSortTable, uId)
+		self:UnscheduleMethod("SetIconBySortedTable")
+		if maxIcon and iconSet == maxIcon then
+			self:SetIconBySortedTable(startIcon, reverseIcon, returnFunc)
+		elseif self:LatencyCheck() then--lag can fail the icons so we check it before allowing.
+			self:ScheduleMethod(delay or 0.5, "SetIconBySortedTable", startIcon, maxIcon, returnFunc)
+		end
 	end
 end
 
