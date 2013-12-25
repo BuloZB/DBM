@@ -51,7 +51,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10839 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10841 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -4904,13 +4904,17 @@ do
 	end
 
 	function bossModPrototype:RemoveShieldHealthBar(guid, name)
-		shieldsByGuid[guid] = nil
-		for i = #activeShields, 1, -1 do
-			if activeShields[i].guid == guid and activeShields[i].mod == self.id and (not name or activeShields[i].name == name) then
-				if DBM.BossHealth:IsShown() then
-					DBM.BossHealth.RemoveBoss(activeShields[i].func)
+		if not guid then
+			self:RemoveAllSpecialHealthBars()
+		else
+			shieldsByGuid[guid] = nil
+			for i = #activeShields, 1, -1 do
+				if activeShields[i].guid == guid and activeShields[i].mod == self.id and (not name or activeShields[i].name == name) then
+					if DBM.BossHealth:IsShown() then
+						DBM.BossHealth.RemoveBoss(activeShields[i].func)
+					end
+					tremove(activeShields, i)
 				end
-				tremove(activeShields, i)
 			end
 		end
 	end
