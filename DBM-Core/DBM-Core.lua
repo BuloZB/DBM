@@ -51,7 +51,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10841 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10861 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -98,6 +98,8 @@ DBM.DefaultOptions = {
 	WarningIconRight = true,
 	WarningIconChat = true,
 	StripServerName = true,
+	ShowCombatLogMessage = true,
+	ShowTranscriptorMessage = true,
 	ShowLoadMessage = true,
 	ShowPizzaMessage = true,
 	ShowEngageMessage = true,
@@ -2381,6 +2383,10 @@ do
 		else--Not from self, it means someone with a higher version than us probably sent it
 			canSetIcons[optionName] = false
 		end
+		if DBM.Options.DebugMode then
+			local name = DBM:GetFullPlayerNameByGUID(iconSetPerson[optionName])
+			print(name.." was elected icon setter for "..optionName)
+		end
 	end
 
 	syncHandlers["K"] = function(sender, cId)
@@ -3036,6 +3042,7 @@ do
 
 
 	local function checkForPull(mob, combatInfo)
+		healthCombatInitialized = false
 		DBM:Schedule(0.5, scanForCombat, combatInfo.mod, mob, 0.5)
 		DBM:Schedule(2, scanForCombat, combatInfo.mod, mob, 2)
 		DBM:Schedule(2.1, function()
@@ -3048,7 +3055,6 @@ do
 	-- detects a boss pull based on combat state, this is required for pre-ICC bosses that do not fire INSTANCE_ENCOUNTER_ENGAGE_UNIT events on engage
 	function DBM:PLAYER_REGEN_DISABLED()
 		lastCombatStarted = GetTime()
-		healthCombatInitialized = false
 		if not combatInitialized then return end
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
@@ -3480,7 +3486,7 @@ function DBM:UNIT_HEALTH(uId)
 	if #inCombat == 0 and bossIds[cId] and InCombatLockdown() and UnitAffectingCombat(uId) and healthCombatInitialized then -- StartCombat by UNIT_HEALTH event, for older instances.
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
-				if v.mod.Options.Enabled and not v.mod.disableHealthCombat and (v.type == "combat" and v.multiMobPullDetection and checkEntry(v.multiMobPullDetection, cId) or v.mob == cId) then
+				if v.mod.Options.Enabled and not v.mod.disableHealthCombat and (v.type == "combat" or v.type == "combat_yell" or v.type == "combat_emote" or v.type == "combat_say") and (v.multiMobPullDetection and checkEntry(v.multiMobPullDetection, cId) or v.mob == cId) then
 					self:StartCombat(v.mod, health > 0.97 and 0.5 or mmin(20, (lastCombatStarted and GetTime() - lastCombatStarted) or 2.1), "UNIT_HEALTH", nil, health) -- Above 97%, boss pulled during combat, set min delay (0.5) / Below 97%, combat enter detection failure, use normal delay (max 20s)
 				end
 			end
@@ -3585,37 +3591,39 @@ function DBM:EndCombat(mod, wipe)
 			end
 			local totalKills = mod.stats[statVarTable[savedDifficulty].."Kills"]
 			if DBM.Options.ShowKillMessage then
+				local msg = ""
 				if not mod.combatInfo.pull then--was a bad pull so we ignored thisTime, should never happen
 					if scenario then
-						self:AddMsg(DBM_CORE_SCENARIO_COMPLETE:format(difficultyText..mod.combatInfo.name, DBM_CORE_UNKNOWN))
+						msg = DBM_CORE_SCENARIO_COMPLETE:format(difficultyText..mod.combatInfo.name, DBM_CORE_UNKNOWN)
 					else
-						self:AddMsg(DBM_CORE_BOSS_DOWN:format(difficultyText..mod.combatInfo.name, DBM_CORE_UNKNOWN))
+						msg = DBM_CORE_BOSS_DOWN:format(difficultyText..mod.combatInfo.name, DBM_CORE_UNKNOWN)
 					end
 				elseif mod.ignoreBestkill then--Should never happen in a scenario so no need for scenario check.
 					if scenario then
-						self:AddMsg(DBM_CORE_SCENARIO_COMPLETE_I:format(difficultyText..mod.combatInfo.name, totalKills))
+						msg = DBM_CORE_SCENARIO_COMPLETE_I:format(difficultyText..mod.combatInfo.name, totalKills)
 					else
-						self:AddMsg(DBM_CORE_BOSS_DOWN_I:format(difficultyText..mod.combatInfo.name, totalKills))
+						msg = DBM_CORE_BOSS_DOWN_I:format(difficultyText..mod.combatInfo.name, totalKills)
 					end
 				elseif not lastTime then
 					if scenario then
-						self:AddMsg(DBM_CORE_SCENARIO_COMPLETE:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime)))
+						msg = DBM_CORE_SCENARIO_COMPLETE:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime))
 					else
-						self:AddMsg(DBM_CORE_BOSS_DOWN:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime)))
+						msg = DBM_CORE_BOSS_DOWN:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime))
 					end
 				elseif thisTime < (bestTime or mhuge) then
 					if scenario then
-						self:AddMsg(DBM_CORE_SCENARIO_COMPLETE_NR:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime), strFromTime(bestTime), totalKills))
+						msg = DBM_CORE_SCENARIO_COMPLETE_NR:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime), strFromTime(bestTime), totalKills)
 					else
-						self:AddMsg(DBM_CORE_BOSS_DOWN_NR:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime), strFromTime(bestTime), totalKills))
+						msg = DBM_CORE_BOSS_DOWN_NR:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime), strFromTime(bestTime), totalKills)
 					end
 				else
 					if scenario then
-						self:AddMsg(DBM_CORE_SCENARIO_COMPLETE_L:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime), strFromTime(lastTime), strFromTime(bestTime), totalKills))
+						msg = DBM_CORE_SCENARIO_COMPLETE_L:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime), strFromTime(lastTime), strFromTime(bestTime), totalKills)
 					else
-						self:AddMsg(DBM_CORE_BOSS_DOWN_L:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime), strFromTime(lastTime), strFromTime(bestTime), totalKills))
+						msg = DBM_CORE_BOSS_DOWN_L:format(difficultyText..mod.combatInfo.name, strFromTime(thisTime), strFromTime(lastTime), strFromTime(bestTime), totalKills)
 					end
 				end
+				self:Schedule(1, DBM.AddMsg, DBM, msg)
 			end
 			local msg
 			for k, v in pairs(autoRespondSpam) do
@@ -3710,7 +3718,9 @@ do
 		if DBM.Options.AutologBosses then--Start logging here to catch pre pots.
 			if not LoggingCombat() then
 				autoLog = true
-				self:AddMsg("|cffffff00"..COMBATLOGENABLED.."|r")
+				if DBM.Options.ShowCombatLogMessage then
+					self:AddMsg("|cffffff00"..COMBATLOGENABLED.."|r")
+				end
 				LoggingCombat(true)
 				if checkFunc then
 					self:Unschedule(checkFunc)
@@ -3721,7 +3731,9 @@ do
 		if DBM.Options.AdvancedAutologBosses and Transcriptor then
 			if not Transcriptor:IsLogging() then
 				autoTLog = true
-				self:AddMsg("|cffffff00"..DBM_CORE_TRANSCRIPTOR_LOG_START.."|r")
+				if DBM.Options.ShowTranscriptorMessage then
+					self:AddMsg("|cffffff00"..DBM_CORE_TRANSCRIPTOR_LOG_START.."|r")
+				end
 				Transcriptor:StartLog(1)
 			end
 			if checkFunc then
@@ -3734,13 +3746,17 @@ do
 	function DBM:StopLogging()
 		if DBM.Options.AutologBosses and LoggingCombat() and autoLog then
 			autoLog = false
-			DBM:AddMsg("|cffffff00"..COMBATLOGDISABLED.."|r")
+			if DBM.Options.ShowCombatLogMessage then
+				DBM:AddMsg("|cffffff00"..COMBATLOGDISABLED.."|r")
+			end
 			LoggingCombat(false)
 		end
 		if DBM.Options.AdvancedAutologBosses and Transcriptor and autoTLog then
 			if Transcriptor:IsLogging() then
 				autoTLog = false
-				DBM:AddMsg("|cffffff00"..DBM_CORE_TRANSCRIPTOR_LOG_END.."|r")
+				if DBM.Options.ShowTranscriptorMessage then
+					DBM:AddMsg("|cffffff00"..DBM_CORE_TRANSCRIPTOR_LOG_END.."|r")
+				end
 				Transcriptor:StopLog(1)
 			end
 		end
@@ -6955,8 +6971,17 @@ do
 		startIcon = startIcon and startIcon >= 0 and startIcon <= 8 and startIcon or 8
 		local uId = DBM:GetRaidUnitId(target)
 		if not uId then uId = target end
-		iconSet = iconSet + 1
-		table.insert(iconSortTable, uId)
+		local foundDuplicate = false
+		for i = #iconSortTable, 1, -1 do
+			if iconSortTable[i] == uId then
+				foundDuplicate = true
+				break
+			end
+		end
+		if not foundDuplicate then
+			iconSet = iconSet + 1
+			table.insert(iconSortTable, uId)
+		end
 		self:UnscheduleMethod("SetIconBySortedTable")
 		if maxIcon and iconSet == maxIcon then
 			self:SetIconBySortedTable(startIcon, reverseIcon, returnFunc)

@@ -44,7 +44,7 @@
 
 
 
-local revision =("$Revision: 10818 $"):sub(12, -3)
+local revision =("$Revision: 10860 $"):sub(12, -3)
 local FrameTitle = "DBM_GUI_Option_"	-- all GUI frames get automatically a name FrameTitle..ID
 
 local PanelPrototype = {}
@@ -1536,6 +1536,8 @@ local function CreateOptionsMenu()
 		local generalCoreArea = generalWarningPanel:CreateArea(L.CoreMessages, nil, 120, true)
 --		generalCoreArea:CreateCheckButton(L.ShowLoadMessage, true, nil, "ShowLoadMessage")--Only here as a note, this is commented out so inexperienced users don't disable this, but an option for advanced users who want to manually change the value from true to false
 		generalCoreArea:CreateCheckButton(L.ShowPizzaMessage, true, nil, "ShowPizzaMessage")
+		generalCoreArea:CreateCheckButton(L.ShowCombatLogMessage, true, nil, "ShowCombatLogMessage")
+		generalCoreArea:CreateCheckButton(L.ShowTranscriptorMessage, true, nil, "ShowTranscriptorMessage")
 
 		local generalMessagesArea = generalWarningPanel:CreateArea(L.CombatMessages, nil, 135, true)
 		generalMessagesArea:CreateCheckButton(L.ShowEngageMessage, true, nil, "ShowEngageMessage")

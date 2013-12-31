@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10809 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10843 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetEncounterID(1622)
 mod:DisableESCombatDetection()
@@ -73,7 +73,7 @@ local specWarnFlamesofGalakrondStack= mod:NewSpecialWarningStack("OptionVersion4
 local specWarnFlamesofGalakrondOther= mod:NewSpecialWarningTarget(147029, mod:IsTank())
 
 --Stage 2: Bring Her Down!
-local timerCombatStarts				= mod:NewCombatTimer(35.5)
+local timerCombatStarts				= mod:NewCombatTimer(34.5)
 local timerAddsCD					= mod:NewNextTimer(55, "ej8553", nil, nil, nil, 2457)
 local timerTowerCD					= mod:NewNextTimer(99, 81232, nil, nil, nil, 88852)
 local timerTowerGruntCD				= mod:NewTimer(60, "timerTowerGruntCD", 89253)
@@ -307,6 +307,6 @@ function mod:OnSync(msg)
 	elseif msg == "prepull" then--Alliance
 		timerCombatStarts:Start()
 	elseif msg == "prepull2" then--Horde
-		timerCombatStarts:Start(31.5)
+		timerCombatStarts:Start(30.5)
 	end
 end

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(846, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10765 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10845 $"):sub(12, -3))
 mod:SetCreatureID(71454)
 mod:SetEncounterID(1595)
 mod:SetZone()
@@ -18,6 +18,10 @@ mod:RegisterEventsInCombat(
 	"UNIT_SPELLCAST_SUCCEEDED boss1"
 )
 
+--[[WoL Expression
+spellid = 143913 or spellid =  143805 or spellid = 142851 or (spellid = 143199 or spellid = 142842 or spellid = 142879) and fulltype = SPELL_CAST_START
+http://worldoflogs.com/reports/rt-092xfequ7ks2205b/xe/?s=7029&e=7304&x=spellid+%3D+143913+or+spellid+%3D++143805+or+spellid+%3D+142851+or+%28spellid+%3D+143199+or+spellid+%3D+142842+or+spellid+%3D+142879%29+and+fulltype+%3D+SPELL_CAST_START
+--]]
 --Endless Rage
 local warnBloodRage						= mod:NewSpellAnnounce(142879, 3)
 local warnDisplacedEnergy				= mod:NewTargetAnnounce(142913, 3)
@@ -43,10 +47,10 @@ local timerBloodRage					= mod:NewBuffActiveTimer(22.5, 142879)--2.5sec cast plu
 local timerDisplacedEnergyCD			= mod:NewNextTimer(11, 142913)
 local timerBloodRageCD					= mod:NewNextTimer(127.7, 142879)
 --Might of the Kor'kron
-local timerArcingSmashCD				= mod:NewNextCountTimer(17.5, 142815)--17-18 variation (the 23 second ones are delayed by Breath of Yshaarj)
+local timerArcingSmashCD				= mod:NewCDCountTimer(19, 142815)
 local timerImplodingEnergy				= mod:NewCastTimer(10, 142986)--Always 10 seconds after arcing
-local timerSeismicSlamCD				= mod:NewNextCountTimer(17.5, 142851)--Works exactly same as arcingsmash 18 sec unless delayed by breath. two sets of 3
-local timerBreathofYShaarjCD			= mod:NewNextCountTimer(59, 142842)
+local timerSeismicSlamCD				= mod:NewNextCountTimer(19.5, 142851)--Works exactly same as arcingsmash 18 sec unless delayed by breath. two sets of 3
+local timerBreathofYShaarjCD			= mod:NewNextCountTimer(70, 142842)
 local timerFatalStrike					= mod:NewTargetTimer(30, 142990, nil, mod:IsTank())
 
 local berserkTimer						= mod:NewBerserkTimer(360)
@@ -82,15 +86,9 @@ function mod:OnCombatStart(delay)
 	arcingSmashCount = 0
 	seismicSlamCount = 0
 	rageActive = false
-	if self:IsDifficulty("lfr25") then
-		timerSeismicSlamCD:Start(7.5-delay, 1)
-		timerArcingSmashCD:Start(14-delay, 1)
-		timerBreathofYShaarjCD:Start(70-delay, 1)
-	else
-		timerSeismicSlamCD:Start(5-delay, 1)
-		timerArcingSmashCD:Start(14-delay, 1)
-		timerBreathofYShaarjCD:Start(-delay, 1)
-	end
+	timerSeismicSlamCD:Start(5-delay, 1)
+	timerArcingSmashCD:Start(11-delay, 1)
+	timerBreathofYShaarjCD:Start(70-delay, 1)
 	timerBloodRageCD:Start(122-delay)
 	if self:IsDifficulty("lfr25") then
 		berserkTimer:Start(720-delay)
@@ -123,15 +121,9 @@ function mod:SPELL_CAST_START(args)
 		if breathCast == 1 then
 			arcingSmashCount = 0
 			seismicSlamCount = 0
-			if self:IsDifficulty("lfr25") then
-				timerSeismicSlamCD:Start(7.5, 1)
-				timerArcingSmashCD:Start(14, 1)
-				timerBreathofYShaarjCD:Start(70, 2)
-			else
-				timerSeismicSlamCD:Start(5, 1)
-				timerArcingSmashCD:Start(11, 1)
-				timerBreathofYShaarjCD:Start(nil, 2)
-			end
+			timerSeismicSlamCD:Start(7.5, 1)
+			timerArcingSmashCD:Start(14, 1)
+			timerBreathofYShaarjCD:Start(70, 2)
 		end
 	elseif args.spellId == 143199 then
 		breathCast = 0
@@ -139,15 +131,9 @@ function mod:SPELL_CAST_START(args)
 		seismicSlamCount = 0
 		rageActive = false
 		specWarnBloodRageEnded:Show()
-		if self:IsDifficulty("lfr25") then
-			timerSeismicSlamCD:Start(7.5, 1)
-			timerArcingSmashCD:Start(14, 1)
-			timerBreathofYShaarjCD:Start(70, 1)
-		else
-			timerSeismicSlamCD:Start(5, 1)
-			timerArcingSmashCD:Start(11, 1)
-			timerBreathofYShaarjCD:Start(nil, 1)
-		end
+		timerSeismicSlamCD:Start(7.5, 1)
+		timerArcingSmashCD:Start(14, 1)
+		timerBreathofYShaarjCD:Start(70, 1)
 		timerBloodRageCD:Start()
 		if self.Options.RangeFrame then
 			DBM.RangeCheck:Show(5)
@@ -160,11 +146,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		seismicSlamCount = seismicSlamCount + 1
 		warnSeismicSlam:Show(seismicSlamCount)
 		if seismicSlamCount < 3 then
-			if self:IsDifficulty("lfr25") then
-				timerSeismicSlamCD:Start(19.5, seismicSlamCount+1)
-			else
-				timerSeismicSlamCD:Start(nil, seismicSlamCount+1)
-			end
+			timerSeismicSlamCD:Start(nil, seismicSlamCount+1)
 		end
 		if self.Options.SetIconOnAdds and self:IsDifficulty("heroic10", "heroic25") then
 			self:ScanForMobs(71644, 0, 8, nil, 0.2, 6)
@@ -245,11 +227,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		countdownImplodingEnergy:Start()
 		specWarnImplodingEnergySoon:Schedule(6)
 		if arcingSmashCount < 3 then
-			if self:IsDifficulty("lfr25") then
-				timerArcingSmashCD:Start(19.5, arcingSmashCount+1)
-			else
-				timerArcingSmashCD:Start(nil, arcingSmashCount+1)
-			end
+			timerArcingSmashCD:Start(nil, arcingSmashCount+1)
 		end
 	end
 end

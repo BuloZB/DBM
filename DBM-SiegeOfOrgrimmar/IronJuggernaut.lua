@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(864, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10765 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10853 $"):sub(12, -3))
 mod:SetCreatureID(71466)
 mod:SetEncounterID(1600)
 mod:SetZone()
@@ -60,7 +60,7 @@ local timerCrawlerMineCD		= mod:NewCDTimer(30, 144673)
 local timerRicochetCD			= mod:NewCDTimer(15, 144356)
 --Siege Mode
 local timerSiegeModeCD			= mod:NewNextTimer(114, 84974, nil, nil, "timerSiegeModeCD")--Wish spell name was a litlte shorter but still better than localizing
-local timerCuttingLaser			= mod:NewTargetTimer(10, 146325)--Spell tooltip says 15 but combat log showed 10
+local timerCutterLaser			= mod:NewBuffFadesTimer(10, 146325)--Spell tooltip says 15 but combat log showed 10
 local timerShockPulseCD			= mod:NewNextCountTimer(16.5, 144485)
 local timerExplosiveTarCD		= mod:NewNextTimer(30, 144492)
 local timerMortarBarrageCD		= mod:NewNextTimer(30, 144555)
@@ -236,13 +236,13 @@ function mod:OnSync(msg, guid)
 	if msg == "LaserTarget" and guid then
 		local targetName = DBM:GetFullPlayerNameByGUID(guid)
 		warnCutterLaser:Show(targetName)
-		timerIgniteArmor:Start(targetName)
 		if targetName == UnitName("player") then
+			timerCutterLaser:Start()
 			specWarnCutterLaser:Show()
 			yellCutterLaser:Yell()
 			soundCuttingLaser:Play()
 		end
 	elseif msg == "LaserTargetRemoved" and guid then
-		timerCuttingLaser:Cancel(DBM:GetFullPlayerNameByGUID(guid))
+		timerCutterLaser:Cancel(DBM:GetFullPlayerNameByGUID(guid))
 	end
 end
