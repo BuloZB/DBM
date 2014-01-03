@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10844 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10877 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
 mod:DisableESCombatDetection()
@@ -69,7 +69,7 @@ local specWarnPiercingCorruption		= mod:NewSpecialWarningSpell(144657)
 --Amalgam of Corruption
 local timerCombatStarts					= mod:NewCombatTimer(25)
 local timerUnleashedAngerCD				= mod:NewCDTimer(11, 145216, nil, mod:IsTank())
-local timerBlindHatred					= mod:NewBuffActiveTimer(30, 145226, nil, false, nil, nil, nil, nil, nil, 2)
+local timerBlindHatred					= mod:NewBuffActiveTimer("OptionVersion3", 30, 145226, nil, mod:IsHealer())
 local timerBlindHatredCD				= mod:NewNextTimer(30, 145226)
 --All Tests
 local timerLookWithin					= mod:NewBuffFadesTimer(60, "ej8220")
@@ -103,6 +103,15 @@ local residue = {}
 local function addsDelay()
 	warnManifestation:Show()
 	specWarnManifestation:Show()
+end
+
+local function addSync()
+	specWarnManifestationSoon:Show()
+	if mod:IsDifficulty("lfr25") then
+		mod:Schedule(10, addsDelay, GetTime())
+	else
+		mod:Schedule(5, addsDelay, GetTime())
+	end
 end
 
 local function delayPowerSync()
@@ -254,19 +263,19 @@ function mod:OnSync(msg, guid)
 		unleashedAngerCast = 0
 	elseif msg == "prepull" then
 		timerCombatStarts:Start()
-	elseif msg == "ManifestationDied" and not playerInside and self:AntiSpam(1) then
-		specWarnManifestationSoon:Show()
-		self:Schedule(5, addsDelay, GetTime())
 	end
 end
 
 function mod:CHAT_MSG_ADDON(prefix, message, channel, sender)
 	--Because core already registers BigWigs prefix with server, shouldn't need it here
-	if prefix == "BigWigs" and message then
+	if prefix == "D4" and message then
+		if message:find("ManifestationDied") and not playerInside and self:AntiSpam(1) then
+			addSync()
+		end
+	elseif prefix == "BigWigs" and message then
 		local bwPrefix, bwMsg = message:match("^(%u-):(.+)")
 		if bwMsg == "InsideBigAddDeath" and not playerInside and self:AntiSpam(1) then
-			specWarnManifestationSoon:Show()
-			self:Schedule(5, addsDelay, GetTime())
+			addSync()
 		end
 	end
 end

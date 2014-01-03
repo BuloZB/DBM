@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(870, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10809 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10864 $"):sub(12, -3))
 mod:SetCreatureID(73720, 71512)
 mod:SetEncounterID(1594)
 mod:DisableESCombatDetection()
@@ -90,6 +90,7 @@ local timerReturnToStoneCD		= mod:NewNextTimer(12, 145489)
 local timerSetToBlowCD			= mod:NewNextTimer(9.6, 145996)
 local timerSetToBlow			= mod:NewBuffFadesTimer(30, 145996)
 --Stout Crate of Goods
+local timerMatterScramble		= mod:NewCastTimer(7, 145288, nil, not mod:IsTank())
 local timerMatterScrambleCD		= mod:NewCDTimer(18, 145288)--18-22 sec variation. most of time it's 20 exactly, unsure what causes the +-2 variations
 local timerCrimsonReconCD		= mod:NewNextTimer(15, 142947)
 local timerMantidSwarmCD		= mod:NewCDTimer(35, 142539)
@@ -152,8 +153,9 @@ end
 function mod:OnCombatStart(delay)
 	worldTimer = 0
 	maxTimer = 0
-	if self.Options.InfoFrame then--Will just call it "infoframe" that's good enough
-		 DBM.InfoFrame:Show(2, "enemypower", 2, ALTERNATE_POWER_INDEX)
+	if self.Options.InfoFrame then
+		DBM.InfoFrame:SetHeader(L.name)
+		DBM.InfoFrame:Show(2, "enemypower", 2, ALTERNATE_POWER_INDEX)
 	end
 end
 
@@ -173,6 +175,7 @@ function mod:SPELL_CAST_START(args)
 	elseif args.spellId == 145288 and not isPlayerInMantid() then
 		warnMatterScramble:Show()
 		specWarnMatterScramble:Show()
+		timerMatterScramble:Start()
 		timerMatterScrambleCD:Start(args.sourceGUID)
 	elseif args.spellId == 145461 and not isPlayerInMantid() then
 		warnEnergize:Show()

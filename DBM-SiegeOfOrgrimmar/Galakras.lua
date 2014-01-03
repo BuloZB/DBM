@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10843 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10864 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetEncounterID(1622)
 mod:DisableESCombatDetection()
@@ -237,7 +237,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		timerAddsCD:Cancel()
 		timerProtoCD:Cancel()
 		warnPhase2:Show()
-		timerFlamesofGalakrondCD:Start(18.6, 1)--TODO, verify consistency since this timing may depend on where drake lands and time it takes to get picked up.
+		timerFlamesofGalakrondCD:Start(13.5, 1)
 	end
 end
 

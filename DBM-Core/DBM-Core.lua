@@ -46,12 +46,11 @@
 --
 
 
-
 -------------------------------
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10861 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10877 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -2368,7 +2367,9 @@ do
 		modRevision = tonumber(modRevision or 0) or 0
 		if mod and (mod.revision < modRevision) then
 			--TODO, maybe require at least 2 senders? this doesn't disable mod or make a popup though, just warn in chat that mod may have invalid timers/warnings do to a blizzard hotfix
-			DBM:AddMsg(DBM_CORE_UPDATEREMINDER_HOTFIX)
+			if mod:AntiSpam(3, 50) then--No mod should be using an ID of 50, so using mods own prototype should not conflict anywhere.
+				DBM:AddMsg(DBM_CORE_UPDATEREMINDER_HOTFIX)
+			end
 		end
 	end
 
@@ -2385,7 +2386,7 @@ do
 		end
 		if DBM.Options.DebugMode then
 			local name = DBM:GetFullPlayerNameByGUID(iconSetPerson[optionName])
-			print(name.." was elected icon setter for "..optionName)
+			print("DBM Debug: "..name.." was elected icon setter for "..optionName)
 		end
 	end
 
@@ -2888,6 +2889,12 @@ do
 		end
 	end
 
+	whisperSyncHandlers["VI"] = function(sender, mod, name, value)
+		mod = DBM:GetModByName(mod or "")
+		value = tonumber(value) or value
+		DBM:ReceiveVariableInfo(sender, mod, name, value)
+	end
+
 	local function handleSync(channel, sender, prefix, ...)
 		if not prefix then
 			return
@@ -3101,7 +3108,7 @@ do
 
 	function DBM:ENCOUNTER_START(encounterID, name, difficulty, size)
 		if DBM.Options.DebugMode then
-			print("ENCOUNTER_START event fired:", encounterID, name, difficulty, size)
+			print("DBM Debug: ENCOUNTER_START event fired:", encounterID, name, difficulty, size)
 		end
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
@@ -3130,7 +3137,7 @@ do
 	
 	function DBM:ENCOUNTER_END(encounterID, name, difficulty, size, success)
 		if DBM.Options.DebugMode then
-			print("ENCOUNTER_END event fired:", encounterID, name, difficulty, size, success)
+			print("DBM Debug: ENCOUNTER_END event fired:", encounterID, name, difficulty, size, success)
 		end
 		for i = #inCombat, 1, -1 do
 			local v = inCombat[i]
@@ -3269,7 +3276,7 @@ function checkWipe(confirm)
 			for i = #inCombat, 1, -1 do
 				if DBM.Options.DebugMode then
 					local reason = (wipe == 1 and "No combat unit found in your party." or "No boss found : "..(wipe or "nil"))
-					print("You wiped. Reason : "..reason)
+					print("DBM Debug: You wiped. Reason : "..reason)
 				end
 				DBM:EndCombat(inCombat[i], true)
 			end
@@ -3299,9 +3306,9 @@ local statVarTable = {
 function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 	if DBM.Options.DebugMode and not mod.inCombat then
 		if event then
-			print("DBM:StartCombat called by : "..event)
+			print("DBM Debug: StartCombat called by : "..event)
 		else
-			print("DBM:StartCombat called by individual mod or unknown reason.")
+			print("DBM Debug: StartCombat called by individual mod or unknown reason.")
 		end
 	end
 	cSyncSender = {}
@@ -3565,7 +3572,13 @@ function DBM:EndCombat(mod, wipe)
 					if scenario then
 						msg = msg or chatPrefixShort..DBM_CORE_WHISPER_SCENARIO_END_WIPE:format(playerName, difficultyText..(mod.combatInfo.name or ""))
 					else
-						msg = msg or chatPrefixShort..DBM_CORE_WHISPER_COMBAT_END_WIPE_AT:format(playerName, difficultyText..(mod.combatInfo.name or ""), wipeHP)
+						local hpText
+						if mod.phase then
+							hpText = wipeHP.."("..mod.phase..")"
+						else
+							hpText = wipeHP
+						end
+						msg = msg or chatPrefixShort..DBM_CORE_WHISPER_COMBAT_END_WIPE_AT:format(playerName, difficultyText..(mod.combatInfo.name or ""), hpText)
 					end
 				end
 				sendWhisper(k, msg)
@@ -3844,6 +3857,12 @@ do
 			end
 		end
 	end
+
+	function DBM:ReceiveVariableInfo(sender, mod, name, value)
+		if sender == requestedFrom and (GetTime() - requestTime) < 5 then
+			mod.variables[name] = value
+		end
+	end
 end
 
 do
@@ -3872,6 +3891,7 @@ do
 		mod = mod or inCombat[1]
 		self:SendCombatInfo(mod, target)
 		self:SendTimerInfo(mod, target)
+		self:SendVariableInfo(mod, target)
 	end
 end
 
@@ -3906,6 +3926,15 @@ function DBM:SendTimerInfo(mod, target)
 			if timeLeft > 0 and totalTime > 0 then
 				SendAddonMessage("D4", ("TI\t%s\t%s\t%s\t%s"):format(mod.id, timeLeft, totalTime, uId), "WHISPER", target)
 			end
+		end
+	end
+end
+
+function DBM:SendVariableInfo(mod, target)
+	for vname, v in pairs(mod.variables) do
+		local v2 = tostring(v)
+		if v2 then
+			SendAddonMessage("D4", ("VI\t%s\t%s\t%s"):format(mod.id, vname, v2), "WHISPER", target)
 		end
 	end
 end
@@ -4359,6 +4388,7 @@ do
 				specwarns = {},
 				timers = {},
 				countdowns = {},
+				variables = {},
 				modId = modId,
 				instanceId = instanceId,
 				revision = 0,
@@ -6808,6 +6838,14 @@ function bossModPrototype:IsInCombat()
 	return self.inCombat
 end
 
+function bossModPrototype:Phase(set)
+	if set then
+		self.variables.phase = set
+	else
+		return self.variables.phase
+	end
+end
+
 function bossModPrototype:SetMinCombatTime(t)
 	self.minCombatTime = t
 end
@@ -6941,7 +6979,7 @@ do
 		table.wipe(iconSortTable)
 		iconSet = 0
 		if DBM.Options.DebugMode then
-			print("iconSortTable cleared")
+			print("DBM Debug: iconSortTable cleared")
 		end
 	end
 

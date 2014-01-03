@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10851 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10877 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetEncounterID(1623)
 mod:SetHotfixNoticeRev(10828)
@@ -31,6 +31,7 @@ local warnChainHeal					= mod:NewSpellAnnounce(144583, 4)
 local warnChainLightning			= mod:NewSpellAnnounce(144584, 3, nil, false)--Maybe turn off by default if too spammy
 --Intermission: Realm of Y'Shaarj
 local warnYShaarjsProtection		= mod:NewTargetAnnounce(144945, 2)
+local warnYShaarjsProtectionFade	= mod:NewFadesAnnounce(144945, 1)
 local warnAnnihilate				= mod:NewCastAnnounce(144969, 4)
 --Stage Two: Power of Y'Shaarj
 local warnPhase2					= mod:NewPhaseAnnounce(2)
@@ -53,6 +54,7 @@ local warnIronStarSpawn				= mod:NewSpellAnnounce(147047, 2)
 --Stage 1: The True Horde
 local specWarnDesecrate				= mod:NewSpecialWarningCount(144748, nil, nil, nil, 2)
 local specWarnDesecrateYou			= mod:NewSpecialWarningYou(144748)
+local specWarnDesecrateNear			= mod:NewSpecialWarningClose(144748)
 local yellDesecrate					= mod:NewYell(144748)
 local specWarnHellscreamsWarsong	= mod:NewSpecialWarningSpell(144821, mod:IsTank() or mod:IsHealer())
 local specWarnExplodingIronStar		= mod:NewSpecialWarningSpell(144798, nil, nil, nil, 3)
@@ -64,7 +66,7 @@ local specWarnChainLightning		= mod:NewSpecialWarningInterrupt(144584, false)
 local specWarnAnnihilate			= mod:NewSpecialWarningSpell("OptionVersion3", 144969, false, nil, nil, 3)
 --Stage Two: Power of Y'Shaarj
 local specWarnWhirlingCorruption	= mod:NewSpecialWarningCount(144985)--Two options important, for distinction and setting custom sounds for empowered one vs non empowered one, don't merge
-local specWarnGrippingDespair		= mod:NewSpecialWarningStack(145183, mod:IsTank(), 3)--Unlike whirling and desecrate, doesn't need two options, distinction isn't important for tank swaps.
+local specWarnGrippingDespair		= mod:NewSpecialWarningStack(145183, mod:IsTank(), 4)--Unlike whirling and desecrate, doesn't need two options, distinction isn't important for tank swaps.
 local specWarnGrippingDespairOther	= mod:NewSpecialWarningTarget(145183, mod:IsTank())
 local specWarnTouchOfYShaarj		= mod:NewSpecialWarningSwitch("OptionVersion3", 145071, not mod:IsHealer())
 local specWarnTouchInterrupt		= mod:NewSpecialWarningInterrupt(145599, false)
@@ -88,7 +90,7 @@ local timerSiegeEngineerCD			= mod:NewNextTimer(40, "ej8298", nil, nil, nil, 144
 local timerPowerIronStar			= mod:NewCastTimer(16.5, 144616)
 --Intermission: Realm of Y'Shaarj
 local timerEnterRealm				= mod:NewNextTimer(145.5, 144866, nil, nil, nil, 144945)
-local timerYShaarjsProtection		= mod:NewBuffActiveTimer(61, "ej8305", nil, nil, nil, 144945)--May be too long, but intermission makes more sense than protection buff which actually fades before intermission ends if you do it right.
+local timerYShaarjsProtection		= mod:NewBuffActiveTimer(60.5, "ej8305", nil, nil, nil, 144945)--May be too long, but intermission makes more sense than protection buff which actually fades before intermission ends if you do it right.
 --Stage Two: Power of Y'Shaarj
 local timerWhirlingCorruptionCD		= mod:NewCDCountTimer(49.5, 144985)--One bar for both, "empowered" makes timer too long
 local timerWhirlingCorruption		= mod:NewBuffActiveTimer("OptionVersion2", 9, 144985, nil, false)
@@ -106,24 +108,50 @@ local soundWhirlingCorrpution		= mod:NewSound("OptionVersion2", 144985, false)--
 local countdownPowerIronStar		= mod:NewCountdown(16.5, 144616)
 local countdownWhirlingCorruption	= mod:NewCountdown(49.5, 144985)
 local countdownTouchOfYShaarj		= mod:NewCountdown("Alt45", 145071, false)--Off by default only because it's a cooldown and it does have a 45-48sec variation
-local countdownRealm				= mod:NewCountdown(61, 144945)
+local countdownRealm				= mod:NewCountdown(60.5, 144945, nil, nil, 10)
 
 mod:AddBoolOption("yellMaliceFading", false)
 mod:AddSetIconOption("SetIconOnShaman", "ej8294", false, true)
 mod:AddSetIconOption("SetIconOnMC", 145071, false)
 mod:AddSetIconOption("SetIconOnMalice", 147209, false)
+mod:AddBoolOption("InfoFrame")
 mod:AddBoolOption("RangeFrame")
 
+mod:Phase(1)
 local firstIronStar = false
 local engineerDied = 0
-local phase = 1
-local UnitExists = UnitExists
+local UnitExists, UnitDebuff = UnitExists, UnitDebuff
 local whirlCount = 0
 local desecrateCount = 0
 local mindControlCount = 0
 local shamanAlive = 0
 local bombardCount = 0
 local bombardCD = {55, 40, 40, 25, 25}
+local lines = {}
+local spellName1 = GetSpellInfo(149004)
+local spellName2 = GetSpellInfo(148983)
+local spellName3 = GetSpellInfo(148994)
+
+local function updateInfoFrame()
+	table.wipe(lines)
+	for uId in DBM:GetGroupMembers() do
+		if not (UnitDebuff(uId, spellName1) or UnitDebuff(uId, spellName2) or UnitDebuff(uId, spellName3)) and not UnitIsDeadOrGhost(uId) then
+			lines[UnitName(uId)] = ""
+		end
+	end
+	return lines
+end
+
+local function showInfoFrame()
+	if mod.Options.InfoFrame then
+		DBM.InfoFrame:SetHeader(L.NoReduce)
+		DBM.InfoFrame:Show(10, "function", updateInfoFrame)
+	end
+end
+
+local function hideInfoFrame()
+	DBM.InfoFrame:Hide()
+end
 
 function mod:DesecrateTarget(targetname, uId)
 	if not targetname then return end
@@ -132,13 +160,27 @@ function mod:DesecrateTarget(targetname, uId)
 	if targetname == UnitName("player") then
 		specWarnDesecrateYou:Show()
 		yellDesecrate:Yell()
+	else
+		if self:IsDifficulty("heroic10", "heroic25") and self:Phase() == 1 then return end--On heroic, All strat stack in weapon in phase 1 and don't want to move. Phase 2-3 all player want to run from weapon
+		local uId = DBM:GetRaidUnitId(targetname)
+		if uId then
+			local x, y = GetPlayerMapPosition(targetname)
+			if x == 0 and y == 0 then
+				SetMapToCurrentZone()
+				x, y = GetPlayerMapPosition(targetname)
+			end
+			local inRange = DBM.RangeCheck:GetDistance("player", x, y)
+			if inRange and inRange < 20 then
+				specWarnDesecrateNear:Show(targetname)
+			end
+		end
 	end
 end
 
 function mod:OnCombatStart(delay)
 	firstIronStar = false
 	engineerDied = 0
-	phase = 1
+	self:Phase(1)
 	whirlCount = 0
 	desecrateCount = 0
 	mindControlCount = 0
@@ -225,9 +267,9 @@ function mod:SPELL_CAST_SUCCESS(args)
 		else
 			specWarnEmpDesecrate:Show(desecrateCount)
 		end
-		if phase == 1 then
+		if self:Phase() == 1 then
 			timerDesecrateCD:Start(41, desecrateCount+1)
-		elseif phase == 3 then
+		elseif self:Phase() == 3 then
 			timerDesecrateCD:Start(25, desecrateCount+1)
 		else--Phase 2
 			timerDesecrateCD:Start(nil, desecrateCount+1)
@@ -236,7 +278,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 	elseif args:IsSpellID(145065, 145171) then
 		mindControlCount = mindControlCount + 1
 		specWarnTouchOfYShaarj:Show()
-		if phase == 3 then
+		if self:Phase() == 3 then
 			if mindControlCount == 1 then--First one in phase is shorter than rest (well that or rest are delayed because of whirling)
 				timerTouchOfYShaarjCD:Start(35, mindControlCount+1)
 				countdownTouchOfYShaarj:Start(35)
@@ -277,7 +319,7 @@ function mod:SPELL_AURA_APPLIED(args)
 			warnEmpGrippingDespair:Show(args.destName, amount)
 		end
 		timerGrippingDespair:Start(args.destName)
-		if amount >= 3 then
+		if amount >= 4 then
 			if args:IsPlayer() then
 				specWarnGrippingDespair:Show(amount)
 			else
@@ -327,6 +369,9 @@ mod.SPELL_AURA_APPLIED_DOSE = mod.SPELL_AURA_APPLIED
 function mod:SPELL_AURA_REMOVED(args)
 	if args:IsSpellID(145183, 145195) then
 		timerGrippingDespair:Cancel(args.destName)
+	elseif args.spellId == 144945 and self:IsInCombat() then
+		warnYShaarjsProtectionFade:Show()
+		showInfoFrame()
 	elseif args:IsSpellID(145065, 145171) and self.Options.SetIconOnMC then
 		self:SetIcon(args.destName, 0)
 	elseif args.spellId == 147209 and self.Options.SetIconOnMalice then
@@ -360,7 +405,9 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		timerDesecrateCD:Cancel()
 		timerHellscreamsWarsongCD:Cancel()
 		specWarnSiegeEngineer:Cancel()
-		timerEnterRealm:Start(25)
+		if self:Phase() == 1 then
+			timerEnterRealm:Start(25)
+		end
 	elseif spellId == 144866 then--Enter Realm of Y'Shaarj
 		timerPowerIronStar:Cancel()
 		countdownPowerIronStar:Cancel()
@@ -371,12 +418,13 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		countdownWhirlingCorruption:Cancel()
 	elseif spellId == 144956 then--Jump To Ground (intermission ending)
 		if timerEnterRealm:GetTime() > 0 then--first cast, phase2 trigger.
-			phase = 2
+			self:Phase(2)
 			warnPhase2:Show()
 		else
 			whirlCount = 0
 			desecrateCount = 0
 			mindControlCount = 0
+			hideInfoFrame()
 			timerDesecrateCD:Start(10, 1)
 			timerTouchOfYShaarjCD:Start(15, 1)
 			countdownTouchOfYShaarj:Start(15)
@@ -386,7 +434,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		end
 	--"<556.9 21:41:56> [UNIT_SPELLCAST_SUCCEEDED] Garrosh Hellscream [[boss1:Realm of Y'Shaarj::0:145647]]", -- [169886]
 	elseif spellId == 145647 then--Phase 3 trigger
-		phase = 3
+		self:Phase(3)
 		whirlCount = 0
 		desecrateCount = 0
 		mindControlCount = 0
@@ -403,7 +451,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		timerWhirlingCorruptionCD:Start(44.5, 1)
 		countdownWhirlingCorruption:Start(44.5)
 	elseif spellId == 146984 then--Phase 4 trigger
-		phase = 4
+		self:Phase(4)
 		timerEnterRealm:Cancel()
 		timerDesecrateCD:Cancel()
 		timerTouchOfYShaarjCD:Cancel()
