@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(683, "DBM-TerraceofEndlessSpring", nil, 320)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10893 $"):sub(12, -3))
 mod:SetCreatureID(60585, 60586, 60583)--60583 Protector Kaolan, 60585 Elder Regail, 60586 Elder Asani
 mod:SetEncounterID(1409)
 mod:SetZone()
@@ -238,7 +238,7 @@ end
 
 function mod:SPELL_CAST_START(args)
 	if args.spellId == 117309 then
-		self:BossTargetScanner(60586, "WatersTarget", 0.1, 15, true)
+		self:BossTargetScanner(60586, "WatersTarget", 0.1, 15, true, true)
 		timerCleansingWatersCD:Start()
 	elseif args.spellId == 117975 then
 		warnExpelCorruption:Show()

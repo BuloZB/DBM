@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10847 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10894 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetEncounterID(1598)
 mod:SetZone()
@@ -58,6 +58,7 @@ local warnDarkMeditation			= mod:NewSpellAnnounce(143546, 2)--Activation
 --Rook Stonetoe
 local specWarnVengefulStrikes		= mod:NewSpecialWarningSpell(144396, mod:IsTank())
 local specWarnClash					= mod:NewSpecialWarningYou(143027)
+local specWarnKick					= mod:NewSpecialWarningMove(143007, not mod:IsTank())
 local specWarnCorruptedBrew			= mod:NewSpecialWarningYou(143019)
 local yellCorruptedBrew				= mod:NewYell(143019)
 local specWarnCorruptedBrewNear		= mod:NewSpecialWarningClose(143019)
@@ -104,12 +105,14 @@ local berserkTimer					= mod:NewBerserkTimer(600)
 mod:AddSetIconOption("SetIconOnStrike", 143962, false)
 mod:AddRangeFrameOption(5, 143423, false)--For heroic. Need to chage smart range frame?
 
+--Upvales, don't need variables
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
-local strikeDebuff = GetSpellInfo(143962)--Cast spellid, Unconfirmed if debuff has same id or even name. Need to verify
-local sorrowActive = false
+--Not important, don't need to recover
 local isInfernoTarget = false
+--Important, needs recover
+mod.vb.sorrowActive = false
 
 function mod:BrewTarget(targetname, uId)
 	if not targetname then return end
@@ -117,18 +120,8 @@ function mod:BrewTarget(targetname, uId)
 	if targetname == UnitName("player") then
 		specWarnCorruptedBrew:Show()
 		yellCorruptedBrew:Yell()
-	else
-		if uId then
-			local x, y = GetPlayerMapPosition(uId)
-			if x == 0 and y == 0 then
-				SetMapToCurrentZone()
-				x, y = GetPlayerMapPosition(uId)
-			end
-			local inRange = DBM.RangeCheck:GetDistance("player", x, y)
-			if inRange and inRange < 6 then
-				specWarnCorruptedBrewNear:Show(targetname)
-			end
-		end
+	elseif self:CheckNearby(6, targetname) then
+		specWarnCorruptedBrewNear:Show(targetname)
 	end
 end
 
@@ -259,7 +252,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		timerBaneCD:Cancel()
 		timerCalamityCD:Cancel()
 	elseif args.spellId == 143955 then--Misery, Sorrow, and Gloom
-		sorrowActive = true
+		self.vb.sorrowActive = true
 		warnMiserySorrowGloom:Show()
 		specWarnMiserySorrowGloom:Show()
 		timerVengefulStrikesCD:Cancel()
@@ -276,7 +269,7 @@ function mod:SPELL_AURA_APPLIED(args)
 		timerGougeCD:Cancel()
 		timerGarroteCD:Cancel()
 		timerCalamityCD:Cancel()--Can't be cast during THIS special
-	elseif args.spellId == 143423 and args:IsPlayer() and sorrowActive and not self:IsDifficulty("lfr25") and not isInfernoTarget then
+	elseif args.spellId == 143423 and args:IsPlayer() and self.vb.sorrowActive and not self:IsDifficulty("lfr25") and not isInfernoTarget then
 		specWarnShaShearYou:Show()
 		yellShaShear:Yell()
 	end
@@ -288,7 +281,7 @@ function mod:SPELL_AURA_REMOVED(args)
 		timerBaneCD:Start(10)
 		timerCalamityCD:Start(23)--Now back to not cast right away again.
 	elseif args.spellId == 143955 then--Misery, Sorrow, and Gloom
-		sorrowActive = false--Just in case UNIT_DIED doesn't fire.
+		self.vb.sorrowActive = false--Just in case UNIT_DIED doesn't fire.
 		timerDefiledGroundCD:Cancel()
 		timerInfernoStrikeCD:Cancel()
 		timerInfernoStrike:Cancel()
@@ -307,6 +300,8 @@ function mod:SPELL_DAMAGE(_, _, _, _, destGUID, _, _, _, spellId)
 		specWarnDefiledGround:Show()
 	elseif spellId == 144367 and destGUID == UnitGUID("player") and self:AntiSpam(1.5, 4) then
 		specWarnNoxiousPoison:Show()
+	elseif spellId == 143009 and destGUID == UnitGUID("player") and self:AntiSpam(1.5, 5) then
+		specWarnKick:Show()
 	end
 end
 mod.SPELL_MISSED = mod.SPELL_DAMAGE
@@ -314,7 +309,7 @@ mod.SPELL_MISSED = mod.SPELL_DAMAGE
 function mod:UNIT_DIED(args)
 	local cid = self:GetCIDFromGUID(args.destGUID)
 	if cid == 71481 then--Sorrow
-		sorrowActive = false
+		self.vb.sorrowActive = false
 	end
 end
 

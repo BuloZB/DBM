@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10864 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10899 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetEncounterID(1622)
 mod:DisableESCombatDetection()
@@ -37,6 +37,9 @@ mod:RegisterEventsInCombat(
 local warnWarBanner					= mod:NewSpellAnnounce(147328, 3)
 local warnFracture					= mod:NewTargetAnnounce(146899, 3)
 local warnChainHeal					= mod:NewCastAnnounce(146757, 4)
+local warnAdd						= mod:NewCountAnnounce("ej8553", 2, "Interface\\ICONS\\INV_Misc_Head_Orc_01.blp")
+local warnProto						= mod:NewCountAnnounce("ej8587", 2, 59961)
+local warnTowerOpen					= mod:NewAnnounce("warnTowerOpen", 1, "Interface\\ICONS\\Achievement_BG_DefendXtowers_AV.blp")
 local warnDemolisher				= mod:NewSpellAnnounce("ej8562", 3, 116040)
 local warnTowerGrunt				= mod:NewAnnounce("warnTowerGrunt", 3, 89253)
 ----Master Cannoneer Dragryn (Tower)
@@ -51,6 +54,7 @@ local warnShatteringCleave			= mod:NewSpellAnnounce(146849, 3, nil, mod:IsTank()
 local warnPhase2					= mod:NewPhaseAnnounce(2, 2)
 local warnFlamesofGalakrondTarget	= mod:NewTargetAnnounce(147068, 4)
 local warnFlamesofGalakrond			= mod:NewStackAnnounce(147029, 2, nil, mod:IsTank())
+local warnPulsingFlames				= mod:NewCountAnnounce(147042, 3)
 
 --Stage 2: Bring Her Down!
 local specWarnWarBanner				= mod:NewSpecialWarningSwitch(147328, not mod:IsHealer())
@@ -66,34 +70,43 @@ local specWarnCrushersCall			= mod:NewSpecialWarningSpell(146769, false, nil, ni
 ----Korgra the Snake (Road)
 local specWarnPoisonCloud			= mod:NewSpecialWarningMove(147705)
 --Phase 3: Galakras,The Last of His Progeny
-local specWarnFlamesofGalakrond		= mod:NewSpecialWarningCount(147029, false, nil, nil, 2)--Cast often, so lets make this optional since it's spammy
+local specWarnFlamesofGalakrond		= mod:NewSpecialWarningSpell(147029, false)--Cast often, so lets make this optional since it's spammy
 local specWarnFlamesofGalakrondYou	= mod:NewSpecialWarningYou(147068)
 local yellFlamesofGalakrond			= mod:NewYell(147068)
 local specWarnFlamesofGalakrondStack= mod:NewSpecialWarningStack("OptionVersion4", 147029, nil, 6)
 local specWarnFlamesofGalakrondOther= mod:NewSpecialWarningTarget(147029, mod:IsTank())
+local specWarnPulsingFlames			= mod:NewSpecialWarningSpell(147042, false, nil, nil, 2)
 
 --Stage 2: Bring Her Down!
 local timerCombatStarts				= mod:NewCombatTimer(34.5)
-local timerAddsCD					= mod:NewNextTimer(55, "ej8553", nil, nil, nil, 2457)
+local timerAddsCD					= mod:NewNextCountTimer(55, "ej8553", nil, nil, nil, "Interface\\ICONS\\INV_Misc_Head_Orc_01.blp")
+local timerProtoCD					= mod:NewNextCountTimer(55, "ej8587", nil, nil, nil, 59961)
 local timerTowerCD					= mod:NewNextTimer(99, 81232, nil, nil, nil, 88852)
 local timerTowerGruntCD				= mod:NewTimer(60, "timerTowerGruntCD", 89253)
 local timerDemolisherCD				= mod:NewNextTimer(20, "ej8562", nil, nil, nil, 116040)--EJ is just not complete yet, shouldn't need localizing
-local timerProtoCD					= mod:NewNextTimer(55, "ej8587", nil, nil, nil, 59961)
 ----High Enforcer Thranok (Road)
 local timerShatteringCleaveCD		= mod:NewCDTimer(7.5, 146849, nil, mod:IsTank())
 local timerCrushersCallCD			= mod:NewNextTimer(30, 146769)
 
 --Phase 3: Galakras,The Last of His Progeny
-local timerFlamesofGalakrondCD		= mod:NewCDCountTimer(6, 147068)
+local timerFlamesofGalakrondCD		= mod:NewCDTimer(6, 147068)
 local timerFlamesofGalakrond		= mod:NewTargetTimer(15, 147029, nil, mod:IsTank())
+local timerPulsingFlamesCD			= mod:NewNextCountTimer(25, 147042)
+local timerPulsingFlames			= mod:NewBuffActiveTimer(7, 147042)
 
 mod:AddSetIconOption("FixateIcon", 147068)
 mod:AddSetIconOption("SetIconOnAdds", "ej8556", false, true)
 
-local addsCount = 0
-local firstTower = 0--0: first tower not started, 1: first tower started, 2: first tower breached
-local flamesCount = 0
+--Important, needs recover
+mod.vb.addsCount = 0
+mod.vb.firstTower = 0--0: first tower not started, 1: first tower started, 2: first tower breached
+mod.vb.pulseCount = 0
 
+local function protos()
+	mod.vb.addsCount = mod.vb.addsCount + 1
+	warnProto:Show(mod.vb.addsCount)
+	timerAddsCD:Start(nil, mod.vb.addsCount + 1)
+end
 
 local function TowerGrunt()
 	warnTowerGrunt:Show()
@@ -102,9 +115,9 @@ local function TowerGrunt()
 end
 
 function mod:OnCombatStart(delay)
-	addsCount = 0
-	firstTower = 0
-	flamesCount = 0
+	self.vb.addsCount = 0
+	self.vb.firstTower = 0
+	self.vb.pulseCount = 0
 --	timerAddsCD:Start(6.5-delay)--First wave actually seems to have a couple second variation, since timer is so short anyways, just disabling it
 	if not self:IsDifficulty("heroic10", "heroic25") then
 		timerTowerCD:Start(116.5-delay)
@@ -153,15 +166,13 @@ end
 
 function mod:SPELL_AURA_APPLIED(args)
 	if args.spellId == 147068 then
-		flamesCount = flamesCount + 1
 		warnFlamesofGalakrondTarget:Show(args.destName)
-		timerFlamesofGalakrondCD:Cancel(flamesCount)
-		timerFlamesofGalakrondCD:Start(nil, flamesCount+1)
+		timerFlamesofGalakrondCD:Start()
 		if args:IsPlayer() then
 			specWarnFlamesofGalakrondYou:Show()
 			yellFlamesofGalakrond:Yell()
 		else
-			specWarnFlamesofGalakrond:Show(flamesCount)
+			specWarnFlamesofGalakrond:Show()
 		end
 		if self.Options.FixateIcon then
 			self:SetIcon(args.destName, 2)
@@ -172,6 +183,12 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif args.spellId == 146899 and UnitPower("player", ALTERNATE_POWER_INDEX) == 0 then
 		warnFracture:Show(args.destName)
 		specWarnFracture:Show(args.destName)
+	elseif args.spellId == 147042 then
+		self.vb.pulseCount = self.vb.pulseCount + 1
+		warnPulsingFlames:Show(self.vb.pulseCount)
+		specWarnPulsingFlames:Show()
+		timerPulsingFlames:Start()
+		timerPulsingFlamesCD:Start(nil, self.vb.pulseCount + 1)
 	end
 end
 
@@ -237,7 +254,8 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		timerAddsCD:Cancel()
 		timerProtoCD:Cancel()
 		warnPhase2:Show()
-		timerFlamesofGalakrondCD:Start(13.5, 1)
+		timerFlamesofGalakrondCD:Start(13.5)
+		timerPulsingFlamesCD:Start(39, 1)--unconfirmed
 	end
 end
 
@@ -266,8 +284,8 @@ end
 function mod:UPDATE_WORLD_STATES()
 	local text = select(4, GetWorldStateUIInfo(4))
 	local percent = tonumber(string.match(text or "", "%d+"))
-	if percent == 1 and (firstTower == 0) and not self:IsDifficulty("heroic10", "heroic25") then
-		firstTower = 1
+	if percent == 1 and (self.vb.firstTower == 0) and not self:IsDifficulty("heroic10", "heroic25") then
+		self.vb.firstTower = 1
 		timerTowerCD:Start()
 	end
 end
@@ -276,12 +294,13 @@ end
 function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg)
 	if msg:find("cFFFF0404") then--They fixed epiccenter bug (figured they would). Color code should be usuable though. It's only emote on encounter that uses it.
 		warnDemolisher:Show()
-		if self:IsDifficulty("heroic10", "heroic25") and firstTower == 0 then
+		if self:IsDifficulty("heroic10", "heroic25") and self.vb.firstTower == 0 then
 			timerTowerGruntCD:Start(15)
 			self:Schedule(15, TowerGrunt)
-			firstTower = 2
+			self.vb.firstTower = 2
 		end
 	elseif msg:find(L.tower) then
+		warnTowerOpen:Show()
 		timerDemolisherCD:Start()
 		if self:IsDifficulty("heroic10", "heroic25") then
 			timerTowerGruntCD:Cancel()
@@ -292,14 +311,17 @@ end
 
 function mod:OnSync(msg)
 	if msg == "Adds" and self:AntiSpam(10, 4) then
-		addsCount = addsCount + 1
-		if addsCount == 1 then
-			timerAddsCD:Start(48)
-		elseif addsCount == 3 or addsCount == 7 or addsCount == 11 then--Verified. Every 4th wave gets a proto. IE waves 4, 8, 12
-			timerProtoCD:Start()
-			timerAddsCD:Start(110)
+		self.vb.addsCount = self.vb.addsCount + 1
+		if self.vb.addsCount % 5 == 3 then
+			warnAdd:Show(self.vb.addsCount)
+			timerProtoCD:Start(nil, self.vb.addsCount + 1)
+			self:Schedule(55, protos)
+		elseif self.vb.addsCount == 1 then
+			warnAdd:Show(self.vb.addsCount)
+			timerAddsCD:Start(48, 2)
 		else
-			timerAddsCD:Start()
+			warnAdd:Show(self.vb.addsCount)
+			timerAddsCD:Start(nil, self.vb.addsCount + 1)
 		end
 		if self.Options.SetIconOnAdds then
 			self:ScanForMobs(72958, 0, 8, 2, 0.2, 8)

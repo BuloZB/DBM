@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(870, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10864 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10894 $"):sub(12, -3))
 mod:SetCreatureID(73720, 71512)
 mod:SetEncounterID(1594)
 mod:DisableESCombatDetection()
@@ -119,9 +119,11 @@ local berserkWarning2			= mod:NewAnnounce(DBM_CORE_GENERIC_WARNING_BERSERK, 4, n
 mod:AddRangeFrameOption(10, 145987)
 mod:AddInfoFrameOption("ej8350")--Eh, "overview" works.
 
+--Upvales, don't need variables
 local select, tonumber, GetPlayerMapPosition, GetWorldStateUIInfo = select, tonumber, GetPlayerMapPosition, GetWorldStateUIInfo
 local point1 = {0.488816, 0.208129}
 local point2 = {0.562330, 0.371684}
+--Not important, don't need to recover
 local worldTimer = 0
 local maxTimer = 0
 
@@ -175,7 +177,7 @@ function mod:SPELL_CAST_START(args)
 	elseif args.spellId == 145288 and not isPlayerInMantid() then
 		warnMatterScramble:Show()
 		specWarnMatterScramble:Show()
-		timerMatterScramble:Start()
+		timerMatterScramble:Start(args.sourceGUID)
 		timerMatterScrambleCD:Start(args.sourceGUID)
 	elseif args.spellId == 145461 and not isPlayerInMantid() then
 		warnEnergize:Show()
@@ -295,6 +297,7 @@ function mod:UNIT_DIED(args)
 	elseif cid == 71409 then--Ka'thik Demolisher
 		timerSetToBlowCD:Cancel(args.destGUID)
 	elseif cid == 71395 then--Modified Anima Golem
+		timerMatterScramble:Cancel(args.sourceGUID)
 		timerMatterScrambleCD:Cancel(args.destGUID)
 		timerCrimsonReconCD:Cancel(args.destGUID)
 	elseif cid == 71397 then--Ka'thik Swarmleader

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10877 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10902 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -57,7 +57,7 @@ local warnCalculated				= mod:NewTargetAnnounce(144095, 3)--Wild variation on ti
 local warnInsaneCalculationFire		= mod:NewCastAnnounce(142416, 4)--3 seconds after 144095
 --Ka'roz the Locust
 local warnFlash						= mod:NewCastAnnounce(143701, 3, 2)--62-70
-local warnWhirling					= mod:NewTargetAnnounce("OptionVersion3", 143701, 3)
+local warnWhirling					= mod:NewTargetCountAnnounce(143701, 3)
 local warnHurlAmber					= mod:NewSpellAnnounce(143759, 3)
 --Skeer the Bloodseeker
 local warnBloodletting				= mod:NewSpellAnnounce(143280, 4)
@@ -130,7 +130,7 @@ local yellAim						= mod:NewYell(142948)
 local specWarnAimOther				= mod:NewSpecialWarningTarget(142948)
 local specWarnRapidFire				= mod:NewSpecialWarningSpell(143243, nil, nil, nil, 2)
 
-local timerJumpToCenter				= mod:NewCastTimer(5, 143545)
+local timerJumpToCenter				= mod:NewCastTimer(7, 143545)
 --Kil'ruk the Wind-Reaver
 local timerGouge					= mod:NewTargetTimer(10, 143939, nil, mod:IsTank())
 local timerReaveCD					= mod:NewCDTimer(33, 148676)
@@ -144,6 +144,7 @@ local timerShieldBashCD				= mod:NewCDTimer(17, 143974, nil, mod:IsTank())
 local timerEncaseInAmber			= mod:NewTargetTimer(10, 142564)
 local timerEncaseInAmberCD			= mod:NewCDTimer(30, 142564)--Technically a next timer but we use cd cause it's only cast if someone is low when it comes off 30 second internal cd. VERY important timer for heroic
 --Iyyokuk the Lucid
+local timerInsaneCalculation		= mod:NewBuffActiveTimer(9, 142808)
 local timerInsaneCalculationCD		= mod:NewCDTimer(25, 142416)--25 is minimum but variation is wild (25-50 second variation)
 --Ka'roz the Locust
 local timerFlashCD					= mod:NewCDTimer(62, 143701)
@@ -170,23 +171,25 @@ mod:AddSetIconOption("SetIconOnAim", 142948, false)
 mod:AddSetIconOption("SetIconOnMesmerize", 142671, false)
 mod:AddBoolOption("AimArrow", false)
 
+--Upvales, don't need variables
+local UnitDebuff, GetSpellInfo = UnitDebuff, GetSpellInfo
+local calculatingDude, readyToFight = EJ_GetSectionInfo(8012), GetSpellInfo(143542)
+--Tables, can't recover
 local activatedTargets = {}--A table, for the 3 on pull
 local activeBossGUIDS = {}
-local UnitDebuff = UnitDebuff
-local GetSpellInfo = GetSpellInfo
-local calculatedShape = nil
-local calculatedNumber = nil
-local calculatedColor = nil
+--Not important, don't need to recover
+local calculatedShape, calculatedNumber, calculatedColor  = nil, nil, nil
+local lastWhirl = nil
 local mathNumber = 100
-local calculatingDude = EJ_GetSectionInfo(8012)
-local readyToFight = GetSpellInfo(143542)
-local mutateCount = 0
-local aimCount = 0
-local parasitesActive = 0
-local whirlScanCount = 0
-local aimActive = false
-local mutateActive = false
-local toxicInjection = false--Workaround blizzard bug
+--Important, needs recover
+mod.vb.mutateCount = 0
+mod.vb.aimCount = 0
+mod.vb.parasitesActive = 0
+mod.vb.whirlCast = 0
+mod.vb.whirlTime = 0
+mod.vb.aimActive = false
+mod.vb.mutateActive = false
+mod.vb.toxicInjection = false--Workaround blizzard bug (double check if hotfix live and if workaround still needed on heroic)
 
 local function warnActivatedTargets(vulnerable)
 	if #activatedTargets > 1 then
@@ -205,75 +208,11 @@ end
 
 local function showRangeFrame()
 	DBM.RangeCheck:Show(3)
-	mutateActive = true
+	mod.vb.mutateActive = true
 end
 
 local function hideRangeFrame()
 	DBM.RangeCheck:Hide()
-end
-
---Another pre target scan (ie targets player BEFORE cast like iron qon)
-local function DFAScan()
-	for i = 1, 5 do
-		local unitID = "boss"..i
-		if UnitExists(unitID) and mod:GetCIDFromGUID(UnitGUID(unitID)) == 71161 then
-			if UnitExists(unitID.."target") and not mod:IsTanking(unitID.."target", unitID) then
-				mod:Unschedule(DFAScan)
-				local targetname = DBM:GetUnitFullName(unitID.."target")
-				warnDeathFromAbove:Show(targetname)
-				if UnitIsUnit(unitID.."target", "player") then
-					specWarnDeathFromAbove:Show()
-					yellDeathFromAbove:Yell()
-				else
-					local x, y = GetPlayerMapPosition(unitID.."target")
-					if x == 0 and y == 0 then
-						SetMapToCurrentZone()
-						x, y = GetPlayerMapPosition(unitID.."target")
-					end
-					local inRange = DBM.RangeCheck:GetDistance("player", x, y)
-					if inRange and inRange < 6 then
-						specWarnDeathFromAboveNear:Show(targetname)
-					end
-				end
-			else
-				mod:Schedule(0.25, DFAScan)
-			end
-			return--If we found the boss before hitting 5, want to fire this return to break checking other bosses needlessly
-		end
-	end
-end
-
-local function whirlingScan()
-	whirlScanCount = whirlScanCount + 1
-	if whirlScanCount < 80 then -- scan for 20s.
-		for i = 1, 5 do
-			local unitID = "boss"..i
-			if UnitExists(unitID) and mod:GetCIDFromGUID(UnitGUID(unitID)) == 71154 then
-				if UnitExists(unitID.."target") and not mod:IsTanking(unitID.."target", unitID) then
-					mod:Unschedule(whirlingScan)
-					local targetname = DBM:GetUnitFullName(unitID.."target")
-					warnWhirling:Show(targetname)
-					if UnitIsUnit(unitID.."target", "player") then
-						specWarnWhirling:Show()
-						yellWhirling:Yell()
-					else
-						local x, y = GetPlayerMapPosition(unitID.."target")
-						if x == 0 and y == 0 then
-							SetMapToCurrentZone()
-							x, y = GetPlayerMapPosition(unitID.."target")
-						end
-						local inRange = DBM.RangeCheck:GetDistance("player", x, y)
-						if inRange and inRange < 10 then
-							specWarnWhirlingNear:Show(targetname)
-						end
-					end
-				end
-			end
-		end
-		mod:Schedule(0.25, whirlingScan)
-	else
-		mod:Unschedule(whirlingScan)
-	end
 end
 
 local function CheckBosses(ignoreRTF)
@@ -304,7 +243,7 @@ local function CheckBosses(ignoreRTF)
 				if mod:IsDifficulty("heroic10", "heroic25") then
 					timerReaveCD:Start(38.5)
 				end
-				mod:Schedule(23, DFAScan)--Not a large sample size, data shows it happen 29-30 seconds after IEEU fires on two different pulls. Although 2 is a poor sample
+				mod:ScheduleMethod(23, "StartRepeatedScan", unitGUID, "DFAScan", 0.25, true)--Not a large sample size, data shows it happen 29-30 seconds after IEEU fires on two different pulls. Although 2 is a poor sample
 				if UnitDebuff("player", GetSpellInfo(142929)) then vulnerable = true end
 			elseif cid == 71157 then--Xaril the Poisoned-Mind
 				timerToxicCatalystCD:Start(19.5)--May need tweaking by about a sec or two. Need some transcriptors
@@ -326,20 +265,49 @@ local function CheckBosses(ignoreRTF)
 	end
 end
 
+--Another pre target scan (ie targets player BEFORE cast like iron qon)
+function mod:DFAScan(targetname)
+	self:StopRepeatedScan("DFAScan")
+	warnDeathFromAbove:Show(targetname)
+	if targetname == UnitName("player") then
+		specWarnDeathFromAbove:Show()
+		yellDeathFromAbove:Yell()
+	elseif self:CheckNearby(10, targetname) then
+		specWarnDeathFromAboveNear:Show(targetname)
+	end
+end
+
+function mod:WhirlingScan(targetname)
+	if targetname ~= lastWhirl then
+		lastWhirl = targetname
+		self.vb.whirlCast = self.vb.whirlCast + 1
+		warnWhirling:Show(self.vb.whirlCast, targetname)
+		if targetname == UnitName("player") then
+			specWarnWhirling:Show()
+			yellWhirling:Yell()
+		elseif self:CheckNearby(10, targetname) then
+			specWarnWhirlingNear:Show(targetname)
+		end
+	end
+	if (self.vb.whirlCast > 2) or ((GetTime() - self.vb.whirlTime) > 10) then
+		self:StopRepeatedScan("WhirlingScan")
+	end
+end
+
 function mod:OnCombatStart(delay)
 	table.wipe(activeBossGUIDS)
 	table.wipe(activatedTargets)
 	calculatedShape = nil
 	calculatedNumber = nil
 	calculatedColor = nil
-	mutateCount = 0
-	aimCount = 0
-	parasitesActive = 0
-	aimActive = false
-	mutateActive = false
-	toxicInjection = false
+	self.vb.mutateCount = 0
+	self.vb.aimCount = 0
+	self.vb.parasitesActive = 0
+	self.vb.aimActive = false
+	self.vb.mutateActive = false
+	self.vb.toxicInjection = false
 	self:RegisterShortTermEvents(
-		"INSTANCE_ENCOUNTER_ENGAGE_UNIT"--We register here to make sure we wipe variables on pull
+		"INSTANCE_ENCOUNTER_ENGAGE_UNIT"--We register here to make sure we wipe vb.on pull
 	)
 	timerJumpToCenter:Start(-delay)
 	berserkTimer:Start(-delay)
@@ -368,7 +336,7 @@ function mod:INSTANCE_ENCOUNTER_ENGAGE_UNIT()
 end
 
 local function delayedCatalyst(spellID)
-	toxicInjection = true--we won't need work around anymore since you'll get injections from the catalysts cast
+	mod.vb.toxicInjection = true--we won't need work around anymore since you'll get injections from the catalysts cast
 	local debuffFound = false
 	if spellID == 142725 then
 		if UnitDebuff("player", GetSpellInfo(142532)) then
@@ -431,7 +399,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystBlue:Show()
 		end
 		--Work around blizzard bug. Sometimes he doesn't cast injection, causing you to not have a color assignment until 0.5 after this SPELL_CAST_START event.
-		if not toxicInjection then
+		if not self.vb.toxicInjection then
 			self:Schedule(0.2, delayedCatalyst, args.spellId)
 		else
 			delayedCatalyst(args.spellId)
@@ -442,7 +410,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystRed:Show()
 		end
 		--Work around blizzard bug. Sometimes he doesn't cast injection, causing you to not have a color assignment until 0.5 after this SPELL_CAST_START event.
-		if not toxicInjection then
+		if not self.vb.toxicInjection then
 			self:Schedule(0.2, delayedCatalyst, args.spellId)
 		else
 			delayedCatalyst(args.spellId)
@@ -453,7 +421,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystYellow:Show()
 		end
 		--Work around blizzard bug. Sometimes he doesn't cast injection, causing you to not have a color assignment until 0.5 after this SPELL_CAST_START event.
-		if not toxicInjection then
+		if not self.vb.toxicInjection then
 			self:Schedule(0.2, delayedCatalyst, args.spellId)
 		else
 			delayedCatalyst(args.spellId)
@@ -464,7 +432,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystOrange:Show()
 		end
 		--Work around blizzard bug. Sometimes he doesn't cast injection, causing you to not have a color assignment until 0.5 after this SPELL_CAST_START event.
-		if not toxicInjection then
+		if not self.vb.toxicInjection then
 			self:Schedule(0.2, delayedCatalyst, args.spellId)
 		else
 			delayedCatalyst(args.spellId)
@@ -475,7 +443,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystPurple:Show()
 		end
 		--Work around blizzard bug. Sometimes he doesn't cast injection, causing you to not have a color assignment until 0.5 after this SPELL_CAST_START event.
-		if not toxicInjection then
+		if not self.vb.toxicInjection then
 			self:Schedule(0.2, delayedCatalyst, args.spellId)
 		else
 			delayedCatalyst(args.spellId)
@@ -486,7 +454,7 @@ function mod:SPELL_CAST_START(args)
 			warnToxicCatalystGreen:Show()
 		end
 		--Work around blizzard bug. Sometimes he doesn't cast injection, causing you to not have a color assignment until 0.5 after this SPELL_CAST_START event.
-		if not toxicInjection then
+		if not self.vb.toxicInjection then
 			self:Schedule(0.2, delayedCatalyst, args.spellId)
 		else
 			delayedCatalyst(args.spellId)
@@ -502,8 +470,10 @@ function mod:SPELL_CAST_START(args)
 		warnFlash:Show()
 		specWarnFlash:Show()
 		timerFlashCD:Start()
-		whirlScanCount = 0
-		whirlingScan()
+		self.vb.whirlCast = 0
+		self.vb.whirlTime = GetTime()
+		lastWhirl = nil
+		self:StartRepeatedScan(args.sourceGUID, "WhirlingScan", 0.08, true)
 		if self.Options.RangeFrame then
 			DBM.RangeCheck:Show(6)--Range assumed, spell tooltips not informative enough
 			self:Schedule(5, hideRangeFrame)
@@ -533,9 +503,9 @@ function mod:SPELL_CAST_START(args)
 		for i = 1, 5 do
 			local bossUnitID = "boss"..i
 			if UnitExists(bossUnitID) and UnitGUID(bossUnitID) == args.sourceGUID and UnitDetailedThreatSituation("player", bossUnitID) then
-				local elapsed, total = timerMutateCD:GetTime(mutateCount+1)
+				local elapsed, total = timerMutateCD:GetTime(self.vb.mutateCount+1)
 				local remaining = total - elapsed
-				if self:IsDifficulty("heroic10", "heroic25") and (remaining < 20) and (parasitesActive < 3) and not UnitDebuff("player", GetSpellInfo(143339)) then--We need more parasites to spawn with this attack
+				if self:IsDifficulty("heroic10", "heroic25") and (remaining < 20) and (self.vb.parasitesActive < 3) and not UnitDebuff("player", GetSpellInfo(143339)) then--We need more parasites to spawn with this attack
 					specWarnMoreParasites:Show()
 				else--We want to block attack and not spawn anything
 					specWarnInjection:Show()
@@ -555,12 +525,12 @@ end
 
 function mod:SPELL_CAST_SUCCESS(args)
 	if args.spellId == 142528 then
-		toxicInjection = true
+		self.vb.toxicInjection = true
 		warnToxicInjection:Show()
 		timerToxicCatalystCD:Start(20)
 	elseif args.spellId == 142232 then
-		self:Unschedule(DFAScan)
-		self:Schedule(17, DFAScan)
+		self:StopRepeatedScan("DFAScan")
+		self:ScheduleMethod(17, "StartRepeatedScan", args.sourceGUID, "DFAScan", 0.25, true)
 	end
 end
 
@@ -626,17 +596,17 @@ function mod:SPELL_AURA_APPLIED(args)
 		timerHurlAmberCD:Start()
 	elseif args.spellId == 143337 then
 		if self:AntiSpam(2, 3) then
-			mutateCount = mutateCount + 1
-			timerMutateCD:Start(nil, mutateCount+1)
+			self.vb.mutateCount = self.vb.mutateCount + 1
+			timerMutateCD:Start(nil, self.vb.mutateCount+1)
 			if self.Options.RangeFrame then
-				mutateActive = false
-				if not aimActive then
+				self.vb.mutateActive = false
+				if not self.vb.aimActive then
 					DBM.RangeCheck:Hide()--Hide it if aim isn't active, otherwise, delay hide call until hide is called by SPELL_AURA_REMOVED for aim
 				end
 				self:Schedule(26.5, showRangeFrame)--Show about 5 seconds before mutate cast
 			end
 		end
-		warnMutate:CombinedShow(0.5, mutateCount, args.destName)
+		warnMutate:CombinedShow(0.5, self.vb.mutateCount, args.destName)
 		if args.IsPlayer() then
 			specWarnMutate:Show()
 			timerMutate:Start()
@@ -644,15 +614,15 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif args.spellId == 143358 and args.IsPlayer() then
 		specWarnParasiteFixate:Show()
 	elseif args.spellId == 142948 then
-		aimCount = aimCount + 1
-		aimActive = true
-		warnAim:Show(aimCount, args.destName)
+		self.vb.aimCount = self.vb.aimCount + 1
+		self.vb.aimActive = true
+		warnAim:Show(self.vb.aimCount, args.destName)
 		if self:IsDifficulty("lfr25") then
 			timerAim:Start(7, args.destName)
 		else
 			timerAim:Start(nil, args.destName)
 		end
-		timerAimCD:Start(nil, aimCount+1)
+		timerAimCD:Start(nil, self.vb.aimCount+1)
 		if args.IsPlayer() then
 			specWarnAim:Show()
 			yellAim:Yell()
@@ -683,12 +653,12 @@ function mod:SPELL_AURA_REMOVED(args)
 		timerGouge:Cancel(args.destName)
 	elseif args.spellId == 143974 then
 		timerShieldBash:Cancel(args.destName)
-	elseif args.spellId == 143700 and self.Options.RangeFrame and not mutateActive and not aimActive then
+	elseif args.spellId == 143700 and self.Options.RangeFrame and not self.vb.mutateActive and not self.vb.aimActive then
 		DBM.RangeCheck:Hide()
 	elseif args.spellId == 142948 then
-		aimActive = false
+		self.vb.aimActive = false
 		if self.Options.RangeFrame then
-			if not mutateActive then--Don't call hide because frame is needed by mutate and will be hiden after that.
+			if not self.vb.mutateActive then--Don't call hide because frame is needed by mutate and will be hiden after that.
 				DBM.RangeCheck:Hide()
 			end
 		end
@@ -696,7 +666,7 @@ function mod:SPELL_AURA_REMOVED(args)
 			self:SetIcon(args.destName, 0)
 		end
 	elseif args.spellId == 143339 then
-		parasitesActive = parasitesActive + 8
+		self.vb.parasitesActive = self.vb.parasitesActive + 8
 	elseif args.spellId == 142671 and self.Options.SetIconOnMesmerize then
 		self:SetIcon(args.destName, 0)
 	end
@@ -724,7 +694,7 @@ local FlavorTable = {
 function mod:UNIT_DIED(args)
 	local cid = self:GetCIDFromGUID(args.destGUID)
 	if cid == 71161 then--Kil'ruk the Wind-Reaver
-		self:Unschedule(DFAScan)
+		self:StopRepeatedScan(args.sourceGUID, "DFAScan")
 		timerReaveCD:Cancel()
 	elseif cid == 71157 then--Xaril the Poisoned-Mind
 		timerToxicCatalystCD:Cancel()
@@ -735,7 +705,7 @@ function mod:UNIT_DIED(args)
 	elseif cid == 71160 then--Iyyokuk the Lucid
 		timerInsaneCalculationCD:Cancel()
 	elseif cid == 71154 then--Ka'roz the Locust
-		self:Unschedule(whirlingScan)
+		self:StopRepeatedScan("WhirlingScan")
 		timerFlashCD:Cancel()
 		timerHurlAmberCD:Cancel()
 	elseif cid == 71152 then--Skeer the Bloodseeker
@@ -749,8 +719,8 @@ function mod:UNIT_DIED(args)
 		timerAimCD:Cancel()
 		timerRapidFireCD:Cancel()
 	elseif cid == 71578 then--Amber Parasite
-		parasitesActive = parasitesActive - 1
-		warnParasitesLeft:Show(parasitesActive)
+		self.vb.parasitesActive = self.vb.parasitesActive - 1
+		warnParasitesLeft:Show(self.vb.parasitesActive)
 	elseif cid == 71156 then--Kaz'tik the Manipulator
 		timerMesmerizeCD:Cancel()
 	end
@@ -864,6 +834,7 @@ end
 local function delayMonsterEmote(target)
 	--Because now the raid boss emotes fire AFTER this and we need them first
 	warnCalculated:Show(target)
+	timerInsaneCalculation:Start()
 	timerInsaneCalculationCD:Start()
 	if target == UnitName("player") then
 		specWarnCalculated:Show()

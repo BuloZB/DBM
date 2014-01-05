@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10877 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10894 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
 mod:DisableESCombatDetection()
@@ -37,6 +37,7 @@ local warnUnleashedAnger				= mod:NewSpellAnnounce(145216, 2, nil, mod:IsTank())
 local warnBlindHatred					= mod:NewSpellAnnounce(145226, 3)
 local warnManifestation					= mod:NewSpellAnnounce("ej8232", 1, 147082)
 local warnResidualCorruption			= mod:NewSpellAnnounce(145073)
+local warnLookWithinEnd					= mod:NewEndTargetAnnounce("ej8220", 2, nil, false)
 --Test of Serenity (DPS)
 local warnTearReality					= mod:NewCastAnnounce(144482, 3)
 --Test of Reliance (Healer)
@@ -91,11 +92,15 @@ local countdownHurlCorruption			= mod:NewCountdown("Alt20", 144649)
 
 mod:AddInfoFrameOption("ej8252", false)--May still be buggy but it's needed for heroic.
 
+--Upvales, don't need variables
 local corruptionLevel = EJ_GetSectionInfo(8252)
-local unleashedAngerCast = 0
+--Tables, can't recover
+local residue = {}
+--Not important, don't need to recover
 local playerInside = false
 local previousPower = nil
-local residue = {}
+--Important, needs recover
+mod.vb.unleashedAngerCast = 0
 
 --May be buggy with two adds spawning at exact same time
 --Two different icon functions end up both marking same mob with 8 and 7 and other mob getting no mark.
@@ -108,7 +113,7 @@ end
 local function addSync()
 	specWarnManifestationSoon:Show()
 	if mod:IsDifficulty("lfr25") then
-		mod:Schedule(10, addsDelay, GetTime())
+		mod:Schedule(15, addsDelay, GetTime())
 	else
 		mod:Schedule(5, addsDelay, GetTime())
 	end
@@ -123,6 +128,7 @@ end
 function mod:OnCombatStart(delay)
 	playerInside = false
 	previousPower = nil
+	mod.vb.unleashedAngerCast = 0
 	table.wipe(residue)
 	timerBlindHatredCD:Start(25-delay)
 	if self:IsDifficulty("lfr25") then
@@ -145,11 +151,11 @@ end
 
 function mod:SPELL_CAST_START(args)
 	if args.spellId == 145216 then
-		unleashedAngerCast = unleashedAngerCast + 1
-		warnUnleashedAnger:Show(unleashedAngerCast)
+		self.vb.unleashedAngerCast = self.vb.unleashedAngerCast + 1
+		warnUnleashedAnger:Show(self.vb.unleashedAngerCast)
 		specWarnUnleashedAnger:Show()
-		if unleashedAngerCast < 3 then
-			timerUnleashedAngerCD:Start(nil, unleashedAngerCast+1)
+		if self.vb.unleashedAngerCast < 3 then
+			timerUnleashedAngerCD:Start(nil, self.vb.unleashedAngerCast+1)
 		end
 	elseif args.spellId == 144482 then
 		warnTearReality:Show()
@@ -196,18 +202,21 @@ function mod:SPELL_AURA_APPLIED(args)
 end
 
 function mod:SPELL_AURA_REMOVED(args)
-	if args:IsSpellID(144849, 144850, 144851) and args:IsPlayer() then--Look Within
-		playerInside = false
-		timerTearRealityCD:Cancel()
-		timerLingeringCorruptionCD:Cancel()
-		countdownLingeringCorruption:Cancel()
-		timerDishearteningLaughCD:Cancel()
-		timerTitanicSmashCD:Cancel()
-		timerHurlCorruptionCD:Cancel()
-		countdownHurlCorruption:Cancel()
-		timerPiercingCorruptionCD:Cancel()
-		timerLookWithin:Cancel()
-		countdownLookWithin:Cancel()
+	if args:IsSpellID(144849, 144850, 144851) then--Look Within
+		warnLookWithinEnd:CombinedShow(1, args.destName)
+		if args:IsPlayer() then
+			playerInside = false
+			timerTearRealityCD:Cancel()
+			timerLingeringCorruptionCD:Cancel()
+			countdownLingeringCorruption:Cancel()
+			timerDishearteningLaughCD:Cancel()
+			timerTitanicSmashCD:Cancel()
+			timerHurlCorruptionCD:Cancel()
+			countdownHurlCorruption:Cancel()
+			timerPiercingCorruptionCD:Cancel()
+			timerLookWithin:Cancel()
+			countdownLookWithin:Cancel()
+		end
 	elseif args.spellId == 145226 then
 		self:SendSync("BlindHatredEnded")
 	end
@@ -260,7 +269,7 @@ function mod:OnSync(msg, guid)
 		timerBlindHatred:Start()
 	elseif msg == "BlindHatredEnded" then
 		timerBlindHatredCD:Start()
-		unleashedAngerCast = 0
+		self.vb.unleashedAngerCast = 0
 	elseif msg == "prepull" then
 		timerCombatStarts:Start()
 	end

@@ -34,15 +34,17 @@ L:SetOptionLocalization({
 L= DBM:GetModLocalization(868)
 
 L:SetWarningLocalization({
+	warnTowerOpen		= "Tower opened",
 	warnTowerGrunt		= "Tower Grunt"
 })
 
 L:SetTimerLocalization({
 	timerTowerCD		= "Next Tower",
-	timerTowerGruntCD	= "Next tower grunt"
+	timerTowerGruntCD	= "Next Tower Grunt"
 })
 
 L:SetOptionLocalization({
+	warnTowerOpen		= "Announce when tower opens",
 	warnTowerGrunt		= "Announce when new tower grunt spawns",
 	timerTowerCD		= "Show timer for next tower assault",
 	timerTowerGruntCD	= "Show timer for next tower grunt"

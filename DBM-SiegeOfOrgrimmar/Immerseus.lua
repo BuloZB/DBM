@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(852, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10767 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10894 $"):sub(12, -3))
 mod:SetCreatureID(71543)
 mod:SetEncounterID(1602)
 mod:SetReCombatTime(45)--Lets just assume he has same bug as tsulong in advance and avoid problems
@@ -44,10 +44,7 @@ local timerSwellingCorruptionCD			= mod:NewCDTimer(75, 143578, nil, nil, nil, 14
 
 local berserkTimer						= mod:NewBerserkTimer(605)
 
-local lastPower = 100
-
 function mod:OnCombatStart(delay)
-	lastPower = 100
 	timerBreathCD:Start(10-delay)
 	timerSwirlCD:Start(20-delay)
 	berserkTimer:Start(-delay)
