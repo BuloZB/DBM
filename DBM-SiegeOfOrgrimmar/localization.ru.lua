@@ -50,7 +50,7 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
-	wasteOfTime		= "Well done! Landing parties, form up! Footmen to the front!",--Alliance Version
+	wasteOfTime		= "Отлично! Десант, стройся! Пехота – впереди.",--Alliance Version
 	wasteOfTime2	= "Отлично, первый отряд высадился.",--Horde Version
 	Pull			= "Воины Драконьей Пасти! Отбейте пристань и сбросьте врага в море! Во имя Истинной Орды!",
 	newForces1		= "Вот и они!",--Jaina's line, horde may not be same
