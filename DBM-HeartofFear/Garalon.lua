@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(713, "DBM-HeartofFear", nil, 330)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10923 $"):sub(12, -3))
 mod:SetCreatureID(63191)--Also has CID 62164. He has 2 CIDs for a single target, wtf? It seems 63191 is one players attack though so i'll try just it.
 mod:SetEncounterID(1463)
 mod:SetZone()
@@ -10,14 +10,14 @@ mod:SetUsedIcons(2)
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
-	"SPELL_AURA_REMOVED_DOSE",
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
-	"SPELL_DAMAGE",
-	"SPELL_MISSED",
+	"SPELL_AURA_APPLIED 122754 122786 122835 123081",
+	"SPELL_AURA_APPLIED_DOSE 122754 122784 122835 123081",
+	"SPELL_AURA_REMOVED 122786 122835 123081",
+	"SPELL_AURA_REMOVED_DOSE 122786 122835 123081",
+	"SPELL_CAST_START 122735",
+	"SPELL_CAST_SUCCESS 123495",
+	"SPELL_DAMAGE 123120",
+	"SPELL_MISSED 123120",
 	"CHAT_MSG_RAID_BOSS_EMOTE"
 )
 

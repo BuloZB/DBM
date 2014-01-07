@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(814, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10698 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10925 $"):sub(12, -3))
 mod:SetCreatureID(69099)
 mod:SetReCombatTime(20)
 mod:SetZone()
@@ -10,9 +10,8 @@ mod:SetMinSyncRevision(10466)
 mod:RegisterCombat("combat_yell", L.Pull)
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_START",
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_REMOVED"
+	"SPELL_CAST_START 136340 136338 136339",
+	"SPELL_AURA_APPLIED 136340 136339"
 )
 
 local warnStormcloud				= mod:NewTargetAnnounce(136340, 3)

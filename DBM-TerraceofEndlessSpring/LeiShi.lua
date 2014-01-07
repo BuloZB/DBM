@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(729, "DBM-TerraceofEndlessSpring", nil, 320)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10805 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10921 $"):sub(12, -3))
 mod:SetCreatureID(62983)--62995 Animated Protector
 mod:SetEncounterID(1506)
 
@@ -10,10 +10,10 @@ mod:RegisterKill("yell", L.Victory)--Kill detection is aweful. No death, no spec
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3) -- on 25 heroic 6 guards spawn.
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
-	"SPELL_CAST_START",
+	"SPELL_AURA_APPLIED 123250 123505 123461 123121 123705",
+	"SPELL_AURA_APPLIED_DOSE 123121 123705",
+	"SPELL_AURA_REMOVED 123250 123121 123461",
+	"SPELL_CAST_START 123244 123705",
 	"UNIT_HEALTH boss1",--UNIT_HEALTH_FREQUENT maybe not needed. It's too high cpu usage.
 	"UNIT_SPELLCAST_SUCCEEDED boss1"
 )

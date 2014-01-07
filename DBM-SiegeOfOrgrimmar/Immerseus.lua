@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(852, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10894 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10913 $"):sub(12, -3))
 mod:SetCreatureID(71543)
 mod:SetEncounterID(1602)
 mod:SetReCombatTime(45)--Lets just assume he has same bug as tsulong in advance and avoid problems
@@ -11,12 +11,12 @@ mod:RegisterCombat("combat")
 mod:RegisterKill("yell", L.Victory)
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_START",
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
-	"SPELL_PERIODIC_DAMAGE",
-	"SPELL_PERIODIC_MISSED",
+	"SPELL_CAST_START 143436 143309",
+	"SPELL_AURA_APPLIED 143459 143524 143297 143574",
+	"SPELL_AURA_APPLIED_DOSE 143459 143524 143297 143574",--needs review
+	"SPELL_AURA_REMOVED 143459 143524 143574",
+	"SPELL_PERIODIC_DAMAGE 143297",
+	"SPELL_PERIODIC_MISSED 143297",
 	"UNIT_SPELLCAST_SUCCEEDED boss1",
 	"CHAT_MSG_RAID_BOSS_EMOTE"
 )

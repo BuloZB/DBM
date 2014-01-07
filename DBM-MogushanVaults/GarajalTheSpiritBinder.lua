@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(682, "DBM-MogushanVaults", nil, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10924 $"):sub(12, -3))
 mod:SetCreatureID(60143)
 mod:SetEncounterID(1434)
 mod:SetZone()
@@ -11,10 +11,10 @@ mod:SetMinSyncRevision(7751)
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_REFRESH",
-	"SPELL_AURA_REMOVED",
-	"SPELL_CAST_SUCCESS",
+	"SPELL_AURA_APPLIED 122151 116161 116260 116278 117543 117549 117723 117752",
+	"SPELL_AURA_REFRESH 122151 116161 116260 116278 117543 117549 117723 117752",
+	"SPELL_AURA_REMOVED 116161 116260 116278 122151 117543 115749 117723",
+	"SPELL_CAST_SUCCESS 116174 116272",
 	"UNIT_SPELLCAST_SUCCEEDED boss1"
 )
 

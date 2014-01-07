@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(691, "DBM-Pandaria", nil, 322)	-- 322 = Pandaria/Outdoor I assume
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10855 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10925 $"):sub(12, -3))
 mod:SetCreatureID(60491)
 mod:SetReCombatTime(20)
 mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)
@@ -11,9 +11,9 @@ mod:SetZone()
 mod:RegisterCombat("combat_yell", L.Pull)
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_START",
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_REMOVED",
+	"SPELL_CAST_START 119488 119622",
+	"SPELL_AURA_APPLIED 119622 119626",
+	"SPELL_AURA_REMOVED 119626 119488",
 	"UNIT_AURA player"
 )
 

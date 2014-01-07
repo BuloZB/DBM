@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(737, "DBM-HeartofFear", nil, 330)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10923 $"):sub(12, -3))
 mod:SetCreatureID(62511)
 mod:SetEncounterID(1499)
 mod:SetZone()
@@ -10,13 +10,13 @@ mod:SetMinSyncRevision(8052)
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
-	"SPELL_DAMAGE",
-	"SPELL_MISSED",
+	"SPELL_AURA_APPLIED 123059 121949 122540 122395 122784 125502",
+	"SPELL_AURA_APPLIED_DOSE 123059",
+	"SPELL_AURA_REMOVED 122370 121994 121949 122540",
+	"SPELL_CAST_START 122398 122402 122408 122413",
+	"SPELL_CAST_SUCCESS 122348 121994 122532 123156 122389",
+	"SPELL_DAMAGE 122504",
+	"SPELL_MISSED 122504",
 	"UNIT_SPELLCAST_STOP boss1 boss2"
 )
 

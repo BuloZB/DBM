@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(828, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10920 $"):sub(12, -3))
 mod:SetCreatureID(69712)
 mod:SetEncounterID(1573)
 mod:SetZone()
@@ -11,9 +11,9 @@ mod:RegisterCombat("combat")
 mod:RegisterEventsInCombat(
 	"UNIT_SPELLCAST_CHANNEL_START boss1",
 	"UNIT_SPELLCAST_START boss1",
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
+	"SPELL_AURA_APPLIED 134366 133755 140741 140571",
+	"SPELL_AURA_APPLIED_DOSE 134366",
+	"SPELL_AURA_REMOVED 134366 133755 140741 140571",
 	"CHAT_MSG_RAID_BOSS_EMOTE",
 	"CHAT_MSG_MONSTER_EMOTE"
 )
@@ -77,8 +77,8 @@ function mod:OnCombatStart(delay)
 	end
 	if self.Options[specWarnFeedPool.option] then--specWarnFeedPool is turned on, since it's off by default, no reason to register high CPU events unless user turns it on
 		self:RegisterShortTermEvents(
-			"SPELL_PERIODIC_DAMAGE",
-			"SPELL_PERIODIC_MISSED"
+			"SPELL_PERIODIC_DAMAGE 138319",
+			"SPELL_PERIODIC_MISSED 138319"
 		)
 	end
 end

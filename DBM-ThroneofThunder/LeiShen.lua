@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(832, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10920 $"):sub(12, -3))
 mod:SetCreatureID(68397)--Diffusion Chain Conduit 68696, Static Shock Conduit 68398, Bouncing Bolt conduit 68698, Overcharge conduit 68697
 mod:SetEncounterID(1579)
 mod:SetZone()
@@ -10,13 +10,13 @@ mod:SetUsedIcons(8, 7, 6, 5, 4, 3, 2, 1)--All icons can be used, because if a pi
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_START",
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
-	"SPELL_CAST_SUCCESS",
-	"SPELL_PERIODIC_DAMAGE",
-	"SPELL_PERIODIC_MISSED",
+	"SPELL_CAST_START 135095 136850 136478",
+	"SPELL_AURA_APPLIED 135000 134912 135695 136295 135680 135681 139011 136914",
+	"SPELL_AURA_APPLIED_DOSE 136914",
+	"SPELL_CAST_SUCCESS 135991 136543 108199 114028",
+	"SPELL_AURA_REMOVED 135680 135681 135682 135683 135695 136295",
+	"SPELL_PERIODIC_DAMAGE 135153 137176",
+	"SPELL_PERIODIC_MISSED 135153 137176",
 	"CHAT_MSG_RAID_BOSS_EMOTE",
 	"UNIT_SPELLCAST_SUCCEEDED"
 )
@@ -179,8 +179,8 @@ function mod:OnCombatStart(delay)
 	berserkTimer:Start(-delay)
 	self:RegisterShortTermEvents(
 		"UNIT_HEALTH_FREQUENT boss1",
-		"SPELL_DAMAGE",
-		"SPELL_MISSED"
+		"SPELL_DAMAGE 135150 135991",
+		"SPELL_MISSED 135150 135991"
 	)-- Do not use on phase 3.
 end
 

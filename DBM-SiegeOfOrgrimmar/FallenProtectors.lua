@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(849, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10894 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10913 $"):sub(12, -3))
 mod:SetCreatureID(71479, 71475, 71480)--He-Softfoot, Rook Stonetoe, Sun Tenderheart
 mod:SetEncounterID(1598)
 mod:SetZone()
@@ -10,12 +10,12 @@ mod:SetUsedIcons(7)
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_REMOVED",
-	"SPELL_DAMAGE",
-	"SPELL_MISSED",
+	"SPELL_CAST_START 143958 143330 143446 143491 143961 143962 143497 144396",
+	"SPELL_CAST_SUCCESS 143027 143423",
+	"SPELL_AURA_APPLIED 143959 143301 143198 143840 143546 143955 143812 143423",
+	"SPELL_AURA_REMOVED 143546 143955 143812",
+	"SPELL_DAMAGE 144357 144367 143009",
+	"SPELL_MISSED 144357 144367 143009",
 	"RAID_BOSS_WHISPER",
 	"UNIT_SPELLCAST_SUCCEEDED boss1 boss2 boss3"
 )

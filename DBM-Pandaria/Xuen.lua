@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(860, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10505 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10925 $"):sub(12, -3))
 mod:SetCreatureID(71953)
 mod:SetReCombatTime(20)
 mod:SetZone()
@@ -11,10 +11,10 @@ mod:RegisterCombat("combat_yell", L.Pull)
 mod:RegisterKill("yell", L.Victory)
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_START",
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
+	"SPELL_CAST_START 144635 144642",
+	"SPELL_AURA_APPLIED 144638 144631",
+	"SPELL_AURA_APPLIED_DOSE 144638 144631",
+	"SPELL_AURA_REMOVED 144638",
 	"UNIT_SPELLCAST_SUCCEEDED target focus"
 )
 

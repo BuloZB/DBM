@@ -1,15 +1,15 @@
 local mod	= DBM:NewMod("ToTTrash", "DBM-ThroneofThunder")
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10579 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10920 $"):sub(12, -3))
 mod:SetModelID(47785)
 mod:SetZone()
 
 mod.isTrashMod = true
 
 mod:RegisterEvents(
-	"SPELL_CAST_START",
-	"SPELL_AURA_APPLIED",
+	"SPELL_CAST_START 139895 136751 139899",
+	"SPELL_AURA_APPLIED 139322 139900 140296",
 	"UNIT_DIED",
 	"UNIT_SPELLCAST_SUCCEEDED target focus"
 )

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(683, "DBM-TerraceofEndlessSpring", nil, 320)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10893 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10921 $"):sub(12, -3))
 mod:SetCreatureID(60585, 60586, 60583)--60583 Protector Kaolan, 60585 Elder Regail, 60586 Elder Asani
 mod:SetEncounterID(1409)
 mod:SetZone()
@@ -11,11 +11,11 @@ mod:SetBossHPInfoToHighest()
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS"
+	"SPELL_AURA_APPLIED 117519 111850 117436 117283 117052 118191",
+	"SPELL_AURA_APPLIED_DOSE 118191",
+	"SPELL_AURA_REMOVED 117519 117436",
+	"SPELL_CAST_START 117309 117975 117227 118077 118312",
+	"SPELL_CAST_SUCCESS 117986 117052 118191"
 )
 
 local Kaolan = EJ_GetSectionInfo(5789)

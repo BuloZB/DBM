@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(726, "DBM-MogushanVaults", nil, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10809 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10924 $"):sub(12, -3))
 mod:SetCreatureID(60410)--Energy Charge (60913), Emphyreal Focus (60776), Cosmic Spark (62618), Celestial Protector (60793)
 mod:SetEncounterID(1500)
 mod:DisableESCombatDetection()
@@ -13,11 +13,11 @@ mod:SetUsedIcons(8, 7, 6, 5, 4, 3)
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
-	"SPELL_CAST_SUCCESS",
-	"SPELL_CAST_START"
+	"SPELL_AURA_APPLIED 124967 116994 117878 119389 118310 132226 132222",
+	"SPELL_AURA_APPLIED_DOSE 117878",
+	"SPELL_AURA_REMOVED 116994 132226 132222",
+	"SPELL_CAST_SUCCESS 116598 132265 116989",
+	"SPELL_CAST_START 117960 117954 117945 129711 117949 119358"
 )
 
 local warnPhase1					= mod:NewPhaseAnnounce(1, 2)--117727 Charge Vortex

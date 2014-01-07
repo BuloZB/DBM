@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(738, "DBM-Party-MoP", 6, 324)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10922 $"):sub(12, -3))
 mod:SetCreatureID(61634)
 mod:SetEncounterID(1502)
 mod:SetZone()
@@ -9,14 +9,14 @@ mod:SetZone()
 mod:RegisterCombat("combat")
 
 mod:RegisterEvents(
-	"SPELL_AURA_REMOVED",
+	"SPELL_AURA_REMOVED 120402 120759",
 --	"CHAT_MSG_MONSTER_YELL",
 	"RAID_BOSS_EMOTE"
 )
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_CAST_START"
+	"SPELL_AURA_APPLIED 120759",
+	"SPELL_CAST_START 120789"
 )
 
 local warnCausticTar			= mod:NewSpellAnnounce("ej6278", 2)--Announce a tar is ready to be used. (may be spammy and turned off by default if it is)

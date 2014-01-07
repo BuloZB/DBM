@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(745, "DBM-HeartofFear", nil, 330)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10923 $"):sub(12, -3))
 mod:SetCreatureID(62980)--63554 (Special invisible Vizier that casts the direction based spellid versions of attenuation)
 mod:SetEncounterID(1507)
 mod:SetZone()
@@ -10,11 +10,11 @@ mod:RegisterCombat("combat")
 mod:RegisterKill("yell", L.Defeat)
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REMOVED",
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
+	"SPELL_AURA_APPLIED 122852 122761 122740",
+	"SPELL_AURA_APPLIED_DOSE 122852",
+	"SPELL_AURA_REMOVED 122761 122740",
+	"SPELL_CAST_START 122713 122474 122496 123721 122479 122497 123722 127834",
+	"SPELL_CAST_SUCCESS 124018",
 	"RAID_BOSS_EMOTE",
 	"UNIT_SPELLCAST_SUCCEEDED boss1",
 	"UNIT_DIED"

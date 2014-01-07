@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10910 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10929 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -150,7 +150,7 @@ DBM.DefaultOptions = {
 	SpecialWarningY = 75,
 	SpecialWarningFont = STANDARD_TEXT_FONT,
 	SpecialWarningFontSize = 50,
-	SpecialWarningFontColor = {0.0, 0.0, 1.0},
+	SpecialWarningFontCol = {1.0, 0.7, 0.0},--Yellow, with a tint of orange
 	SpecialWarningFlashCol1 = {1.0, 1.0, 0.0},--Yellow
 	SpecialWarningFlashCol2 = {1.0, 0.5, 0.0},--Orange
 	SpecialWarningFlashCol3 = {1.0, 0.0, 0.0},--Red
@@ -388,12 +388,21 @@ local function sendWhisper(target, msg)
 end
 local BNSendWhisper = sendWhisper
 
+local function stripServerName(cap)
+	cap = cap:sub(2, -2)
+	if DBM.Options.StripServerName then
+		cap = cap:gsub("%-.*$", "")
+	end
+	return cap
+end
 
 --------------
 --  Events  --
 --------------
 do
 	local registeredEvents = {}
+	local registeredSpellIds = {}
+	local unfilteredCLEUEvents = {}
 	local registeredUnitEventIds = {}
 	local argsMT = {__index = {}}
 	local args = setmetatable({}, argsMT)
@@ -465,7 +474,7 @@ do
 		end
 	end
 
-	local registerUnitEvent, unregisterUnitEvent
+	local registerUnitEvent, unregisterUnitEvent, registerSpellId, unregisterSpellId, registerCLEUEvent, unregisterCLEUEvent
 	do
 		local frames = {} -- frames that are being used for unit events, one frame per unit id (this could be optimized, as it currently creates a new frame even for a different event, but that's not worth the effort as 90% of all calls are just boss1 anyways)
 
@@ -521,44 +530,134 @@ do
 			end
 		end
 
-	end
+		function registerSpellId(event, spellId)
+			if not GetSpellInfo(spellId) then
+				print("RegisterEvents : "..spellId.." spell id not exists!")
+				return
+			end
+			if not registeredSpellIds[event] then
+				registeredSpellIds[event] = {}
+			end
+			registeredSpellIds[event][spellId] = (registeredSpellIds[event][spellId] or 0) + 1
+		end
 
+		function unregisterSpellId(event, spellId)
+			if not registeredSpellIds[event] then return end
+			local refs = (registeredSpellIds[event][spellId] or 1) - 1
+			registeredSpellIds[event][spellId] = refs
+			if refs <= 0 then
+				registeredSpellIds[event][spellId] = nil
+			end
+		end
+
+		--There are 2 tables. unfilteredCLEUEvents and registeredSpellIds table.
+		--unfilteredCLEUEvents saves UNFILTERED cleu event count. this is count table to prevent bad unregister.
+		--registeredSpellIds tables filtered table. this saves event and spell ids. works smiliar with unfilteredCLEUEvents table.
+		function registerCLEUEvent(mod, event)
+			local argTable = {strsplit(" ", event)}
+			-- filtered cleu event. save information in registeredSpellIds table.
+			if #argTable > 1 then
+				event = argTable[1]
+				for i = 2, #argTable do
+					registerSpellId(event, tonumber(argTable[i]))
+				end
+			-- no args. works as unfiltered. save information in unfilteredCLEUEvents table.
+			else
+				unfilteredCLEUEvents[event] = (unfilteredCLEUEvents[event] or 0) + 1
+			end
+			registeredEvents[event] = registeredEvents[event] or {}
+			tinsert(registeredEvents[event], mod)
+		end
+
+		function unregisterCLEUEvent(mod, event)
+			local argTable = {strsplit(" ", event)}
+			local eventCleared = false
+			-- filtered cleu event. save information in registeredSpellIds table.
+			if #argTable > 1 then
+				event = argTable[1]
+				for i = 2, #argTable do
+					unregisterSpellId(event, tonumber(argTable[i]))
+				end
+				local remainingSpellIdCount = 0
+				if registeredSpellIds[event] then
+					for i, v in pairs(registeredSpellIds[event]) do
+						remainingSpellIdCount = remainingSpellIdCount + 1
+					end
+				end
+				if remainingSpellIdCount == 0 then
+					registeredSpellIds[event] = nil
+					-- if unfilteredCLEUEvents and registeredSpellIds do not exists, clear registeredEvents.
+					if not unfilteredCLEUEvents[event] then
+						eventCleared = true
+					end
+				end
+			-- no args. works as unfiltered. save information in unfilteredCLEUEvents table.
+			else
+				local refs = (unfilteredCLEUEvents[event] or 1) - 1
+				unfilteredCLEUEvents[event] = refs
+				if refs <= 0 then
+					unfilteredCLEUEvents[event] = nil
+					-- if unfilteredCLEUEvents and registeredSpellIds do not exists, clear registeredEvents.
+					if not registeredSpellIds[event] then
+						eventCleared = true
+					end
+				end
+			end
+			for i = #registeredEvents[event], 1, -1 do
+				if registeredEvents[event][i] == mod then
+					registeredEvents[event][i] = {}
+					break
+				end
+			end
+			if eventCleared then
+				registeredEvents[event] = nil
+			end
+		end
+	end
 
 	-- UNIT_* events are special: they can take 'parameters' like this: "UNIT_HEALTH boss1 boss2" which only trigger the event for the given unit ids
 	function DBM:RegisterEvents(...)
 		for i = 1, select("#", ...) do
 			local event = select(i, ...)
-			local eventWithArgs = event
-			-- unit events need special care
-			if event:sub(0, 5) == "UNIT_" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED" then
-				-- unit events are limited to 8 "parameters", as there is no good reason to ever use more than 5 (it's just that the code old code supported 8 (boss1-5, target, focus))
-				local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
-				event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 = strsplit(" ", event)
-				if not arg1 and event:sub(event:len() - 10) ~= "_UNFILTERED" then -- no arguments given, support for legacy mods
-					eventWithArgs = event .. " boss1 boss2 boss3 boss4 boss5 target focus"
-					event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 = strsplit(" ", eventWithArgs)
-				end
-				if event:sub(event:len() - 10) == "_UNFILTERED" then
-					-- we really want *all* unit ids
-					mainFrame:RegisterEvent(event:sub(0, -12))
-				else
-					registerUnitEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-				end
+			-- spell events with special care.
+			if event:sub(0, 6) == "SPELL_" or event:sub(0, 6) == "RANGE_" then
+				registerCLEUEvent(self, event)
 			else
-				-- normal events
-				mainFrame:RegisterEvent(event)
-			end
-			registeredEvents[eventWithArgs] = registeredEvents[eventWithArgs] or {}
-			tinsert(registeredEvents[eventWithArgs], self)
-			if event ~= eventWithArgs then
-				registeredEvents[event] = registeredEvents[event] or {}
-				tinsert(registeredEvents[event], self)
+				local eventWithArgs = event
+				-- unit events need special care
+				if event:sub(0, 5) == "UNIT_" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED" then
+					-- unit events are limited to 8 "parameters", as there is no good reason to ever use more than 5 (it's just that the code old code supported 8 (boss1-5, target, focus))
+					local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
+					event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 = strsplit(" ", event)
+					if not arg1 and event:sub(event:len() - 10) ~= "_UNFILTERED" then -- no arguments given, support for legacy mods
+						eventWithArgs = event .. " boss1 boss2 boss3 boss4 boss5 target focus"
+						event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 = strsplit(" ", eventWithArgs)
+					end
+					if event:sub(event:len() - 10) == "_UNFILTERED" then
+						-- we really want *all* unit ids
+						mainFrame:RegisterEvent(event:sub(0, -12))
+					else
+						registerUnitEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+					end
+				-- spell events with filter
+				else
+					-- normal events
+					mainFrame:RegisterEvent(event)
+				end
+				registeredEvents[eventWithArgs] = registeredEvents[eventWithArgs] or {}
+				tinsert(registeredEvents[eventWithArgs], self)
+				if event ~= eventWithArgs then
+					registeredEvents[event] = registeredEvents[event] or {}
+					tinsert(registeredEvents[event], self)
+				end
 			end
 		end
 	end
 
 	local function unregisterEvent(mod, event)
-		if event:sub(0, 5) == "UNIT_" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED" then
+		if event:sub(0, 6) == "SPELL_" or event:sub(0, 6) == "RANGE_" then
+			unregisterCLEUEvent(mod, event)
+		elseif event:sub(0, 5) == "UNIT_" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED" then
 			local event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 = strsplit(" ", event)
 			if event:sub(event:len() - 10) == "_UNFILTERED" then
 				mainFrame:UnregisterEvent(event:sub(0, -12))
@@ -570,9 +669,42 @@ do
 		end
 	end
 
-	function DBM:UnregisterInCombatEvents(ignore)
+	local function findRealEvent(t, val)
+		for i, v in ipairs(t) do
+			local event = strsplit(" ", v)
+			if event == val then
+				return v
+			end
+		end
+	end
+
+	function DBM:UnregisterInCombatEvents(srmOnly)
 		for event, mods in pairs(registeredEvents) do
-			if event ~= ignore then
+			if srmOnly then
+				local i = 1
+				while mods[i] do
+					if mods[i] == self and event == "SPELL_AURA_REMOVED" then
+						local findEvent = findRealEvent(self.inCombatOnlyEvents, "SPELL_AURA_REMOVED")
+						if findEvent then
+							unregisterCLEUEvent(self, findEvent)
+							break
+						end
+					end
+					i = i +1
+				end
+			elseif (event:sub(0, 6) == "SPELL_" or event:sub(0, 6) == "RANGE_") then
+				local i = 1
+				while mods[i] do
+					if mods[i] == self and event ~= "SPELL_AURA_REMOVED" then
+						local findEvent = findRealEvent(self.inCombatOnlyEvents, event)
+						if findEvent then
+							unregisterCLEUEvent(self, findEvent)
+							break
+						end
+					end
+					i = i +1
+				end
+			else
 				local match = false
 				for i = #mods, 1, -1 do
 					if mods[i] == self and checkEntry(self.inCombatOnlyEvents, event)  then
@@ -593,18 +725,32 @@ do
 	function DBM:UnregisterShortTermEvents()
 		if self.shortTermRegisterEvents then
 			for event, mods in pairs(registeredEvents) do
-				local match = false
-				for i = #mods, 1, -1 do
-					if mods[i] == self and checkEntry(self.shortTermRegisterEvents, event)  then
-						tremove(mods, i)
-						match = true
+				if event:sub(0, 6) == "SPELL_" or event:sub(0, 6) == "RANGE_" then
+					local i = 1
+					while mods[i] do
+						if mods[i] == self then
+							local findEvent = findRealEvent(self.shortTermRegisterEvents, event)
+							if findEvent then
+								unregisterCLEUEvent(self, findEvent)
+								break
+							end
+						end
+						i = i +1
 					end
-				end
-				if #mods == 0 or (match and event:sub(0, 5) == "UNIT_" and event:sub(0, -10) ~= "_UNFILTERED" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED") then
-					unregisterEvent(self, event)
-				end
-				if #mods == 0 then
-					registeredEvents[event] = nil
+				else
+					local match = false
+					for i = #mods, 1, -1 do
+						if mods[i] == self and checkEntry(self.shortTermRegisterEvents, event) then
+							tremove(mods, i)
+							match = true
+						end
+					end
+					if #mods == 0 or (match and event:sub(0, 5) == "UNIT_" and event:sub(0, -10) ~= "_UNFILTERED" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED") then
+						unregisterEvent(self, event)
+					end
+					if #mods == 0 then
+						registeredEvents[event] = nil
+					end
 				end
 			end
 			self.shortTermEventsRegistered = nil
@@ -612,23 +758,20 @@ do
 		end
 	end
 
-
-
 	DBM:RegisterEvents("ADDON_LOADED")
 
 	function DBM:FilterRaidBossEmote(msg, ...)
 		return handleEvent(nil, "CHAT_MSG_RAID_BOSS_EMOTE_FILTERED", msg:gsub("\124c%x+(.-)\124r", "%1"), ...)
 	end
 
-
 	local noArgTableEvents = {
 		SWING_DAMAGE = true,
 		SWING_MISSED = true,
+		RANGE_DAMAGE = true,
+		RANGE_MISSED = true,
 		SPELL_DAMAGE = true,
 		SPELL_BUILDING_DAMAGE = true,
 		SPELL_MISSED = true,
-		RANGE_DAMAGE = true,
-		RANGE_MISSED = true,
 		SPELL_HEAL = true,
 		SPELL_ENERGIZE = true,
 		SPELL_PERIODIC_MISSED = true,
@@ -641,6 +784,10 @@ do
 	}
 	function DBM:COMBAT_LOG_EVENT_UNFILTERED(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 		if not registeredEvents[event] then return end
+		if (event:sub(0, 6) == "SPELL_" or event:sub(0, 6) == "RANGE_") and not unfilteredCLEUEvents[event] then
+			local spellId = ...
+			if not registeredSpellIds[event][spellId] then return end
+		end
 		-- process some high volume events without building the whole table which is somewhat faster
 		-- this prevents work-around with mods that used to have their own event handler to prevent this overhead
 		if noArgTableEvents[event] then
@@ -831,7 +978,6 @@ do
 			self:RegisterEvents(
 				"COMBAT_LOG_EVENT_UNFILTERED",
 				"GROUP_ROSTER_UPDATE",
-				"UNIT_NAME_UPDATE_UNFILTERED",
 				--"INSTANCE_GROUP_SIZE_CHANGED",
 				"CHAT_MSG_ADDON",
 				"PLAYER_REGEN_DISABLED",
@@ -1759,12 +1905,6 @@ do
 	end
 
 	function DBM:GROUP_ROSTER_UPDATE()
-		self:Schedule(1.5, updateAllRoster)
-	end
-
-	--Joined lfr during combat, many unit shows "Somewhat" and invisiable, and break class coloring temporarly. So update roster table again when unit name successfully updated.
-	function DBM:UNIT_NAME_UPDATE_UNFILTERED()
-		self:Unschedule(updateAllRoster)
 		self:Schedule(1.5, updateAllRoster)
 	end
 
@@ -3547,8 +3687,8 @@ function DBM:EndCombat(mod, wipe)
 		local scenario = mod.type == "SCENARIO"
 		if mod.inCombatOnlyEvents and mod.inCombatOnlyEventsRegistered then
 			-- unregister all events except for SPELL_AURA_REMOVED events (might still be needed to remove icons etc...)
-			mod:UnregisterInCombatEvents("SPELL_AURA_REMOVED")
-			self:Schedule(2, mod.UnregisterInCombatEvents, mod) -- 2 seconds should be enough for all auras to fade
+			mod:UnregisterInCombatEvents()
+			self:Schedule(2, mod.UnregisterInCombatEvents, mod, true) -- 2 seconds should be enough for all auras to fade
 			self:Schedule(2.1, mod.Stop, mod) -- Remove accident started timers.
 			mod.inCombatOnlyEventsRegistered = nil
 		end
@@ -5021,7 +5161,6 @@ end
 
 do
 	local frame = CreateFrame("Frame") -- frame for CLEU events, we don't want to run all *_MISSED events through the whole DBM event system...
-	frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	local activeShields = {}
 	local shieldsByGuid = {}
@@ -5069,6 +5208,9 @@ do
 
 	function bossModPrototype:ShowShieldHealthBar(guid, name, absorb)
 		self:RemoveShieldHealthBar(guid, name)
+		if #activeShields == 0 then
+			frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		end
 		local obj = {
 			mod = self.id,
 			name = name,
@@ -5092,10 +5234,13 @@ do
 			for i = #activeShields, 1, -1 do
 				if activeShields[i].guid == guid and activeShields[i].mod == self.id and (not name or activeShields[i].name == name) then
 					if DBM.BossHealth:IsShown() then
-						DBM.BossHealth.RemoveBoss(activeShields[i].func)
+						DBM.BossHealth:RemoveBoss(activeShields[i].func)
 					end
 					tremove(activeShields, i)
 				end
+			end
+			if #activeShields == 0 then
+				frame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 			end
 		end
 	end
@@ -5108,6 +5253,9 @@ do
 
 	function bossModPrototype:ShowDamagedHealthBar(guid, name, damage)
 		self:RemoveDamagedHealthBar(guid, name)
+		if #activeShields == 0 then
+			frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		end
 		local obj = {
 			mod = self.id,
 			name = name,
@@ -5132,6 +5280,9 @@ do
 
 	function bossModPrototype:ShowAbsorbedHealHealthBar(guid, name, heal)
 		self:RemoveAbsorbedHealHealthBar(guid, name)
+		if #activeShields == 0 then
+			frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		end
 		local obj = {
 			mod = self.id,
 			name = name,
@@ -5150,10 +5301,11 @@ do
 
 	-- removes all shield, damaged, healed bars of a boss mod
 	function bossModPrototype:RemoveAllSpecialHealthBars()
+		frame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 		for i = #activeShields, 1, -1 do
 			if activeShields[i].mod == self.id then
 				if DBM.BossHealth:IsShown() then
-					DBM.BossHealth.RemoveBoss(activeShields[i].func)
+					DBM.BossHealth:RemoveBoss(activeShields[i].func)
 				end
 				shieldsByGuid[activeShields[i].guid] = nil
 				tremove(activeShields, i)
@@ -5428,56 +5580,32 @@ do
 	function announcePrototype:Show(...) -- todo: reduce amount of unneeded strings
 		if not self.option or self.mod.Options[self.option] then
 			if DBM.Options.DontShowBossAnnounces then return end	-- don't show the announces if the spam filter option is set
+			local argTable = {...}
 			local colorCode = ("|cff%.2x%.2x%.2x"):format(self.color.r * 255, self.color.g * 255, self.color.b * 255)
-			local text
-			local message
-			if #self.combinedtext > 0 then--very ugly code. need tweaking. can cause script lan too long?
-				local count = select("#", ...)
-				-- create temporary arg table.
-				local argTable = {}
-				local pointToProcess = 0
-				if count == 1 then
-					pointToProcess = 1
-					argTable[1] = select(1, ...)
-				else
-					for i = 1, select("#", ...) do
-						local value = select(i, ...)
-						if type(value) == "table" then
-							pointToProcess = i
-						end
-						argTable[i] = value
+			if #self.combinedtext > 0 then
+				--Throttle spam.
+				local combinedText = table.concat(self.combinedtext, "<, >")
+				if self.combinedcount == 1 then
+					combinedText = combinedText.." "..DBM_CORE_GENERIC_WARNING_OTHERS
+				elseif self.combinedcount > 1 then
+					combinedText = combinedText.." "..DBM_CORE_GENERIC_WARNING_OTHERS2:format(self.combinedcount)
+				end
+				--Process
+				for i = 1, #argTable do
+					if type(argTable[i]) == "string" then
+						argTable[i] = combinedText
 					end
 				end
-				--Throttle spam.
-				local displayText = table.concat(self.combinedtext, "<, >")
-				if self.combinedcount == 1 then
-					displayText = displayText.." "..DBM_CORE_GENERIC_WARNING_OTHERS
-				elseif self.combinedcount > 1 then
-					displayText = displayText.." "..DBM_CORE_GENERIC_WARNING_OTHERS2:format(self.combinedcount)
-				end
-				argTable[pointToProcess] = displayText
-				text = ("%s%s%s|r%s"):format(
-					(DBM.Options.WarningIconLeft and self.icon and textureCode:format(self.icon)) or "",
-					colorCode,
-					pformat(self.text, argTable[1], argTable[2], argTable[3], argTable[4], argTable[5]),
-					(DBM.Options.WarningIconRight and self.icon and textureCode:format(self.icon)) or ""
-				)
-				message = pformat(self.text, argTable[1], argTable[2], argTable[3], argTable[4], argTable[5])
-			else
-				text = ("%s%s%s|r%s"):format(
-					(DBM.Options.WarningIconLeft and self.icon and textureCode:format(self.icon)) or "",
-					colorCode,
-					pformat(self.text, ...),
-					(DBM.Options.WarningIconRight and self.icon and textureCode:format(self.icon)) or ""
-				)
-				message = pformat(self.text, ...)
 			end
-			message = message:gsub("|3%-%d%((.-)%)", "%1") -- for |3-id(text) encoding in russian localization
-			message = message:gsub(">", "")
-			message = message:gsub("<", "")
-			fireEvent("DBM_Announce", message)
+			local message = pformat(self.text, unpack(argTable))
+			local text = ("%s%s%s|r%s"):format(
+				(DBM.Options.WarningIconLeft and self.icon and textureCode:format(self.icon)) or "",
+				colorCode,
+				message,
+				(DBM.Options.WarningIconRight and self.icon and textureCode:format(self.icon)) or ""
+			)
 			self.combinedcount = 0
-			table.wipe(self.combinedtext)
+			self.combinedtext = {}
 			if not cachedColorFunctions[self.color] then
 				local color = self.color -- upvalue for the function to colorize names, accessing self in the colorize closure is not safe as the color of the announce object might change (it would also prevent the announce from being garbage-collected but announce objects are never destroyed)
 				cachedColorFunctions[color] = function(cap)
@@ -5517,40 +5645,26 @@ do
 					PlaySoundFile(DBM.Options.RaidWarningSound)
 				end
 			end
+			fireEvent("DBM_Announce", message)
+		else
+			self.combinedcount = 0
+			self.combinedtext = {}
 		end
 	end
 
-	function announcePrototype:CombinedShow(delay, ...)--very ugly code. need tweaking. can cause script lan too long?
-		local count = select("#", ...)
-		-- support only 5 args.
-		if count > 5 then error("CombinedShow method only support up to 5 args", 2) end
-		-- create temporary arg table.
-		local argTable = {}
-		local pointToCombine = 0
-		if count == 1 then
-			pointToCombine = 1
-			argTable[1] = select(1, ...)
-		else
-			for i = 1, select("#", ...) do
-				local value = select(i, ...)
-				if type(value) == "string" then
-					pointToCombine = i
+	function announcePrototype:CombinedShow(delay, ...)
+		local argTable = {...}
+		for i = 1, #argTable do
+			if type(argTable[i]) == "string" then
+				if #self.combinedtext < 8 then--Throttle spam. We may not need more than 9 targets..
+					self.combinedtext[#self.combinedtext + 1] = argTable[i]
+				else
+					self.combinedcount = self.combinedcount + 1
 				end
-				argTable[i] = value
 			end
 		end
-		-- process text combine.
-		local text = select(pointToCombine, ...)
-		if #self.combinedtext < 8 then--Throttle spam. We may not need more than 9 targets..
-			self.combinedtext[#self.combinedtext + 1] = text or ""
-		else
-			self.combinedcount = self.combinedcount + 1
-		end
-		-- replace arg table
-		argTable[pointToCombine] = self.combinedtext
-		-- return to show method (up to 5 args)
 		unschedule(self.Show, self.mod, self)
-		schedule(delay or 0.5, self.Show, self.mod, self, argTable[1], argTable[2], argTable[3], argTable[4], argTable[5])
+		schedule(delay or 0.5, self.Show, self.mod, self, ...)
 	end
 
 	function announcePrototype:Schedule(t, ...)
@@ -5999,7 +6113,7 @@ do
 		frame:ClearAllPoints()
 		frame:SetPoint(DBM.Options.SpecialWarningPoint, UIParent, DBM.Options.SpecialWarningPoint, DBM.Options.SpecialWarningX, DBM.Options.SpecialWarningY)
 		font:SetFont(DBM.Options.SpecialWarningFont, DBM.Options.SpecialWarningFontSize, "THICKOUTLINE")
-		font:SetTextColor(unpack(DBM.Options.SpecialWarningFontColor))
+		font:SetTextColor(unpack(DBM.Options.SpecialWarningFontCol))
 	end
 
 	local shakeFrame = CreateFrame("Frame")
@@ -6027,19 +6141,11 @@ do
 	function specialWarningPrototype:Show(...)
 		if DBM.Options.ShowSpecialWarnings and (not self.option or self.mod.Options[self.option]) and not moving and frame then
 			local msg = pformat(self.text, ...)
-			local stripName = function(cap)
-				cap = cap:sub(2, -2)
-				if DBM.Options.StripServerName then
-					cap = cap:gsub("%-.*$", "")
-				end
-				return cap
-			end
-			msg = msg:gsub(">.-<", stripName)
-			font:SetText(msg)
-			fireEvent("DBM_SpecWarn", msg)
+			local text = msg:gsub(">.-<", stripServerName)
+			font:SetText(text)
 			if DBM.Options.ShowSWarningsInChat then
-				local colorCode = ("|cff%.2x%.2x%.2x"):format(DBM.Options.SpecialWarningFontColor[1] * 255, DBM.Options.SpecialWarningFontColor[2] * 255, DBM.Options.SpecialWarningFontColor[3] * 255)
-				self.mod:AddMsg(colorCode.."["..DBM_CORE_MOVE_SPECIAL_WARNING_TEXT.."] "..msg.."|r", nil)
+				local colorCode = ("|cff%.2x%.2x%.2x"):format(DBM.Options.SpecialWarningFontCol[1] * 255, DBM.Options.SpecialWarningFontCol[2] * 255, DBM.Options.SpecialWarningFontCol[3] * 255)
+				self.mod:AddMsg(colorCode.."["..DBM_CORE_MOVE_SPECIAL_WARNING_TEXT.."] "..text.."|r", nil)
 			end
 			if not UnitIsDeadOrGhost("player") and DBM.Options.ShowFlashFrame then
 				if self.flash == 1 then
@@ -6057,6 +6163,7 @@ do
 				local soundId = self.option and self.mod.Options[self.option .. "SpecialWarningSound"] or self.flash
 				DBM:PlaySpecialWarningSound(soundId or 1)
 			end
+			fireEvent("DBM_SpecWarn", msg)
 		end
 	end
 
@@ -6395,14 +6502,7 @@ do
 			else
 				msg = pformat(self.text, ...)
 			end
-			local stripName = function(cap)
-				cap = cap:sub(2, -2)
-				if DBM.Options.StripServerName then
-					cap = cap:gsub("%-.*$", "")
-				end
-				return cap
-			end
-			msg = msg:gsub(">.-<", stripName)
+			msg = msg:gsub(">.-<", stripServerName)
 			bar:SetText(msg)
 			fireEvent("DBM_TimerStart", id, msg, timer..DBM_CORE_SEC)
 			tinsert(self.startedTimers, id)

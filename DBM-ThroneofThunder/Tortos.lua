@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(825, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10920 $"):sub(12, -3))
 mod:SetCreatureID(67977)
 mod:SetEncounterID(1565)
 mod:SetZone()
@@ -10,10 +10,10 @@ mod:SetUsedIcons(8, 7, 6, 5, 4, 3)
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_REMOVED",
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
+	"SPELL_CAST_START 133939 136294 135251 134920",
+	"SPELL_AURA_APPLIED 133971 133974",
+	"SPELL_AURA_REMOVED 137633",
+	"SPELL_CAST_SUCCESS 134476 134031",
 	"UNIT_AURA boss1",
 	"UNIT_SPELLCAST_SUCCEEDED boss1"
 )

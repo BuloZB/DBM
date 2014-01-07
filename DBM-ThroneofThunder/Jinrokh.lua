@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(827, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10728 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10920 $"):sub(12, -3))
 mod:SetCreatureID(69465)
 mod:SetEncounterID(1577)
 mod:SetZone()
@@ -9,10 +9,10 @@ mod:SetZone()
 mod:RegisterCombat("combat")
 
 mod:RegisterEventsInCombat(
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_REMOVED",
+	"SPELL_CAST_START 137399 137313 138732",
+	"SPELL_CAST_SUCCESS 137162",
+	"SPELL_AURA_APPLIED 137162 137422 138732",
+	"SPELL_AURA_REMOVED 138732 137422 137313",
 	"CHAT_MSG_RAID_BOSS_EMOTE"
 )
 
@@ -117,8 +117,8 @@ function mod:SPELL_CAST_START(args)
 		end
 		--Only register electrified waters events during storm. Avoid high cpu events during rest of fight.
 		self:RegisterShortTermEvents(
-			"SPELL_PERIODIC_DAMAGE",
-			"SPELL_PERIODIC_MISSED"
+			"SPELL_PERIODIC_DAMAGE 138006",
+			"SPELL_PERIODIC_MISSED 138006"
 		)
 	elseif args.spellId == 138732 then
 		warnIonization:Show()
