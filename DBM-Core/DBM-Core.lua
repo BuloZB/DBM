@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10929 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10937 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -654,18 +654,14 @@ do
 		end
 	end
 
-	local function unregisterEvent(mod, event)
-		if event:sub(0, 6) == "SPELL_" or event:sub(0, 6) == "RANGE_" then
-			unregisterCLEUEvent(mod, event)
-		elseif event:sub(0, 5) == "UNIT_" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED" then
+	local function unregisterUEvent(mod, event)
+		if event:sub(0, 5) == "UNIT_" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED" then
 			local event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 = strsplit(" ", event)
 			if event:sub(event:len() - 10) == "_UNFILTERED" then
 				mainFrame:UnregisterEvent(event:sub(0, -12))
 			else
 				unregisterUnitEvent(mod, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 			end
-		else
-			mainFrame:UnregisterEvent(event)
 		end
 	end
 
@@ -713,13 +709,28 @@ do
 					end
 				end
 				if #mods == 0 or (match and event:sub(0, 5) == "UNIT_" and event:sub(0, -10) ~= "_UNFILTERED" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED") then -- unit events have their own reference count
-					unregisterEvent(self, event)
+					unregisterUEvent(self, event)
 				end
 				if #mods == 0 then
 					registeredEvents[event] = nil
 				end
 			end
 		end
+	end
+
+	function DBM:RegisterShortTermEvents(...)
+		if self.shortTermEventsRegistered then
+			return
+		end
+		self.shortTermRegisterEvents = {...}
+		for k, v in pairs(self.shortTermRegisterEvents) do
+			if v:sub(0, 5) == "UNIT_" and v:sub(v:len() - 10) ~= "_UNFILTERED" and not v:find(" ") and v ~= "UNIT_DIED" and v ~= "UNIT_DESTROYED" then
+				-- legacy event, oh noes
+				self.shortTermRegisterEvents[k] = v .. " boss1 boss2 boss3 boss4 boss5 target focus"
+			end
+		end
+		self.shortTermEventsRegistered = 1
+		self:RegisterEvents(unpack(self.shortTermRegisterEvents))
 	end
 
 	function DBM:UnregisterShortTermEvents()
@@ -746,7 +757,7 @@ do
 						end
 					end
 					if #mods == 0 or (match and event:sub(0, 5) == "UNIT_" and event:sub(0, -10) ~= "_UNFILTERED" and event ~= "UNIT_DIED" and event ~= "UNIT_DESTROYED") then
-						unregisterEvent(self, event)
+						unregisterUEvent(self, event)
 					end
 					if #mods == 0 then
 						registeredEvents[event] = nil
@@ -1001,8 +1012,6 @@ do
 				"LFG_PROPOSAL_FAILED",
 				"LFG_PROPOSAL_SUCCEEDED",
 				"UPDATE_BATTLEFIELD_STATUS",
-				"UPDATE_MOUSEOVER_UNIT",
-				"UNIT_TARGET_UNFILTERED",
 				"CINEMATIC_START",
 				"LFG_COMPLETION_REWARD",
 				"WORLD_STATE_TIMER_START",
@@ -2274,15 +2283,33 @@ end
 --  Load Boss Mods on Demand  --
 --------------------------------
 do
+	local targetEventsRegistered = false
 	local function FixForShittyComputers()
 		timerRequestInProgress = false
 		local _, instanceType, _, _, _, _, _, mapID = GetInstanceInfo()
 		LastInstanceMapID = mapID
-		if instanceType == "none" and not forceloadmapIds[mapID] then return end
+		if instanceType == "none" then
+			if not targetEventsRegistered then
+				DBM:RegisterShortTermEvents("UPDATE_MOUSEOVER_UNIT", "UNIT_TARGET_UNFILTERED")
+				targetEventsRegistered = true
+				if DBM.Options.DebugMode then
+					print("DBM Debug: targetEventsRegistered true")
+				end
+			end
+			if not forceloadmapIds[mapID] then return end
 		-- You entered instance duing worldboss combat. Force end worldboss mod.
-		if instanceType ~= "none" and savedDifficulty == "worldboss" then
-			for i = #inCombat, 1, -1 do
-				DBM:EndCombat(inCombat[i], true)
+		elseif instanceType ~= "none" then
+			if targetEventsRegistered then
+				DBM:UnregisterShortTermEvents()
+				targetEventsRegistered = false
+				if DBM.Options.DebugMode then
+					print("DBM Debug: targetEventsRegistered false")
+				end
+			end
+			if savedDifficulty == "worldboss" then
+				for i = #inCombat, 1, -1 do
+					DBM:EndCombat(inCombat[i], true)
+				end
 			end
 		end
 		-- LoadMod
@@ -4217,8 +4244,12 @@ do
 				mod = not v.isCustomMod and v
 			end
 			mod = mod or inCombat[1]
-			local hp = ("%d%%"):format(mod.highesthealth and mod:GetHighestBossHealth() or mod:GetLowestBossHealth())
-			sendWhisper(sender, chatPrefix..DBM_CORE_STATUS_WHISPER:format(difficultyText..(mod.combatInfo.name or ""), hp or DBM_CORE_UNKNOWN, IsInInstance() and getNumRealAlivePlayers() or getNumAlivePlayers(), DBM:GetNumRealGroupMembers()))
+			local hp = ("%d%%"):format(mod.highesthealth and mod:GetHighestBossHealth() or mod:GetLowestBossHealth()) or DBM_CORE_UNKNOWN
+			local hpText
+			if mod.vb.phase then
+				hpText = hp.." ("..SCENARIO_STAGE:format(mod.vb.phase)..")"
+			end
+			sendWhisper(sender, chatPrefix..DBM_CORE_STATUS_WHISPER:format(difficultyText..(mod.combatInfo.name or ""), hpText, IsInInstance() and getNumRealAlivePlayers() or getNumAlivePlayers(), DBM:GetNumRealGroupMembers()))
 		elseif #inCombat > 0 and DBM.Options.AutoRespond and
 		(isRealIdMessage and (not isOnSameServer(sender) or not DBM:GetRaidUnitId(select(4, BNGetFriendInfoByID(sender)))) or not isRealIdMessage and not DBM:GetRaidUnitId(sender)) then
 			if not difficultyText then -- prevent error when timer recovery function worked and etc (StartCombat not called)
@@ -4303,16 +4334,16 @@ end
 --Toggle is for if we are turning off or on.
 --Custom is for exterior mods to call function without needing global option turned on (such as BG mods option)
 --All also handled by core so both core AND pvp mods aren't trying to hook/hide it. Should all be done HERE
-local unRegistered = false
+local RBEFUnregistered = false
 function DBM:ToggleRaidBossEmoteFrame(toggle, custom)
 	if not DBM.Options.HideBossEmoteFrame and not custom then return end
-	if toggle == 1 and not unRegistered then
-		unRegistered = true
+	if toggle == 1 and not RBEFUnregistered then
+		RBEFUnregistered = true
 		RaidBossEmoteFrame:UnregisterEvent("RAID_BOSS_EMOTE")
 		RaidBossEmoteFrame:UnregisterEvent("RAID_BOSS_WHISPER")
 		RaidBossEmoteFrame:UnregisterEvent("CLEAR_BOSS_EMOTES")
-	elseif toggle == 0 and unRegistered then
-		unRegistered = false
+	elseif toggle == 0 and RBEFUnregistered then
+		RBEFUnregistered = false
 		RaidBossEmoteFrame:RegisterEvent("RAID_BOSS_EMOTE")
 		RaidBossEmoteFrame:RegisterEvent("RAID_BOSS_WHISPER")
 		RaidBossEmoteFrame:RegisterEvent("CLEAR_BOSS_EMOTES")
@@ -4651,6 +4682,7 @@ end
 bossModPrototype.RegisterEvents = DBM.RegisterEvents
 bossModPrototype.UnregisterInCombatEvents = DBM.UnregisterInCombatEvents
 bossModPrototype.AddMsg = DBM.AddMsg
+bossModPrototype.RegisterShortTermEvents = DBM.RegisterShortTermEvents
 bossModPrototype.UnregisterShortTermEvents = DBM.UnregisterShortTermEvents
 
 function bossModPrototype:SetZone(...)
@@ -4726,21 +4758,6 @@ function bossModPrototype:RegisterEventsInCombat(...)
 			self.inCombatOnlyEvents[k] = v .. " boss1 boss2 boss3 boss4 boss5 target focus"
 		end
 	end
-end
-
-function bossModPrototype:RegisterShortTermEvents(...)
-	if self.shortTermEventsRegistered then
-		return
-	end
-	self.shortTermRegisterEvents = {...}
-	for k, v in pairs(self.shortTermRegisterEvents) do
-		if v:sub(0, 5) == "UNIT_" and v:sub(v:len() - 10) ~= "_UNFILTERED" and not v:find(" ") and v ~= "UNIT_DIED" and v ~= "UNIT_DESTROYED" then
-			-- legacy event, oh noes
-			self.shortTermRegisterEvents[k] = v .. " boss1 boss2 boss3 boss4 boss5 target focus"
-		end
-	end
-	self.shortTermEventsRegistered = 1
-	self:RegisterEvents(unpack(self.shortTermRegisterEvents))
 end
 
 -----------------------
@@ -4947,7 +4964,7 @@ do
 	end
 
 	--infinite scanner. so use this carefully.
-	function bossModPrototype:StartRepeatedScan(cidOrGuid, returnFunc, scanInterval, scanOnlyBoss, includeTank)
+	function bossModPrototype:StartRepeatedScan(returnFunc, cidOrGuid, scanInterval, scanOnlyBoss, includeTank)
 		local cidOrGuid = cidOrGuid or self.creatureId
 		local scanInterval = scanInterval or 0.1
 		local targetname, targetuid, bossuid = self:GetBossTarget(cidOrGuid, scanOnlyBoss)

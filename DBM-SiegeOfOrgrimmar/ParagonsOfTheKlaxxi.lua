@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10918 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10935 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -130,7 +130,7 @@ local yellAim						= mod:NewYell(142948)
 local specWarnAimOther				= mod:NewSpecialWarningTarget(142948)
 local specWarnRapidFire				= mod:NewSpecialWarningSpell(143243, nil, nil, nil, 2)
 
-local timerJumpToCenter				= mod:NewCastTimer(7, 143545)
+local timerJumpToCenter				= mod:NewCastTimer(5, 143545)
 --Kil'ruk the Wind-Reaver
 local timerGouge					= mod:NewTargetTimer(10, 143939, nil, mod:IsTank())
 local timerReaveCD					= mod:NewCDTimer(33, 148676)
@@ -307,7 +307,8 @@ local function CheckBosses(ignoreRTF)
 				if mod:IsDifficulty("heroic10", "heroic25") then
 					timerReaveCD:Start(38.5)
 				end
-				mod:ScheduleMethod(23, "StartRepeatedScan", unitGUID, "DFAScan", 0.25, true)--Not a large sample size, data shows it happen 29-30 seconds after IEEU fires on two different pulls. Although 2 is a poor sample
+				mod:StopRepeatedScan("DFAScan")
+				mod:ScheduleMethod(23, "StartRepeatedScan", "DFAScan", unitGUID, 0.25, true)--Not a large sample size, data shows it happen 29-30 seconds after IEEU fires on two different pulls. Although 2 is a poor sample
 				if UnitDebuff("player", GetSpellInfo(142929)) then vulnerable = true end
 			elseif cid == 71157 then--Xaril the Poisoned-Mind
 				timerToxicCatalystCD:Start(19.5)--May need tweaking by about a sec or two. Need some transcriptors
@@ -649,7 +650,7 @@ function mod:SPELL_CAST_START(args)
 		self.vb.whirlCast = 0
 		self.vb.whirlTime = GetTime()
 		lastWhirl = nil
-		self:StartRepeatedScan(args.sourceGUID, "WhirlingScan", 0.08, true)
+		self:StartRepeatedScan("WhirlingScan", args.sourceGUID, 0.08, true)
 		if self.Options.RangeFrame then
 			DBM.RangeCheck:Show(6)--Range assumed, spell tooltips not informative enough
 			self:Schedule(5, hideRangeFrame)
@@ -706,7 +707,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		timerToxicCatalystCD:Start(20)
 	elseif args.spellId == 142232 then
 		self:StopRepeatedScan("DFAScan")
-		self:ScheduleMethod(17, "StartRepeatedScan", args.sourceGUID, "DFAScan", 0.25, true)
+		self:ScheduleMethod(17, "StartRepeatedScan", "DFAScan", args.sourceGUID, 0.25, true)
 	end
 end
 
@@ -858,7 +859,7 @@ mod.SPELL_PERIODIC_MISSED = mod.SPELL_PERIODIC_DAMAGE
 function mod:UNIT_DIED(args)
 	local cid = self:GetCIDFromGUID(args.destGUID)
 	if cid == 71161 then--Kil'ruk the Wind-Reaver
-		self:StopRepeatedScan(args.sourceGUID, "DFAScan")
+		self:StopRepeatedScan("DFAScan")
 		timerReaveCD:Cancel()
 	elseif cid == 71157 then--Xaril the Poisoned-Mind
 		timerToxicCatalystCD:Cancel()

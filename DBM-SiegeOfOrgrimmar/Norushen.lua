@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10913 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10933 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
 mod:DisableESCombatDetection()
@@ -123,6 +123,7 @@ local function delayPowerSync()
 	mod:RegisterShortTermEvents(
 		"UNIT_POWER player"
 	)
+	SendAddonMessage("BigWigs", "T:".."BWPower "..UnitPower("player", 10), IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
 end
 
 function mod:OnCombatStart(delay)
@@ -140,6 +141,7 @@ function mod:OnCombatStart(delay)
 		DBM.InfoFrame:SetHeader(corruptionLevel)
 		DBM.InfoFrame:Show(5, "playerpower", 5, ALTERNATE_POWER_INDEX)
 	end
+	self:Schedule(1, delayPowerSync)
 end
 
 function mod:OnCombatEnd()
