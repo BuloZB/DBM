@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(865, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10918 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10951 $"):sub(12, -3))
 mod:SetCreatureID(71504)--71591 Automated Shredder
 mod:SetEncounterID(1601)
 mod:SetZone()
@@ -14,7 +14,7 @@ mod:RegisterEventsInCombat(
 	"SPELL_CAST_SUCCESS 145774",
 	"SPELL_SUMMON 143641",
 	"SPELL_AURA_APPLIED 145365 143385 145444 144210 144236 145269 145580 144466 143856",
-	"SPELL_AURA_APPLIED_DOSE 143385 145444",--needs review
+	"SPELL_AURA_APPLIED_DOSE 143385 145444 143856",
 	"SPELL_AURA_REMOVED 143385 144236 145269",
 	"UNIT_DIED",
 	"CHAT_MSG_RAID_BOSS_EMOTE",

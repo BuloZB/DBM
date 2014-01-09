@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(850, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10917 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10951 $"):sub(12, -3))
 mod:SetCreatureID(71515)
 mod:SetEncounterID(1603)
 mod:SetZone()
@@ -13,7 +13,7 @@ mod:RegisterEventsInCombat(
 	"SPELL_CAST_START 143872 143503 143420 143431 143432 143473 143502",
 	"SPELL_CAST_SUCCESS 143589 143594 143593 143536 143474 143494",
 	"SPELL_AURA_APPLIED 143494 143484 143480 143475 143638 143882",
-	"SPELL_AURA_APPLIED_DOSE 143494 143475",--needs review
+	"SPELL_AURA_APPLIED_DOSE 143494",
 	"SPELL_AURA_REMOVED 143494",
 	"SPELL_DAMAGE 143873",
 	"UNIT_DIED",

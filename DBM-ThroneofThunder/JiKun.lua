@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(828, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10920 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10952 $"):sub(12, -3))
 mod:SetCreatureID(69712)
 mod:SetEncounterID(1573)
 mod:SetZone()
@@ -12,7 +12,7 @@ mod:RegisterEventsInCombat(
 	"UNIT_SPELLCAST_CHANNEL_START boss1",
 	"UNIT_SPELLCAST_START boss1",
 	"SPELL_AURA_APPLIED 134366 133755 140741 140571",
-	"SPELL_AURA_APPLIED_DOSE 134366",
+	"SPELL_AURA_APPLIED_DOSE 134366 140741",
 	"SPELL_AURA_REMOVED 134366 133755 140741 140571",
 	"CHAT_MSG_RAID_BOSS_EMOTE",
 	"CHAT_MSG_MONSTER_EMOTE"

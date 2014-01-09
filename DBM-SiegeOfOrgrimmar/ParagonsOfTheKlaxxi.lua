@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10935 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10951 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -17,7 +17,7 @@ mod:RegisterEventsInCombat(
 	"SPELL_CAST_START 142725 142726 142727 142728 142729 142730 143765 143666 142416 143709 143280 143974 142315 143243 143339 148676",
 	"SPELL_CAST_SUCCESS 142528 142232",
 	"SPELL_AURA_APPLIED 143339 142532 142533 142534 142671 142564 143939 143974 143701 143759 143337 143358 142948",
-	"SPELL_AURA_APPLIED_DOSE 143339",--needs review
+	"SPELL_AURA_APPLIED_DOSE 143339",
 	"SPELL_AURA_REMOVED 142564 143939 143974 143700 142948 143339 142671",
 	"SPELL_PERIODIC_DAMAGE 143735",
 	"SPELL_PERIODIC_MISSED 143735",
@@ -308,7 +308,7 @@ local function CheckBosses(ignoreRTF)
 					timerReaveCD:Start(38.5)
 				end
 				mod:StopRepeatedScan("DFAScan")
-				mod:ScheduleMethod(23, "StartRepeatedScan", "DFAScan", unitGUID, 0.25, true)--Not a large sample size, data shows it happen 29-30 seconds after IEEU fires on two different pulls. Although 2 is a poor sample
+				mod:ScheduleMethod(23, "StartRepeatedScan", unitGUID, "DFAScan", 0.25, true)--Not a large sample size, data shows it happen 29-30 seconds after IEEU fires on two different pulls. Although 2 is a poor sample
 				if UnitDebuff("player", GetSpellInfo(142929)) then vulnerable = true end
 			elseif cid == 71157 then--Xaril the Poisoned-Mind
 				timerToxicCatalystCD:Start(19.5)--May need tweaking by about a sec or two. Need some transcriptors
@@ -650,7 +650,7 @@ function mod:SPELL_CAST_START(args)
 		self.vb.whirlCast = 0
 		self.vb.whirlTime = GetTime()
 		lastWhirl = nil
-		self:StartRepeatedScan("WhirlingScan", args.sourceGUID, 0.08, true)
+		self:StartRepeatedScan(args.sourceGUID, "WhirlingScan", 0.08, true)
 		if self.Options.RangeFrame then
 			DBM.RangeCheck:Show(6)--Range assumed, spell tooltips not informative enough
 			self:Schedule(5, hideRangeFrame)
@@ -707,7 +707,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		timerToxicCatalystCD:Start(20)
 	elseif args.spellId == 142232 then
 		self:StopRepeatedScan("DFAScan")
-		self:ScheduleMethod(17, "StartRepeatedScan", "DFAScan", args.sourceGUID, 0.25, true)
+		self:ScheduleMethod(17, "StartRepeatedScan", args.sourceGUID, "DFAScan", 0.25, true)
 	end
 end
 

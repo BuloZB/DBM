@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10949 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10953 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -4844,6 +4844,7 @@ do
 		"target", "focus", "boss1", "boss2", "boss3", "boss4", "boss5"
 	}
 	local targetScanCount = {}
+	local repeatedScanEnabled = {}
 
 	local function getBossTarget(guid, scanOnlyBoss)
 		local name, uid, bossuid
@@ -4972,18 +4973,25 @@ do
 	end
 
 	--infinite scanner. so use this carefully.
-	function bossModPrototype:StartRepeatedScan(returnFunc, cidOrGuid, scanInterval, scanOnlyBoss, includeTank)
-		local cidOrGuid = cidOrGuid or self.creatureId
-		local scanInterval = scanInterval or 0.1
-		local targetname, targetuid, bossuid = self:GetBossTarget(cidOrGuid, scanOnlyBoss)
-		if targetname and (includeTank or not self:IsTanking(targetuid, bossuid)) then
-			self[returnFunc](self, targetname, targetuid, bossuid)
+	local function repeatedScanner(cidOrGuid, returnFunc, scanInterval, scanOnlyBoss, includeTank, mod)
+		if repeatedScanEnabled[returnFunc] then
+			local cidOrGuid = cidOrGuid or mod.creatureId
+			local scanInterval = scanInterval or 0.1
+			local targetname, targetuid, bossuid = mod:GetBossTarget(cidOrGuid, scanOnlyBoss)
+			if targetname and (includeTank or not mod:IsTanking(targetuid, bossuid)) then
+				mod[returnFunc](mod, targetname, targetuid, bossuid)
+			end
+			DBM:Schedule(scanInterval, repeatedScanner, cidOrGuid, returnFunc, scanInterval, scanOnlyBoss, includeTank, mod)
 		end
-		self:ScheduleMethod(scanInterval, "StartRepeatedScan", cidOrGuid, returnFunc, scanInterval, scanOnlyBoss, includeTank)
+	end
+
+	function bossModPrototype:StartRepeatedScan(cidOrGuid, returnFunc, scanInterval, scanOnlyBoss, includeTank)
+		repeatedScanEnabled[returnFunc] = true
+		repeatedScanner(cidOrGuid, returnFunc, scanInterval, scanOnlyBoss, includeTank, self)
 	end
 
 	function bossModPrototype:StopRepeatedScan(returnFunc)
-		self:UnscheduleMethod("StartRepeatedScan", returnFunc)
+		repeatedScanEnabled[returnFunc] = nil
 	end
 end
 

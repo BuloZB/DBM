@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(683, "DBM-TerraceofEndlessSpring", nil, 320)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10921 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10953 $"):sub(12, -3))
 mod:SetCreatureID(60585, 60586, 60583)--60583 Protector Kaolan, 60585 Elder Regail, 60586 Elder Asani
 mod:SetEncounterID(1409)
 mod:SetZone()
@@ -212,11 +212,10 @@ function mod:SPELL_AURA_APPLIED(args)
 --				countdownExpelCorruption:Start(5)--There seems to be a variation on when he casts first one, but ONLY first one has variation
 			end
 		end
-	elseif args.spellId == 118191 then
-		if args:IsPlayer() then
-			if (args.amount or 1) >= 9 then
-				specWarnCorruptedEssence:Show(args.amount)
-			end
+	elseif args.spellId == 118191 and args:IsPlayer() then
+		local amount = args.amount or 1
+		if amount >= 9 then
+			specWarnCorruptedEssence:Show(amount)
 		end
 	end
 end

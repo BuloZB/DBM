@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(726, "DBM-MogushanVaults", nil, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10924 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10953 $"):sub(12, -3))
 mod:SetCreatureID(60410)--Energy Charge (60913), Emphyreal Focus (60776), Cosmic Spark (62618), Celestial Protector (60793)
 mod:SetEncounterID(1500)
 mod:DisableESCombatDetection()
@@ -95,8 +95,9 @@ function mod:SPELL_AURA_APPLIED(args)
 		phase2Started = false
 		warnPhase3:Show()
 	elseif args.spellId == 117878 and args:IsPlayer() then
-		if (args.amount or 1) >= 6 and args.amount % 3 == 0 then--Warn every 3 stacks at 6 and above.
-			specWarnOvercharged:Show(args.amount)
+		local amount = args.amount or 1
+		if amount >= 6 and amount % 3 == 0 then--Warn every 3 stacks at 6 and above.
+			specWarnOvercharged:Show(amount)
 		end
 	elseif args.spellId == 119387 then -- do not add other spellids.
 		powerCount = powerCount + 1
@@ -105,10 +106,8 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif args.spellId == 118310 then--Below 50% health
 		warnRadiatingEnergies:Show()
 		specWarnRadiatingEnergies:Show()--Give a good warning so people standing outside barrior don't die.
-	elseif args.spellId == 132226 then
-		if args:IsPlayer() then
-			timerDestabilized:Start()
-		end
+	elseif args.spellId == 132226 and args:IsPlayer() then
+		timerDestabilized:Start()
 	elseif args.spellId == 132222 then
 		stunTargets[#stunTargets + 1] = args.destName
 		if self.Options.SetIconOnDestabilized then
