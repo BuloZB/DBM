@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(861, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10925 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10942 $"):sub(12, -3))
 mod:SetCreatureID(72057)
 mod:SetReCombatTime(20)
 mod:SetZone()
@@ -12,7 +12,7 @@ mod:RegisterCombat("combat_yell", L.Pull)
 
 mod:RegisterEventsInCombat(
 	"SPELL_CAST_START 144696 144688 144695",
-	"SPELL_AURA_APPLIED 144689",
+	"SPELL_AURA_APPLIED 144689 144693",
 	"SPELL_AURA_REMOVED 144689"
 )
 
