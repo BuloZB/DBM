@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(870, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10918 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10969 $"):sub(12, -3))
 mod:SetCreatureID(73720, 71512)
 mod:SetEncounterID(1594)
 mod:DisableESCombatDetection()
@@ -85,7 +85,7 @@ local specWarnPathOfBlossoms	= mod:NewSpecialWarningMove(146257)
 --Crate of Pandaren Relics
 local specWarnGustingCraneKick	= mod:NewSpecialWarningSpell(146180, nil, nil, nil, 2)
 
-local timerCombatStarts			= mod:NewCombatTimer(19)
+local timerCombatStarts			= mod:NewCombatTimer(18)
 --Massive Crate of Goods
 local timerReturnToStoneCD		= mod:NewNextTimer(12, 145489)
 local timerSetToBlowCD			= mod:NewNextTimer(9.6, 145996)
