@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(677, "DBM-MogushanVaults", nil, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10924 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10961 $"):sub(12, -3))
 mod:SetCreatureID(60399, 60400)--60396 (Rage), 60397 (Strength), 60398 (Courage), 60480 (Titan Spark), 60399 (Qin-xi), 60400 (Jan-xi)
 mod:SetEncounterID(1407)
 mod:SetZone()
@@ -75,7 +75,6 @@ mod:AddBoolOption("ArrowOnCombo", mod:IsTank())--Very accurate for tank, everyon
 
 --Upvales, don't need variables
 local focusedAssault = GetSpellInfo(116525)
-local expectedComboCount = 5
 --Important, needs recover
 mod.vb.comboMob = nil
 mod.vb.comboCount = 0
@@ -147,12 +146,10 @@ function mod:OnCombatStart(delay)
 	self.vb.strengthCount = 0
 	self.vb.courageCount = 0
 	if self:IsDifficulty("heroic10", "heroic25") then--Heroic trigger is shorter, everything comes about 6 seconds earlier
-		expectedComboCount = 10
 		timerStrengthActivates:Start(35-delay, 1)
 		timerCourageActivates:Start(69-delay, 1)
 		timerBossesActivates:Start(101-delay)
 	else
-		expectedComboCount = 5
 		timerStrengthActivates:Start(42-delay, 1)
 		timerCourageActivates:Start(75-delay, 1)
 		timerBossesActivates:Start(-delay)
@@ -276,7 +273,7 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 			end
 			warnStomp:Show(self.vb.comboCount)
 		end
-		if self.vb.comboCount == expectedComboCount then
+		if self.vb.comboCount == (self:IsDifficulty("heroic10", "heroic25") and 10 or 5) then
 			self.vb.comboMob = nil
 			self.vb.comboCount = 0
 		end

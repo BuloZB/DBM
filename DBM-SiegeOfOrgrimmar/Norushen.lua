@@ -1,11 +1,11 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10933 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10965 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
 mod:DisableESCombatDetection()
-mod:SetMinSyncRevision(10768)
+mod:SetMinSyncRevision(10958)
 mod:SetHotfixNoticeRev(10768)
 mod:SetZone()
 
@@ -23,7 +23,8 @@ mod:RegisterEventsInCombat(
 )
 
 mod:RegisterEvents(
-	"ENCOUNTER_START"
+	"ENCOUNTER_START",
+	"CHAT_MSG_MONSTER_YELL"
 )
 
 local boss = EJ_GetSectionInfo(8216)
@@ -250,7 +251,7 @@ function mod:UNIT_DIED(args)
 end
 
 function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
-	if spellId == 145769 and self:AntiSpam(1) then--Unleash Corruption
+	if spellId == 145769 and self:AntiSpam(1, 5) then--Unleash Corruption
 		specWarnManifestationSoon:Show()
 		self:Schedule(5, addsDelay, GetTime())
 	end
@@ -262,17 +263,14 @@ function mod:ENCOUNTER_START(id)
 	end
 end
 
+function mod:CHAT_MSG_MONSTER_YELL(msg)
+	if msg == L.wasteOfTime then
+		self:SendSync("prepull")
+	end
+end
+
 function mod:OnSync(msg, guid)
-	if msg == "BlindHatred" then
-		warnBlindHatred:Show()
-		if not playerInside then
-			specWarnBlindHatred:Show()
-		end
-		timerBlindHatred:Start()
-	elseif msg == "BlindHatredEnded" then
-		timerBlindHatredCD:Start()
-		self.vb.unleashedAngerCast = 0
-	elseif msg == "prepull" then
+	if msg == "prepull" then
 		timerCombatStarts:Start()
 	end
 end
@@ -280,12 +278,21 @@ end
 function mod:CHAT_MSG_ADDON(prefix, message, channel, sender)
 	--Because core already registers BigWigs prefix with server, shouldn't need it here
 	if prefix == "D4" and message then
-		if message:find("ManifestationDied") and not playerInside and self:AntiSpam(1) then
+		if message:find("ManifestationDied") and not playerInside and self:AntiSpam(1, 1) then
 			addSync()
+		elseif message:find("BlindHatred") and self:AntiSpam(5, 3) then
+			warnBlindHatred:Show()
+			if not playerInside then
+				specWarnBlindHatred:Show()
+			end
+			timerBlindHatred:Start()
+		elseif message:find("BlindHatredEnded") and self:AntiSpam(5, 4) then
+			timerBlindHatredCD:Start()
+			self.vb.unleashedAngerCast = 0
 		end
 	elseif prefix == "BigWigs" and message then
 		local bwPrefix, bwMsg = message:match("^(%u-):(.+)")
-		if bwMsg == "InsideBigAddDeath" and not playerInside and self:AntiSpam(1) then
+		if bwMsg == "InsideBigAddDeath" and not playerInside and self:AntiSpam(1, 1) then
 			addSync()
 		end
 	end

@@ -16,4 +16,5 @@ move-folders:
     DBM-Core/DBM-Brawlers: DBM-Brawlers
     DBM-Core/DBM-ThroneofThunder: DBM-ThroneofThunder
     DBM-Core/DBM-SiegeOfOrgrimmar: DBM-SiegeOfOrgrimmar
+    DBM-Core/DBM-StatusBarTimers: DBM-StatusBarTimers
     DBM-Core/DBM-Core: DBM-Core

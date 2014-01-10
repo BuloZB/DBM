@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10951 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10963 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -172,9 +172,6 @@ mod:AddSetIconOption("SetIconOnMesmerize", 142671, false)
 mod:AddBoolOption("AimArrow", false)
 
 --Upvales, don't need variables
-local UnitDebuff, GetSpellInfo = UnitDebuff, GetSpellInfo
-local calculatingDude, readyToFight = EJ_GetSectionInfo(8012), GetSpellInfo(143542)
-------------------
 --Normal Only
 --143605 Red Sword
 --143606 Purple Sword
@@ -238,6 +235,10 @@ local FlavorTable = {
 	[71158] = L.RikkalFlavor,--Rik'kal the Dissector
 	[71153] = L.hisekFlavor--Hisek the Swarmkeeper
 }
+
+local UnitDebuff, GetSpellInfo = UnitDebuff, GetSpellInfo
+local calculatingDude, readyToFight = EJ_GetSectionInfo(8012), GetSpellInfo(143542)
+------------------
 --Tables, can't recover
 local activatedTargets = {}--A table, for the 3 on pull
 local activeBossGUIDS = {}
@@ -523,7 +524,7 @@ function mod:WhirlingScan(targetname)
 			specWarnWhirlingNear:Show(targetname)
 		end
 	end
-	if (self.vb.whirlCast > 2) or ((GetTime() - self.vb.whirlTime) > 10) then
+	if self.vb.whirlCast > 4 or (GetTime() - self.vb.whirlTime) > 20 then
 		self:StopRepeatedScan("WhirlingScan")
 	end
 end
@@ -650,7 +651,7 @@ function mod:SPELL_CAST_START(args)
 		self.vb.whirlCast = 0
 		self.vb.whirlTime = GetTime()
 		lastWhirl = nil
-		self:StartRepeatedScan(args.sourceGUID, "WhirlingScan", 0.08, true)
+		self:StartRepeatedScan(args.sourceGUID, "WhirlingScan", 0.03, true)
 		if self.Options.RangeFrame then
 			DBM.RangeCheck:Show(6)--Range assumed, spell tooltips not informative enough
 			self:Schedule(5, hideRangeFrame)
