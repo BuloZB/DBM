@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("d504", "DBM-Scenario-MoP")
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 9891 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10954 $"):sub(12, -3))
 mod:SetZone()
 
 mod:RegisterCombat("scenario", 1030)
@@ -43,7 +43,7 @@ local timerEnrage			= mod:NewBuffActiveTimer(10, 127823)
 --Abomination of Anger
 local timerBreathCD			= mod:NewCDTimer(21.5, 120929)--Limited sample size, may be shorter
 local timerCloudofAngerCD	= mod:NewCDTimer(17, 120824)--Limited sample size, may be shorter
-local timerDarkforceCD		= mod:NewCDTimer(38, 120215)
+local timerDarkforceCD		= mod:NewCDTimer(32, 120215)
 
 local soundDarkforce		= mod:NewSound(120215)
 

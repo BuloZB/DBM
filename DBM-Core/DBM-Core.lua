@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10953 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 10955 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -7172,9 +7172,9 @@ do
 		table.sort(iconSortTable, sort_by_group)
 		local icon = startIcon or 1
 		for i, v in ipairs(iconSortTable) do
-			if not self.iconRestore[uId] then
-				local oldIcon = self:GetIcon(uId) or 0
-				self.iconRestore[uId] = oldIcon
+			if not self.iconRestore[v] then
+				local oldIcon = self:GetIcon(v) or 0
+				self.iconRestore[v] = oldIcon
 			end
 			SetRaidTarget(v, icon)--do not use SetIcon function again. It already checked in SetSortedIcon function.
 			if reverseIcon then
@@ -7219,7 +7219,7 @@ do
 end
 
 function bossModPrototype:GetIcon(uId)
-	return GetRaidTargetIndex(uId)
+	return UnitExists(uId) and GetRaidTargetIndex(uId)
 end
 
 function bossModPrototype:RemoveIcon(target)
