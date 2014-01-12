@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(858, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10925 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10978 $"):sub(12, -3))
 mod:SetCreatureID(71955)
 mod:SetReCombatTime(20)
 mod:SetZone()
@@ -47,7 +47,8 @@ function mod:OnCombatEnd()
 end
 
 function mod:SPELL_CAST_START(args)
-	if args.spellId == 144530 then
+	local spellId = args.spellId
+	if spellId == 144530 then
 		warnJadefireBreath:Show()
 		specWarnJadefireBreath:Show()
 		timerJadefireBreathCD:Start()

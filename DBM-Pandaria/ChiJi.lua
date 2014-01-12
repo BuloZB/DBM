@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(857, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10925 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10978 $"):sub(12, -3))
 mod:SetCreatureID(71952)
 mod:SetReCombatTime(20)
 mod:SetZone()
@@ -39,21 +39,22 @@ function mod:OnCombatStart(delay, yellTriggered)
 end
 
 function mod:SPELL_CAST_START(args)
-	if args.spellId == 144468 then
+	local spellId = args.spellId
+	if spellId == 144468 then
 		warnInspiringSong:Show()
 		specWarnInspiringSong:Show(args.sourceName)
 		timerInspiringSongCD:Start()
-	elseif args.spellId == 144471 then
+	elseif spellId == 144471 then
 		warnBlazingSong:Show()
 		specWarnBlazingSong:Show()
 		timerBlazingSong:Start()
-	elseif args.spellId == 144470 then
+	elseif spellId == 144470 then
 		warnCraneRush:Show()
 		specWarnCraneRush:Show()
-	elseif args.spellId == 144473 then
+	elseif spellId == 144473 then
 		warnBeaconOfHope:Show()
 		specWarnBeaconOfHope:Show()
-	elseif args.spellId == 144461 then
+	elseif spellId == 144461 then
 		warnFirestorm:Show()
 		specWarnFirestorm:Show()
 	end
