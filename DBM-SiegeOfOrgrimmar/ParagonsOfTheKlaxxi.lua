@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10973 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10981 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -57,7 +57,7 @@ local warnCalculated				= mod:NewTargetAnnounce(144095, 3)--Wild variation on ti
 local warnInsaneCalculationFire		= mod:NewCastAnnounce(142416, 4)--3 seconds after 144095
 --Ka'roz the Locust
 local warnFlashCast					= mod:NewCastAnnounce(143701, 3, 2)--62-70
-local warnFlash						= mod:NewTargetCountAnnounce("ej8013", 3)
+local warnFlash						= mod:NewTargetCountAnnounce("ej8058", 3)
 local warnHurlAmber					= mod:NewSpellAnnounce(143759, 3)
 --Skeer the Bloodseeker
 local warnBloodletting				= mod:NewSpellAnnounce(143280, 4)
@@ -112,10 +112,10 @@ local yellCalculated				= mod:NewYell(142416, nil, false)
 local specWarnInsaneCalculationFire	= mod:NewSpecialWarningSpell(142416, nil, nil, nil, 2)
 --Ka'roz the Locust
 local specWarnFlashCast				= mod:NewSpecialWarningSpell(143701, nil, nil, nil, 2)--I realize two abilities on same boss both using same sound is less than ideal, but user can change it now, and 1 or 3 feel appropriate for both of these
-local specWarnFlash					= mod:NewSpecialWarningYou("ej8013")--Flash is name of his charge ability
-local specWarnFlashNear				= mod:NewSpecialWarningClose("ej8013")
+local specWarnFlash					= mod:NewSpecialWarningYou("ej8058")--Flash is name of his charge ability
+local specWarnFlashNear				= mod:NewSpecialWarningClose("ej8058")
 local specWarnWhirlingNear			= mod:NewSpecialWarningClose(143701)--Whirling is name of debuff applied if you get hit by flash (avoidable) No special warning needed for on YOU, but special warning needed if near you to avoid damage
-local yellFlash						= mod:NewYell("ej8013")
+local yellFlash						= mod:NewYell("ej8058")
 local yellWhirling					= mod:NewYell("OptionVersion2", 143701, nil, false)
 local specWarnHurlAmber				= mod:NewSpecialWarningSpell(143759, nil, nil, nil, 2)--I realize two abilities on same boss both using same sound is less than ideal, but user can change it now, and 1 or 3 feel appropriate for both of these
 local specWarnCausticAmber			= mod:NewSpecialWarningMove(143735)--Stuff on the ground
@@ -146,7 +146,7 @@ local timerShieldBashCD				= mod:NewCDTimer(17, 143974, nil, mod:IsTank())
 local timerEncaseInAmber			= mod:NewTargetTimer(10, 142564)
 local timerEncaseInAmberCD			= mod:NewCDTimer(30, 142564)--Technically a next timer but we use cd cause it's only cast if someone is low when it comes off 30 second internal cd. VERY important timer for heroic
 --Iyyokuk the Lucid
-local timerInsaneCalculation		= mod:NewBuffActiveTimer(12, 142808)
+local timerInsaneCalculation		= mod:NewBuffActiveTimer(15, 142808)
 local timerInsaneCalculationCD		= mod:NewCDTimer(25, 142416)--25 is minimum but variation is wild (25-50 second variation)
 --Ka'roz the Locust
 local timerFlashCD					= mod:NewCDTimer(62, 143701)
@@ -240,6 +240,7 @@ local FlavorTable = {
 
 local UnitDebuff, GetSpellInfo = UnitDebuff, GetSpellInfo
 local calculatingDude, readyToFight = EJ_GetSectionInfo(8012), GetSpellInfo(143542)
+local expectedWhirlCount = 4
 ------------------
 --Tables, can't recover
 local activatedTargets = {}--A table, for the 3 on pull
@@ -469,7 +470,7 @@ function mod:FlashScan(targetname)
 			specWarnFlashNear:Show(targetname)
 		end
 	end
-	if self.vb.whirlCast > 4 or (GetTime() - self.vb.whirlTime) > 20 then
+	if self.vb.whirlCast > expectedWhirlCount or (GetTime() - self.vb.whirlTime) > 20 then
 		self:StopRepeatedScan("FlashScan")
 	end
 end
@@ -597,6 +598,7 @@ function mod:SPELL_CAST_START(args)
 		self.vb.whirlCast = 0
 		self.vb.whirlTime = GetTime()
 		lastWhirl = nil
+		expectedWhirlCount = self:IsDifficulty("heroic10", "heroic25") and 5 or 4
 		self:StartRepeatedScan(args.sourceGUID, "FlashScan", 0.03, true)
 		if self.Options.RangeFrame then
 			DBM.RangeCheck:Show(6)--Range assumed, spell tooltips not informative enough

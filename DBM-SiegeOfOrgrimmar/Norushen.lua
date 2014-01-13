@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10977 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10986 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
 mod:DisableESCombatDetection()
@@ -283,15 +283,15 @@ function mod:CHAT_MSG_ADDON(prefix, message, channel, sender)
 	if prefix == "D4" and message then
 		if message:find("ManifestationDied") and not playerInside and self:AntiSpam(1, 1) then
 			addSync()
-		elseif message:find("BlindHatred") and self:AntiSpam(5, 3) then
+		elseif message:find("BlindHatredEnded") and self:AntiSpam(5, 4) then
+			timerBlindHatredCD:Start()
+			self.vb.unleashedAngerCast = 0
+		elseif message:find("BlindHatred") and not message:find("BlindHatredEnded") and self:AntiSpam(5, 3) then
 			warnBlindHatred:Show()
 			if not playerInside then
 				specWarnBlindHatred:Show()
 			end
 			timerBlindHatred:Start()
-		elseif message:find("BlindHatredEnded") and self:AntiSpam(5, 4) then
-			timerBlindHatredCD:Start()
-			self.vb.unleashedAngerCast = 0
 		end
 	elseif prefix == "BigWigs" and message then
 		local bwPrefix, bwMsg = message:match("^(%u-):(.+)")

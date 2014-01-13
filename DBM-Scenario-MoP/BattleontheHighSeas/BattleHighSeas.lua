@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod("d652", "DBM-Scenario-MoP")
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10971 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 10989 $"):sub(12, -3))
 mod:SetZone()
 
 mod:RegisterCombat("scenario", 1099)
@@ -53,7 +53,7 @@ function mod:SPELL_CAST_START(args)
 		timerVerticalSlashCD:Start()
 	elseif args.spellId == 136473 then
 		warnCounterShot:Show()
-		specWarnCounterShot:Shot()
+		specWarnCounterShot:Show()
 		timerCounterShot:Start()
 	end
 end
