@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(861, "DBM-Pandaria", nil, 322, 1)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10978 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11005 $"):sub(12, -3))
 mod:SetCreatureID(72057)
 mod:SetReCombatTime(20)
 mod:SetZone()
@@ -27,7 +27,7 @@ local specWarnPoolOfFire		= mod:NewSpecialWarningMove(144693)
 local specWarnEternalAgony		= mod:NewSpecialWarningSpell(144696, nil, nil, nil, 2)--Fights over, this is 5 minute berserk spell.
 
 --local timerAncientFlameCD		= mod:NewCDTimer(43, 144695)--Insufficent logs
---local timerBurningSoulCD		= mod:NewCDTimer(22, 144689)--22-30 sec variation (maybe larger, small sample size)w
+--local timerBurningSoulCD		= mod:NewCDTimer(22, 144689)--22-30 sec variation (maybe larger, small sample size)
 local timerBurningSoul			= mod:NewBuffFadesTimer(10, 144689)
 
 local berserkTimer				= mod:NewBerserkTimer(300)
@@ -38,6 +38,9 @@ mod:AddReadyCheckOption(33118, false)
 
 function mod:OnCombatStart(delay, yellTriggered)
 	if yellTriggered then--We know for sure this is an actual pull and not diving into in progress
+		if self:IsInCombat() then
+			berserkTimer:Cancel()--In case repulled before last pulls EndCombat Could fire
+		end
 		berserkTimer:Start()
 	end
 end

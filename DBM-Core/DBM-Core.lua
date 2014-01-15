@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 10999 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 11005 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -231,6 +231,7 @@ local unschedule
 local loadOptions
 local loadModOptions
 local checkWipe
+local checkBossHealth
 local fireEvent
 local playerName = UnitName("player")
 local _, class = UnitClass("player")

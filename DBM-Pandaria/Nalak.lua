@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(814, "DBM-Pandaria", nil, 322)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10992 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11000 $"):sub(12, -3))
 mod:SetCreatureID(69099)
 mod:SetReCombatTime(20)
 mod:SetZone()
@@ -99,13 +99,6 @@ function mod:SPELL_AURA_APPLIED(args)
 		if args:IsPlayer() then
 			specWarnStormcloud:Show()
 			yellStormcloud:Yell()
-		end
-		if self.Options.RangeFrame then
-			if UnitDebuff("player", GetSpellInfo(136340)) then--You have debuff, show everyone
-				DBM.RangeCheck:Show(10, nil)
-			else--You do not have debuff, only show players who do
-				DBM.RangeCheck:Show(10, cindersDebuffFilter)
-			end
 		end
 		self:Unschedule(warnStormcloudTargets)
 		self:Schedule(0.3, warnStormcloudTargets)
