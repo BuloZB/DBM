@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 11005 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 11006 $"):sub(12, -3)),
 	DisplayVersion = "5.4.7 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.6", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 10835-- the revision of the latest stable version that is available
@@ -2293,7 +2293,7 @@ do
 			end
 			if not forceloadmapIds[mapID] then return end
 		-- You entered instance duing worldboss combat. Force end worldboss mod.
-		elseif instanceType ~= "none" then
+		else
 			if targetEventsRegistered then
 				DBM:UnregisterShortTermEvents()
 				targetEventsRegistered = false
