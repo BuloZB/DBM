@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11010 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11011 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetEncounterID(1622)
 mod:DisableESCombatDetection()
@@ -256,8 +256,8 @@ end
 
 function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 	if spellId == 50630 and self:AntiSpam(2, 3) then--Eject All Passengers:
-		timerAddsCD:Cancel(self.vb.addsCount + 1)
-		timerProtoCD:Cancel(self.vb.addsCount + 1)
+		timerAddsCD:Cancel()
+		timerProtoCD:Cancel()
 		warnPhase2:Show()
 		timerFlamesofGalakrondCD:Start(13.5)
 		timerPulsingFlamesCD:Start(39, 1)--unconfirmed
