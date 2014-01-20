@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10981 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11016 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -470,7 +470,7 @@ function mod:FlashScan(targetname)
 			specWarnFlashNear:Show(targetname)
 		end
 	end
-	if self.vb.whirlCast > expectedWhirlCount or (GetTime() - self.vb.whirlTime) > 20 then
+	if self.vb.whirlCast >= expectedWhirlCount or (GetTime() - self.vb.whirlTime) > 20 then
 		self:StopRepeatedScan("FlashScan")
 	end
 end
