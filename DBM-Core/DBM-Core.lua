@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 11020 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 11026 $"):sub(12, -3)),
 	DisplayVersion = "5.4.8 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.7", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 11011 -- the revision of the latest stable version that is available
@@ -3143,7 +3143,7 @@ do
 	end
 
 	function DBM:CHAT_MSG_ADDON(prefix, msg, channel, sender)
-		if prefix == "D4" and msg and (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT" or channel == "WHISPER" and self:GetRaidUnitId(sender)) then
+		if prefix == "D4" and msg and (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT" or channel == "WHISPER" or channel == "GUILD") then
 			handleSync(channel, sender, strsplit("\t", msg))
 		elseif prefix == "BigWigs" and msg and (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT" or channel == "WHISPER" and self:GetRaidUnitId(sender)) then
 			local bwPrefix, bwMsg = msg:match("^(%u-):(.+)")
@@ -3741,14 +3741,15 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 		end
 		if savedDifficulty == "worldboss" and LastInstanceMapID ~= 1 and LastInstanceMapID ~= 0 then--Any outdoor boss except Omen and Greench (last thing we want is to sync those 2)
 			if lastBossEngage[name..playerRealm] and GetTime() - lastBossEngage[name..playerRealm] < 10 then return end--Someone else synced in last 10 seconds so don't send out another sync to avoid needless sync spam.
+			lastBossEngage[name..playerRealm] = GetTime()--Update last engage time, that way we ignore our own sync
 			if IsInGuild() then
-				SendAddonMessage("D4", "WBE" .. "\t" .. name.."\t"..playerRealm.."\t"..startHp, "GUILD")--Even guild syncs send realm so we can keep antispam the same across realid as well.
+				SendAddonMessage("D4", "WBE\t"..name.."\t"..playerRealm.."\t"..startHp, "GUILD")--Even guild syncs send realm so we can keep antispam the same across realid as well.
 			end
 			--[[local _, numBNetOnline = BNGetNumFriends()
 			for i = 1, numBNetOnline do
 				local presenceID, _, _, _, _, _, client, isOnline = BNGetFriendInfo(i)
 				if isOnline and client == BNET_CLIENT_WOW then
-					BNSendGameData (presenceID, "D4", "WBE" .. "\t" .. name.."\t"..playerRealm.."\t"..startHp)
+					BNSendGameData (presenceID, "D4", "WBE\t"..name.."\t"..playerRealm.."\t"..startHp)
 				end
 			end--]]
 		end
@@ -3942,14 +3943,15 @@ function DBM:EndCombat(mod, wipe)
 			fireEvent("kill", mod)
 			if savedDifficulty == "worldboss" and LastInstanceMapID ~= 1 and LastInstanceMapID ~= 0 then--Any outdoor boss except Omen and Greench (last thing we want is to sync those 2)
 				if lastBossDefeat[name..playerRealm] and GetTime() - lastBossDefeat[name..playerRealm] < 10 then return end--Someone else synced in last 10 seconds so don't send out another sync to avoid needless sync spam.
+				lastBossDefeat[name..playerRealm] = GetTime()--Update last defeat time before we send it, so we don't handle our own sync
 				if IsInGuild() then
-					SendAddonMessage("D4", "WBD" .. "\t" .. name.."\t"..playerRealm, "GUILD")--Even guild syncs send realm so we can keep antispam the same across realid as well.
+					SendAddonMessage("D4", "WBD\t"..name.."\t"..playerRealm, "GUILD")--Even guild syncs send realm so we can keep antispam the same across realid as well.
 				end
 				--[[local _, numBNetOnline = BNGetNumFriends()
 				for i = 1, numBNetOnline do
 					local presenceID, _, _, _, _, _, client, isOnline = BNGetFriendInfo(i)
 					if isOnline and client == BNET_CLIENT_WOW then
-						BNSendGameData (presenceID, "D4", "WBD" .. "\t" .. name.."\t"..playerRealm)
+						BNSendGameData (presenceID, "D4", "WBD\t"..name.."\t"..playerRealm)
 					end
 				end--]]
 			end
