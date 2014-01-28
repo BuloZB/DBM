@@ -38,7 +38,7 @@ DBM_CORE_COMBAT_STATE_RECOVERED		= "%s был атакован %s назад, в
 DBM_CORE_TRANSCRIPTOR_LOG_START		= "Логирование с помощью Transcriptor начато."
 DBM_CORE_TRANSCRIPTOR_LOG_END		= "Логирование с помощью Transcriptor окончено."
 
-DBM_CORE_WORLDBOSS_ENGAGED			= "В вашем игровом мире начался бой с %s (%s)."
+DBM_CORE_WORLDBOSS_ENGAGED			= "В вашем игровом мире начался бой с %s (%s процентов здоровья)."
 DBM_CORE_WORLDBOSS_DEFEATED			= "%s был побежден в вашем игровом мире."
 
 DBM_CORE_TIMER_FORMAT_SECS			= "%d сек"
