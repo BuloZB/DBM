@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11011 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11029 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 mod:SetEncounterID(1606)
 mod:SetZone()
@@ -224,7 +224,7 @@ function mod:SPELL_AURA_APPLIED(args)
 	elseif spellId == 144215 then
 		local amount = args.amount or 1
 		timerFroststormStrike:Start(args.destName)
-		if amount % 2 == 0 then
+		if amount % 2 == 0 or amount >= 5 then
 			warnFroststormStrike:Show(args.destName, amount)
 		end
 		if amount >= 5 then
