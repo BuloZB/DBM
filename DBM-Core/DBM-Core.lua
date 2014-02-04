@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 11031 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 11032 $"):sub(12, -3)),
 	DisplayVersion = "5.4.8 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.7", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 11011 -- the revision of the latest stable version that is available
@@ -2874,7 +2874,7 @@ do
 		end
 		
 		syncHandlers["WBD"] = function(sender, name, realm)
-			if lastBossDefeat[name..realm] and GetTime() - lastBossEngage[name..realm] < 10 then return end
+			if lastBossDefeat[name..realm] and GetTime() - lastBossDefeat[name..realm] < 10 then return end
 			lastBossDefeat[name..realm] = GetTime()
 			if not DBM.Options.WorldBossAlert then return end
 			DBM:AddMsg(DBM_CORE_WORLDBOSS_DEFEATED:format(name))
@@ -2900,7 +2900,7 @@ do
 		
 		whisperSyncHandlers["WBD"] = function(sender, name, health, realm)
 			if not DBM.Options.WorldBossAlert then return end
-			if lastBossDefeat[name..realm] and GetTime() - lastBossEngage[name..realm] < 10 then return end
+			if lastBossDefeat[name..realm] and GetTime() - lastBossDefeat[name..realm] < 10 then return end
 			lastBossDefeat[name..realm] = GetTime()
 			--RealID sync needs some realm checking.
 			local sameRealm = false
