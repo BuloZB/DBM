@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11016 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11034 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -806,7 +806,11 @@ function mod:SPELL_AURA_REMOVED(args)
 			self:SetIcon(args.destName, 0)
 		end
 	elseif spellId == 143339 then
-		self.vb.parasitesActive = self.vb.parasitesActive + 8
+		if self:IsDifficulty("normal10", "heroic10") then
+			self.vb.parasitesActive = self.vb.parasitesActive + 5
+		else
+			self.vb.parasitesActive = self.vb.parasitesActive + 8
+		end
 	elseif spellId == 142671 and self.Options.SetIconOnMesmerize then
 		self:SetIcon(args.destName, 0)
 	end
@@ -846,7 +850,7 @@ function mod:UNIT_DIED(args)
 	elseif cid == 71153 then--Hisek the Swarmkeeper
 		timerAimCD:Cancel()
 		timerRapidFireCD:Cancel()
-	elseif cid == 71578 then--Amber Parasite
+	elseif cid == 71578 and not self:IsDifficulty("flex") then--Amber Parasite
 		self.vb.parasitesActive = self.vb.parasitesActive - 1
 		warnParasitesLeft:Show(self.vb.parasitesActive)
 	elseif cid == 71156 then--Kaz'tik the Manipulator

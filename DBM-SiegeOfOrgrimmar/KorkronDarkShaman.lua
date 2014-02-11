@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11029 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11038 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 mod:SetEncounterID(1606)
 mod:SetZone()
@@ -78,6 +78,7 @@ local berserkCD						= mod:NewCDTimer(540, 26662)
 
 mod:AddRangeFrameOption(4, 143990)--This is more or less for foul geyser and foul stream splash damage
 mod:AddSetIconOption("SetIconOnToxicMists", 144089, false)
+mod:AddSetIconOption("SetIconOnFoulStream", 144090, false)
 
 --Upvales, don't need variables
 local UnitExists, UnitGUID, UnitDetailedThreatSituation = UnitExists, UnitGUID, UnitDetailedThreatSituation
@@ -107,6 +108,9 @@ function mod:FoulStreamTarget(targetname, uId)
 			yellFoulStream:Yell()
 		else
 			specWarnFoulStream:Show()
+		end
+		if self.Options.SetIconOnFoulStream then
+			self:SetIcon(args.destName, 8, 4)
 		end
 	end
 end

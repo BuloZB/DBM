@@ -50,7 +50,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 11032 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 11039 $"):sub(12, -3)),
 	DisplayVersion = "5.4.8 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.7", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 11011 -- the revision of the latest stable version that is available
@@ -2313,7 +2313,7 @@ do
 	end
 	--Faster and more accurate loading for instances, but useless outside of them
 	function DBM:LOADING_SCREEN_DISABLED()
-		self:Schedule(1, FixForShittyComputers, DBM)
+		self:Schedule(1.5, FixForShittyComputers, DBM)
 	end
 
 	function DBM:LoadModsOnDemand(checkTable, checkValue)
@@ -5479,10 +5479,14 @@ end
 ----------------------------
 function DBM:GetBossHP(cId)
 	local uId = bossHealthuIdCache[cId] or "target"
-	if self:GetCIDFromGUID(uId) == cId and UnitHealthMax(uId) ~= 0 then
+	if self:GetCIDFromGUID(UnitGUID(uId)) == cId and UnitHealthMax(uId) ~= 0 then
 		local hp = UnitHealth(uId) / UnitHealthMax(uId) * 100
 		bossHealth[cId] = hp
 		return hp, uId
+	elseif self:GetCIDFromGUID(UnitGUID("focus")) == cId and UnitHealthMax("focus") ~= 0 then
+		local hp = UnitHealth("focus") / UnitHealthMax("focus") * 100
+		bossHealth[cId] = hp
+		return hp, "focus"
 	else
 		for i = 1, 5 do
 			local guid = UnitGUID("boss"..i)
@@ -5514,6 +5518,10 @@ function DBM:GetBossHPByGUID(guid)
 		local hp = UnitHealth(uId) / UnitHealthMax(uId) * 100
 		bossHealth[guid] = hp
 		return hp, uId
+	elseif UnitGUID("focus") == guid and UnitHealthMax("focus") ~= 0 then
+		local hp = UnitHealth("focus") / UnitHealthMax("focus") * 100
+		bossHealth[guid] = hp
+		return hp, "focus"
 	else
 		for i = 1, 5 do
 			local guid2 = UnitGUID("boss"..i)
