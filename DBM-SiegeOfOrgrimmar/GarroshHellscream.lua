@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11039 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11044 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetEncounterID(1623)
 mod:SetHotfixNoticeRev(10828)
@@ -248,9 +248,9 @@ function mod:SPELL_CAST_START(args)
 		timerClumpCheck:Start()
 		if self.Options.RangeFrame then
 			if self:IsDifficulty("heroic10") then
-				DBM.RangeCheck:Show(8, nil, nil, 2)--Number is a guess
+				DBM.RangeCheck:Show(8, nil, nil, 3)
 			else
-				DBM.RangeCheck:Show(8, nil, nil, 6)--Number is a guess
+				DBM.RangeCheck:Show(8, nil, nil, 7)
 			end
 			self:Schedule(13, hideRangeDelay)
 		end
