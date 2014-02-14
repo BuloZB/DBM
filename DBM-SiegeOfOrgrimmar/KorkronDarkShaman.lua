@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11038 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11043 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 mod:SetEncounterID(1606)
 mod:SetZone()
@@ -110,7 +110,7 @@ function mod:FoulStreamTarget(targetname, uId)
 			specWarnFoulStream:Show()
 		end
 		if self.Options.SetIconOnFoulStream then
-			self:SetIcon(args.destName, 8, 4)
+			self:SetIcon(targetname, 8, 3)
 		end
 	end
 end
@@ -121,7 +121,7 @@ function mod:ToxicStormTarget(targetname, uId)
 	if targetname == UnitName("player") then
 		specWarnToxicStorm:Show()
 		yellToxicStorm:Yell()
-	elseif self:CheckNearby(8, targetname) then
+	elseif self:CheckNearby(10, targetname) then
 		specWarnToxicStormNear:Show(targetname)
 	end
 end
