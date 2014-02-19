@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10986 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11055 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
 mod:DisableESCombatDetection()
@@ -279,6 +279,7 @@ function mod:OnSync(msg, guid)
 end
 
 function mod:CHAT_MSG_ADDON(prefix, message, channel, sender)
+	sender = Ambiguate(sender, "none")
 	--Because core already registers BigWigs prefix with server, shouldn't need it here
 	if prefix == "D4" and message then
 		if message:find("ManifestationDied") and not playerInside and self:AntiSpam(1, 1) then

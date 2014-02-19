@@ -50,10 +50,10 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 11048 $"):sub(12, -3)),
-	DisplayVersion = "5.4.8 alpha", -- the string that is shown as version
-	DisplayReleaseVersion = "5.4.7", -- Needed to work around old versions of BW sending improper version information
-	ReleaseRevision = 11011 -- the revision of the latest stable version that is available
+	Revision = tonumber(("$Revision: 11056 $"):sub(12, -3)),
+	DisplayVersion = "5.4.9 alpha", -- the string that is shown as version
+	DisplayReleaseVersion = "5.4.8", -- Needed to work around old versions of BW sending improper version information
+	ReleaseRevision = 11048 -- the revision of the latest stable version that is available
 }
 
 -- Legacy crap; that stupid "Version" field was never a good idea.
@@ -989,7 +989,7 @@ do
 				"GROUP_ROSTER_UPDATE",
 				"INSTANCE_GROUP_SIZE_CHANGED",
 				"CHAT_MSG_ADDON",
---				"BN_CHAT_MSG_ADDON",--5.4.7+ bnet sync support
+				"BN_CHAT_MSG_ADDON",
 				"PLAYER_REGEN_DISABLED",
 				"PLAYER_REGEN_ENABLED",
 				"INSTANCE_ENCOUNTER_ENGAGE_UNIT",
@@ -2605,6 +2605,7 @@ do
 	local dummyMod -- dummy mod for the pull sound effect
 	syncHandlers["PT"] = function(sender, timer, lastMapID)
 		if select(2, IsInInstance()) == "pvp" or DBM:GetRaidRank(sender) == 0 or IsEncounterInProgress() then
+			print(DBM:GetRaidRank(sender))
 			return
 		end
 		if (lastMapID and tonumber(lastMapID) ~= LastInstanceMapID) or (not lastMapID and DBM.Options.DontShowPTNoID) then return end
@@ -3156,6 +3157,7 @@ do
 	end
 
 	function DBM:CHAT_MSG_ADDON(prefix, msg, channel, sender)
+		sender = Ambiguate(sender, "none")
 		if prefix == "D4" and msg and (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT" or channel == "WHISPER" or channel == "GUILD") then
 			handleSync(channel, sender, strsplit("\t", msg))
 		elseif prefix == "BigWigs" and msg and (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT" or channel == "WHISPER" and self:GetRaidUnitId(sender)) then
@@ -3166,11 +3168,11 @@ do
 		end
 	end
 	
---[[	function DBM:BN_CHAT_MSG_ADDON(prefix, msg, channel, sender)
+	function DBM:BN_CHAT_MSG_ADDON(prefix, msg, channel, sender)
 		if prefix == "D4" and msg then
 			handleSync(channel, sender, strsplit("\t", msg))
 		end
-	end--]]
+	end
 end
 
 -----------------------
@@ -3758,13 +3760,11 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 			if IsInGuild() then
 				SendAddonMessage("D4", "WBE\t"..name.."\t"..playerRealm.."\t"..startHp, "GUILD")--Even guild syncs send realm so we can keep antispam the same across realid as well.
 			end
-			if BNSendGameData then--Remove when 5.4.7 is live in all regions
-				local _, numBNetOnline = BNGetNumFriends()
-				for i = 1, numBNetOnline do
-					local presenceID, _, _, _, _, _, client, isOnline = BNGetFriendInfo(i)
-					if isOnline and client == BNET_CLIENT_WOW then
-						BNSendGameData(presenceID, "D4", "WBE\t"..name.."\t"..playerRealm.."\t"..startHp)
-					end
+			local _, numBNetOnline = BNGetNumFriends()
+			for i = 1, numBNetOnline do
+				local presenceID, _, _, _, _, _, client, isOnline = BNGetFriendInfo(i)
+				if isOnline and client == BNET_CLIENT_WOW then
+					BNSendGameData(presenceID, "D4", "WBE\t"..name.."\t"..playerRealm.."\t"..startHp)
 				end
 			end
 		end
@@ -3970,13 +3970,11 @@ function DBM:EndCombat(mod, wipe)
 				if IsInGuild() then
 					SendAddonMessage("D4", "WBD\t"..name.."\t"..playerRealm, "GUILD")--Even guild syncs send realm so we can keep antispam the same across realid as well.
 				end
-				if BNSendGameData then--Remove when 5.4.7 is live in all regions
-					local _, numBNetOnline = BNGetNumFriends()
-					for i = 1, numBNetOnline do
-						local presenceID, _, _, _, _, _, client, isOnline = BNGetFriendInfo(i)
-						if isOnline and client == BNET_CLIENT_WOW then
-							BNSendGameData(presenceID, "D4", "WBD\t"..name.."\t"..playerRealm)
-						end
+				local _, numBNetOnline = BNGetNumFriends()
+				for i = 1, numBNetOnline do
+					local presenceID, _, _, _, _, _, client, isOnline = BNGetFriendInfo(i)
+					if isOnline and client == BNET_CLIENT_WOW then
+						BNSendGameData(presenceID, "D4", "WBD\t"..name.."\t"..playerRealm)
 					end
 				end
 			end
