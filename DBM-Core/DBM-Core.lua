@@ -50,10 +50,10 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 11056 $"):sub(12, -3)),
-	DisplayVersion = "5.4.9 alpha", -- the string that is shown as version
-	DisplayReleaseVersion = "5.4.8", -- Needed to work around old versions of BW sending improper version information
-	ReleaseRevision = 11048 -- the revision of the latest stable version that is available
+	Revision = tonumber(("$Revision: 11059 $"):sub(12, -3)),
+	DisplayVersion = "5.4.10 alpha", -- the string that is shown as version
+	DisplayReleaseVersion = "5.4.9", -- Needed to work around old versions of BW sending improper version information
+	ReleaseRevision = 11056 -- the revision of the latest stable version that is available
 }
 
 -- Legacy crap; that stupid "Version" field was never a good idea.
@@ -2912,7 +2912,7 @@ do
 			end
 		end
 		
-		whisperSyncHandlers["WBD"] = function(sender, name, health, realm)
+		whisperSyncHandlers["WBD"] = function(sender, name, realm)
 			if not DBM.Options.WorldBossAlert then return end
 			if lastBossDefeat[name..realm] and GetTime() - lastBossDefeat[name..realm] < 10 then return end
 			lastBossDefeat[name..realm] = GetTime()
