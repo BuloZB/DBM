@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(868, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11011 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11066 $"):sub(12, -3))
 mod:SetCreatureID(72311, 72560, 72249, 73910, 72302, 72561, 73909)--Boss needs to engage off friendly NCPS, not the boss. I include the boss too so we don't detect a win off losing varian. :)
 mod:SetEncounterID(1622)
 mod:DisableESCombatDetection()
@@ -315,7 +315,7 @@ function mod:CHAT_MSG_RAID_BOSS_EMOTE(msg)
 end
 
 function mod:OnSync(msg)
-	if msg == "Adds" and self:AntiSpam(10, 4) then
+	if msg == "Adds" and self:AntiSpam(20, 4) then
 		self.vb.addsCount = self.vb.addsCount + 1
 		if self.vb.addsCount % 5 == 3 then
 			warnAdd:Show(self.vb.addsCount)
