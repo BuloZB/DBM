@@ -49,7 +49,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 11068 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 11072 $"):sub(12, -3)),
 	DisplayVersion = "5.4.11 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.10", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 11061 -- the revision of the latest stable version that is available
@@ -526,7 +526,7 @@ do
 		end
 
 		function registerSpellId(event, spellId)
-			if not GetSpellInfo(spellId) then
+			if spellId and not GetSpellInfo(spellId) then
 				print("RegisterEvents : "..spellId.." spell id not exists!")
 				return
 			end
@@ -3308,7 +3308,7 @@ do
 		if not combatInitialized then return end
 		if combatInfo[LastInstanceMapID] then
 			for i, v in ipairs(combatInfo[LastInstanceMapID]) do
-				if v.type == "combat" or v.type == "combat_yell" or v.type == "combat_emote" or v.type == "combat_say" then--this will be faster than string.find
+				if (v.type == "combat" and not v.noRegenDetection) or v.type == "combat_yell" or v.type == "combat_emote" or v.type == "combat_say" then--this will be faster than string.find
 					if v.multiMobPullDetection then
 						for _, mob in ipairs(v.multiMobPullDetection) do
 							if checkForPull(mob, v) then
@@ -6147,12 +6147,6 @@ do
 		font:SetTextColor(unpack(DBM.Options.SpecialWarningFontCol))
 	end
 
-	local shakeFrame = CreateFrame("Frame")
-	shakeFrame:SetScript("OnUpdate", function(self, elapsed)
-		self.timer = self.timer - elapsed
-	end)
-	shakeFrame:Hide()
-
 	frame:SetScript("OnUpdate", function(self, elapsed)
 		self.timer = self.timer - elapsed
 		if self.timer >= 3 and self.timer <= 4 then
@@ -7060,6 +7054,9 @@ function bossModPrototype:RegisterCombat(cType, ...)
 	if self.noEEDetection then
 		info.noEEDetection = self.noEEDetection
 	end
+	if self.noRegenDetection then
+		info.noRegenDetection = self.noRegenDetection
+	end
 	-- use pull-mobs as kill mobs by default, can be overriden by RegisterKill
 	if self.multiMobPullDetection then
 		for i, v in ipairs(self.multiMobPullDetection) do
@@ -7145,6 +7142,13 @@ function bossModPrototype:DisableEEKillDetection()
 	self.noEEDetection = true
 	if self.combatInfo then
 		self.combatInfo.noEEDetection = true
+	end
+end
+
+function bossModPrototype:DisableRegenDetection()
+	self.noRegenDetection = true
+	if self.combatInfo then
+		self.combatInfo.noRegenDetection = true
 	end
 end
 
