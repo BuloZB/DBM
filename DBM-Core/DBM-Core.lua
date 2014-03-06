@@ -49,7 +49,7 @@
 --  Globals/Default Options  --
 -------------------------------
 DBM = {
-	Revision = tonumber(("$Revision: 11072 $"):sub(12, -3)),
+	Revision = tonumber(("$Revision: 11090 $"):sub(12, -3)),
 	DisplayVersion = "5.4.11 alpha", -- the string that is shown as version
 	DisplayReleaseVersion = "5.4.10", -- Needed to work around old versions of BW sending improper version information
 	ReleaseRevision = 11061 -- the revision of the latest stable version that is available
@@ -167,6 +167,7 @@ DBM.DefaultOptions = {
 	ArrowPoint = "TOP",
 	-- global boss mod settings (overrides mod-specific settings for some options)
 	DontShowBossAnnounces = false,
+	DontShowFarWarnings = true,
 	DontSendBossWhispers = false,
 	DontSetIcons = false,
 	DontShowRangeFrame = false,
@@ -272,8 +273,7 @@ local DBM = DBM
 -- so caching them is worth the effort
 local ipairs, pairs, next = ipairs, pairs, next
 local tinsert, tremove, twipe = table.insert, table.remove, table.wipe
-local type = type
-local select = select
+local type, select = type, select
 local GetTime = GetTime
 local floor, mhuge, mmin, mmax = math.floor, math.huge, math.min, math.max
 local GetNumGroupMembers, GetRaidRosterInfo = GetNumGroupMembers, GetRaidRosterInfo
@@ -284,7 +284,7 @@ local UnitExists, UnitIsDead, UnitIsFriend = UnitExists, UnitIsDead, UnitIsFrien
 local GetSpellInfo, EJ_GetSectionInfo = GetSpellInfo, EJ_GetSectionInfo
 local EJ_GetEncounterInfo, EJ_GetCreatureInfo, GetDungeonInfo = EJ_GetEncounterInfo, EJ_GetCreatureInfo, GetDungeonInfo
 local GetInstanceInfo = GetInstanceInfo
-local GetCurrentMapDungeonLevel, GetMapInfo, GetCurrentMapZone, SetMapToCurrentZone = GetCurrentMapDungeonLevel, GetMapInfo, GetCurrentMapZone, SetMapToCurrentZone
+local GetPlayerMapPosition, GetCurrentMapDungeonLevel, GetMapInfo, GetCurrentMapZone, SetMapToCurrentZone = GetPlayerMapPosition, GetCurrentMapDungeonLevel, GetMapInfo, GetCurrentMapZone, SetMapToCurrentZone
 local GetSpecialization = GetSpecialization
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 local GetPartyAssignment, UnitGroupRolesAssigned = GetPartyAssignment, UnitGroupRolesAssigned
@@ -2869,53 +2869,134 @@ do
 		end
 
 		syncHandlers["WBE"] = function(sender, name, realm, health)
-			if lastBossEngage[name..realm] and GetTime() - lastBossEngage[name..realm] < 10 then return end
+			if lastBossEngage[name..realm] and GetTime() - lastBossEngage[name..realm] < 10 then return end--We recently got a sync about this boss on this realm, so do nothing.
 			lastBossEngage[name..realm] = GetTime()
-			if not DBM.Options.WorldBossAlert then return end
-			DBM:AddMsg(DBM_CORE_WORLDBOSS_ENGAGED:format(name, health))
+			--Needs some realm checking (even for people same guild, to keep realid syncs matched up.
+			local sameRealm = false
+ 			local connectedServers = GetAutoCompleteRealms()
+ 			if connectedServers then--Check if realm matches any realm in our connection
+				for i = 1, #connectedServers do
+ 	 				if realm == connectedServers[i] then
+ 	 					lastBossEngage[name..connectedServers[i]] = GetTime()--Antispam ALL connected realms to avoid loop backs from connected realms.
+ 	 					sameRealm = true
+ 	 				end
+				end
+			else--connectedServers is nil, so no connected realms, just check against our own realm
+				if realm == playerRealm then sameRealm = true end
+			end
+			--Begin sync pass on to realid since this was a guild sync.
+			if (lastBossEngage[name..realm.."PASSED"] and GetTime() - lastBossEngage[name..realm.."PASSED"] < 10) or not lastBossEngage[name..realm.."PASSED"] then
+				lastBossEngage[name..realm.."PASSED"] = GetTime()
+				local _, numBNetOnline = BNGetNumFriends()
+				for i = 1, numBNetOnline do
+					local presenceID, _, _, _, _, _, client, isOnline = BNGetFriendInfo(i)
+					if isOnline and client == BNET_CLIENT_WOW then
+						BNSendGameData(presenceID, "D4", "WBE\t"..name.."\t"..realm.."\t"..health)
+					end
+				end
+			end
+			if sameRealm and DBM.Options.WorldBossAlert and not IsEncounterInProgress() then
+				DBM:AddMsg(DBM_CORE_WORLDBOSS_ENGAGED:format(name, floor(health)))
+				if DBM.Options.DebugMode then
+					print("DBM Debug: World Boss Engage sync recieved from "..sender)
+				end
+			end
 		end
 		
 		syncHandlers["WBD"] = function(sender, name, realm)
 			if lastBossDefeat[name..realm] and GetTime() - lastBossDefeat[name..realm] < 10 then return end
 			lastBossDefeat[name..realm] = GetTime()
-			if not DBM.Options.WorldBossAlert then return end
-			DBM:AddMsg(DBM_CORE_WORLDBOSS_DEFEATED:format(name))
+			--Needs some realm checking.
+			local sameRealm = false
+ 			local connectedServers = GetAutoCompleteRealms()
+ 			if connectedServers then--Check if realm matches any realm in our connection
+				for i = 1, #connectedServers do
+ 	 				if realm == connectedServers[i] then
+ 	 					lastBossDefeat[name..connectedServers[i]] = GetTime()--Antispam ALL connected realms to avoid loop backs from connected realms.
+ 	 					sameRealm = true
+ 	 				end
+				end
+			else--connectedServers is nil, so no connected realms, just check against our own realm
+				if realm == playerRealm then sameRealm = true end
+			end
+			--Begin sync pass on to realid since this was a guild sync.
+			if (lastBossDefeat[name..realm.."PASSED"] and GetTime() - lastBossDefeat[name..realm.."PASSED"] < 10) or not lastBossDefeat[name..realm.."PASSED"] then
+				lastBossDefeat[name..realm.."PASSED"] = GetTime()
+				local _, numBNetOnline = BNGetNumFriends()
+				for i = 1, numBNetOnline do
+					local presenceID, _, _, _, _, _, client, isOnline = BNGetFriendInfo(i)
+					if isOnline and client == BNET_CLIENT_WOW then
+						BNSendGameData(presenceID, "D4", "WBD\t"..name.."\t"..realm)
+					end
+				end
+			end
+			if sameRealm and DBM.Options.WorldBossAlert and not IsEncounterInProgress() then
+				DBM:AddMsg(DBM_CORE_WORLDBOSS_DEFEATED:format(name))
+				if DBM.Options.DebugMode then
+					print("DBM Debug: World Boss Defeat sync recieved from "..sender)
+				end
+			end
 		end
 
 		whisperSyncHandlers["WBE"] = function(sender, name, realm, health)
 			if lastBossEngage[name..realm] and GetTime() - lastBossEngage[name..realm] < 10 then return end
 			lastBossEngage[name..realm] = GetTime()
-			--RealID sync needs some realm checking.
+			--Needs some realm checking.
 			local sameRealm = false
  			local connectedServers = GetAutoCompleteRealms()
  			if connectedServers then--Check if realm matches any realm in our connection
 				for i = 1, #connectedServers do
- 	 				if realm == connectedServers[i] then sameRealm = true end
+ 	 				if realm == connectedServers[i] then
+ 	 					lastBossEngage[name..connectedServers[i]] = GetTime()--Antispam ALL connected realms to avoid loop backs from connected realms.
+ 	 					sameRealm = true
+ 	 				end
 				end
 			else--connectedServers is nil, so no connected realms, just check against our own realm
 				if realm == playerRealm then sameRealm = true end
 			end
-			if sameRealm and DBM.Options.WorldBossAlert then
-				DBM:AddMsg(DBM_CORE_WORLDBOSS_ENGAGED:format(name, health))
+			--Begin sync pass on
+			if (lastBossEngage[name..realm.."PASSED"] and GetTime() - lastBossEngage[name..realm.."PASSED"] < 10) or not lastBossEngage[name..realm.."PASSED"] then
+				lastBossEngage[name..realm.."PASSED"] = GetTime()
+				if IsInGuild() then--Sync from realid, send to GUILD
+					SendAddonMessage("D4", "WBE\t"..name.."\t"..realm.."\t"..health, "GUILD")
+				end
+			end
+			if sameRealm and DBM.Options.WorldBossAlert and not IsEncounterInProgress() then
+				DBM:AddMsg(DBM_CORE_WORLDBOSS_ENGAGED:format(name, floor(health)))
+				if DBM.Options.DebugMode then
+					print("DBM Debug: World Boss Engage sync recieved from "..sender)
+				end
 			end
 		end
 		
 		whisperSyncHandlers["WBD"] = function(sender, name, realm)
-			if not DBM.Options.WorldBossAlert then return end
 			if lastBossDefeat[name..realm] and GetTime() - lastBossDefeat[name..realm] < 10 then return end
 			lastBossDefeat[name..realm] = GetTime()
-			--RealID sync needs some realm checking.
+			--Needs some realm checking.
 			local sameRealm = false
  			local connectedServers = GetAutoCompleteRealms()
  			if connectedServers then--Check if realm matches any realm in our connection
 				for i = 1, #connectedServers do
- 	 				if realm == connectedServers[i] then sameRealm = true end
+ 	 				if realm == connectedServers[i] then
+ 	 					lastBossDefeat[name..connectedServers[i]] = GetTime()--Antispam ALL connected realms to avoid loop backs from connected realms.
+ 	 					sameRealm = true
+ 	 				end
 				end
 			else--connectedServers is nil, so no connected realms, just check against our own realm
 				if realm == playerRealm then sameRealm = true end
 			end
-			if sameRealm then
+			--Begin sync pass on
+			if (lastBossDefeat[name..realm.."PASSED"] and GetTime() - lastBossDefeat[name..realm.."PASSED"] < 10) or not lastBossDefeat[name..realm.."PASSED"] then
+				lastBossDefeat[name..realm.."PASSED"] = GetTime()
+				if IsInGuild() then--Sync from realid, send to GUILD
+					SendAddonMessage("D4", "WBD\t"..name.."\t"..realm, "GUILD")
+				end
+			end
+			if sameRealm and DBM.Options.WorldBossAlert and not IsEncounterInProgress() then
 				DBM:AddMsg(DBM_CORE_WORLDBOSS_DEFEATED:format(name))
+				if DBM.Options.DebugMode then
+					print("DBM Debug: World Boss Defeat sync recieved from "..sender)
+				end
 			end
 		end
 
@@ -3491,7 +3572,7 @@ function checkWipe(confirm)
 		local wipe = 1 -- 0: no wipe, 1: normal wipe, 2: wipe by UnitExists check.
 		if IsInScenarioGroup() or (difficultyIndex == 11) or (difficultyIndex == 12) then -- Scenario mod uses special combat start and must be enabled before sceniro end. So do not wipe.
 			wipe = 0
-		elseif IsEncounterInProgress() then -- Encounter Progress marked, you obiously combat whth boss. So do not Wipe
+		elseif IsEncounterInProgress() then -- Encounter Progress marked, you obviously in combat with boss. So do not Wipe
 			wipe = 0
 		elseif savedDifficulty == "worldboss" and UnitIsDeadOrGhost("player") then -- On dead or ghost, unit combat status detection would be fail. If you ghost in instance, that means wipe. But in worldboss, ghost means not wipe. So do not wipe.
 			wipe = 0
@@ -3597,6 +3678,7 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 		--set mod default info
 		savedDifficulty, difficultyText, difficultyIndex, LastGroupSize = DBM:GetCurrentInstanceDifficulty()
 		local name = mod.combatInfo.name
+		local modId = mod.id
 		if C_Scenario.IsInScenario() then
 			mod.inScenario = true
 		end
@@ -3704,7 +3786,7 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 			end
 			--send "C" sync
 			if not synced then
-				sendSync("C", (delay or 0).."\t"..mod.id.."\t"..(mod.revision or 0).."\t"..startHp.."\t"..DBM.Revision)
+				sendSync("C", (delay or 0).."\t"..modId.."\t"..(mod.revision or 0).."\t"..startHp.."\t"..DBM.Revision)
 			end
 			--show bigbrother check
 			if DBM.Options.ShowBigBrotherOnCombatStart and BigBrother and type(BigBrother.ConsumableCheck) == "function" then
@@ -3738,12 +3820,12 @@ function DBM:StartCombat(mod, delay, event, synced, syncedStartHp)
 			end
 			--show hotfix notify
 			if mod.hotfixNoticeRev then
-				sendSync("HF", mod.id.."\t"..mod.hotfixNoticeRev)
+				sendSync("HF", modId.."\t"..mod.hotfixNoticeRev)
 			end
 		elseif DBM.Options.ShowRecoveryMessage then--show timer recovery message
 			self:AddMsg(DBM_CORE_COMBAT_STATE_RECOVERED:format(difficultyText..name, strFromTime(delay)))
 		end
-		if savedDifficulty == "worldboss" and LastInstanceMapID ~= 1 and LastInstanceMapID ~= 0 then--Any outdoor boss except Omen and Greench (last thing we want is to sync those 2)
+		if savedDifficulty == "worldboss" and modId ~= "Omen" and modId ~= "Greench" and modId ~= "Moonfang" then--Any outdoor boss except Omen and Greench and MoonFang
 			if lastBossEngage[name..playerRealm] and GetTime() - lastBossEngage[name..playerRealm] < 10 then return end--Someone else synced in last 10 seconds so don't send out another sync to avoid needless sync spam.
 			lastBossEngage[name..playerRealm] = GetTime()--Update last engage time, that way we ignore our own sync
 			if IsInGuild() then
@@ -3821,6 +3903,7 @@ function DBM:EndCombat(mod, wipe)
 			return--Don't run any further, stats are nil on a bad load so rest of this code will also error out.
 		end
 		local name = mod.combatInfo.name
+		local modId = mod.id
 		if wipe then
 			mod.lastWipeTime = GetTime()
 			--Fix for "attempt to perform arithmetic on field 'pull' (a nil value)" (which was actually caused by stats being nil, so we never did getTime on pull, fixing one SHOULD fix the other)
@@ -3953,7 +4036,7 @@ function DBM:EndCombat(mod, wipe)
 				sendWhisper(k, msg)
 			end
 			fireEvent("kill", mod)
-			if savedDifficulty == "worldboss" and LastInstanceMapID ~= 1 and LastInstanceMapID ~= 0 then--Any outdoor boss except Omen and Greench (last thing we want is to sync those 2)
+			if savedDifficulty == "worldboss" and modId ~= "Omen" and modId ~= "Greench" and modId ~= "Moonfang" then--Any outdoor boss except Omen and Greench and Moonfang
 				if lastBossDefeat[name..playerRealm] and GetTime() - lastBossDefeat[name..playerRealm] < 10 then return end--Someone else synced in last 10 seconds so don't send out another sync to avoid needless sync spam.
 				lastBossDefeat[name..playerRealm] = GetTime()--Update last defeat time before we send it, so we don't handle our own sync
 				if IsInGuild() then
@@ -4363,8 +4446,7 @@ do
 				hpText = hpText.." ("..BOSSES_KILLED:format(bossesKilled, mod.numBoss)..")"
 			end
 			sendWhisper(sender, chatPrefix..DBM_CORE_STATUS_WHISPER:format(difficultyText..(mod.combatInfo.name or ""), hpText, IsInInstance() and getNumRealAlivePlayers() or getNumAlivePlayers(), DBM:GetNumRealGroupMembers()))
-		elseif #inCombat > 0 and DBM.Options.AutoRespond and
-		(isRealIdMessage and (not isOnSameServer(sender) or not DBM:GetRaidUnitId(select(4, BNGetFriendInfoByID(sender)))) or not isRealIdMessage and not DBM:GetRaidUnitId(sender)) then
+		elseif #inCombat > 0 and DBM.Options.AutoRespond and (isRealIdMessage and (not isOnSameServer(sender) or not DBM:GetRaidUnitId(select(4, BNGetFriendInfoByID(sender)))) or not isRealIdMessage and not DBM:GetRaidUnitId(sender)) then
 			if not difficultyText then -- prevent error when timer recovery function worked and etc (StartCombat not called)
 				difficultyText = select(2, DBM:GetCurrentInstanceDifficulty())
 			end
@@ -4388,6 +4470,7 @@ do
 
 	function DBM:CHAT_MSG_WHISPER(msg, name, _, _, _, status)
 		if status ~= "GM" then
+			name = Ambiguate(name, "none")
 			return onWhisper(msg, name, false)
 		end
 	end
@@ -5125,6 +5208,7 @@ do
 	local rangeUpdated = {}
 
 	function bossModPrototype:CheckTankDistance(cidOrGuid, distance, defaultReturn)
+		if not DBM.Options.DontShowFarWarnings then return true end--Global disable.
 		if rangeCache[cidOrGuid] and (GetTime() - (rangeUpdated[cidOrGuid] or 0)) < 2 then -- return same range within 2 sec call
 			if rangeCache[cidOrGuid] > distance then
 				return false

@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(866, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11061 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11075 $"):sub(12, -3))
 mod:SetCreatureID(72276)
 mod:SetEncounterID(1624)
 mod:DisableESCombatDetection()
@@ -263,6 +263,7 @@ end
 
 function mod:ENCOUNTER_START(id)
 	if id == 1624 then
+		if self.lastWipeTime and GetTime() - self.lastWipeTime < 20 then return end--False ENCOUNTER_START firing on a wipe (blizz bug), ignore it so we don't start pre pull timer
 		self:SendSync("prepull")
 	end
 end
@@ -275,6 +276,7 @@ end
 
 function mod:OnSync(msg, guid)
 	if msg == "prepull" then
+		if self.lastWipeTime and GetTime() - self.lastWipeTime < 20 then return end
 		timerCombatStarts:Start()
 	end
 end

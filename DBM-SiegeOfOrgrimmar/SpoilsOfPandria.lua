@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(870, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 10977 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11083 $"):sub(12, -3))
 mod:SetCreatureID(73720, 71512)
 mod:SetEncounterID(1594)
 mod:DisableESCombatDetection()
@@ -174,33 +174,33 @@ end
 
 function mod:SPELL_CAST_START(args)
 	local spellId = args.spellId
-	if spellId == 145996 and isPlayerInMantid() then
+	if spellId == 145996 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) then
 		timerSetToBlowCD:Start(args.sourceGUID)
-	elseif spellId == 145288 and not isPlayerInMantid() then
+	elseif spellId == 145288 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		warnMatterScramble:Show()
 		specWarnMatterScramble:Show()
 		timerMatterScramble:Start(args.sourceGUID)
 		timerMatterScrambleCD:Start(args.sourceGUID)
-	elseif spellId == 145461 and not isPlayerInMantid() then
+	elseif spellId == 145461 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		warnEnergize:Show()
-	elseif spellId == 142934 and not isPlayerInMantid() then
+	elseif spellId == 142934 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		warnTorment:Show()
 		specWarnTorment:Show()
-	elseif spellId == 142539 and isPlayerInMantid() then
+	elseif spellId == 142539 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) then
 		warnMantidSwarm:Show()
 		specWarnMantidSwarm:Show()
 		timerMantidSwarmCD:Start(args.sourceGUID)
-	elseif spellId == 145286 and isPlayerInMantid() and self:AntiSpam(5, args.sourceGUID) then
+	elseif spellId == 145286 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) and self:AntiSpam(5, args.sourceGUID) then
 		warnWindStorm:Show()
 		timerWindstormCD:Start(args.sourceGUID)
-	elseif spellId == 144922 and not isPlayerInMantid() then
+	elseif spellId == 144922 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		local source = args.sourceName
 		warnHardenFlesh:Show()
 		timerHardenFleshCD:Start(args.sourceGUID)
 		if source == UnitName("target") or source == UnitName("focus") then 
 			specWarnHardenFlesh:Show(source)
 		end
-	elseif spellId == 144923 and not isPlayerInMantid() then
+	elseif spellId == 144923 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		local source = args.sourceName
 		warnEarthenShard:Show()
 		timerEarthenShardCD:Start(args.sourceGUID)
@@ -213,10 +213,10 @@ function mod:SPELL_CAST_START(args)
 		warnGustingCraneKick:Show()
 		specWarnGustingCraneKick:Show()
 		timerGustingCraneKickCD:Start(args.sourceGUID)
-	elseif spellId == 145489 and not isPlayerInMantid() then
+	elseif spellId == 145489 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		warnReturnToStone:Show()
 		timerReturnToStoneCD:Start(args.sourceGUID)
-	elseif spellId == 142947 and not isPlayerInMantid() then--Pre warn more or less
+	elseif spellId == 142947 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then--Pre warn more or less
 		warnCrimsonRecon:Show()
 		specWarnCrimsonRecon:Show()
 	elseif spellId == 146815 and self:AntiSpam(2, 4)  then--Will do more work on this later, not enough time before raid, but i have an idea for it
@@ -227,25 +227,25 @@ end
 
 function mod:SPELL_CAST_SUCCESS(args)
 	local spellId = args.spellId
-	if spellId == 142694 and not isPlayerInMantid() then
+	if spellId == 142694 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		warnSparkofLife:Show()
-	elseif spellId == 142947 and not isPlayerInMantid() then
+	elseif spellId == 142947 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		timerCrimsonReconCD:Start(args.sourceGUID)
-	elseif spellId == 145712 and isPlayerInMantid() then
+	elseif spellId == 145712 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) then
 		timerBlazingChargeCD:Start(args.sourceGUID)
-	elseif spellId == 146253 and isPlayerInMantid() then
+	elseif spellId == 146253 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) then
 		timerPathOfBlossomsCD:Start(args.sourceGUID)
-	elseif spellId == 145230 and not isPlayerInMantid() then
+	elseif spellId == 145230 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then
 		local source = args.sourceName
 		warnForbiddenMagic:Show(args.destName)
 		if source == UnitName("target") or source == UnitName("focus") then 
 			specWarnForbiddenMagic:Show(source)
 		end
-	elseif spellId == 145786 and isPlayerInMantid() then
+	elseif spellId == 145786 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) then
 		warnResidue:Show()
 		timerResidueCD:Start(args.sourceGUID)
 		specWarnResidue:Show()
-	elseif spellId == 145812 and isPlayerInMantid() then
+	elseif spellId == 145812 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) then
 		warnRageoftheEmpress:Show()
 		specWarnRageoftheEmpress:Show()
 		timerRageoftheEmpressCD:Start(args.sourceGUID)
@@ -254,7 +254,7 @@ end
 
 function mod:SPELL_AURA_APPLIED(args)
 	local spellId = args.spellId
-	if spellId == 145987 and isPlayerInMantid() then
+	if spellId == 145987 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) then
 		warnSetToBlow:CombinedShow(0.5, args.destName)
 		if args:IsPlayer() then
 			local _, _, _, _, _, _, expires = UnitDebuff("player", args.spellName)
@@ -263,11 +263,11 @@ function mod:SPELL_AURA_APPLIED(args)
 			timerSetToBlow:Start(buffTime)
 			specWarnSetToBlow:Schedule(buffTime)
 		end
-	elseif spellId == 145692 and isPlayerInMantid() then
+	elseif spellId == 145692 and (not DBM.Options.DontShowFarWarnings or isPlayerInMantid()) then
 		warnEnrage:Show(args.destName)
 		specWarnEnrage:Show(args.destName)
 		timerEnrage:Start(args.destName)
-	elseif spellId == 145998 and not isPlayerInMantid() then--This is a massive crate mogu spawning
+	elseif spellId == 145998 and (not DBM.Options.DontShowFarWarnings or not isPlayerInMantid()) then--This is a massive crate mogu spawning
 		timerReturnToStoneCD:Start(6)
 	end
 end
@@ -350,17 +350,17 @@ function mod:UPDATE_WORLD_STATES()
 	end
 	if time % 10 == 0 then
 		berserkTimer:Update(maxTimer-time-1, maxTimer)
-		if time == 300 and self.Options["timer_berserk"] then
+		if time == 300 and self.Options["timer_berserk"] and self:AntiSpam(2, 5) then
 			berserkWarning1:Show(5, DBM_CORE_MIN)
-		elseif time == 180 and self.Options["timer_berserk"] then
+		elseif time == 180 and self.Options["timer_berserk"] and self:AntiSpam(2, 5) then
 			berserkWarning1:Show(3, DBM_CORE_MIN)
-		elseif time == 60 and self.Options["timer_berserk"] then
+		elseif time == 60 and self.Options["timer_berserk"] and self:AntiSpam(2, 5) then
 			berserkWarning2:Show(1, DBM_CORE_MIN)
-		elseif time == 30 and self.Options["timer_berserk"] then
+		elseif time == 30 and self.Options["timer_berserk"] and self:AntiSpam(2, 5) then
 			berserkWarning2:Show(30, DBM_CORE_SEC)
-		elseif time == 20 then
+		elseif time == 20 and self:AntiSpam(2, 5) then
 			countdownBerserk:Start()
-		elseif time == 10 and self.Options["timer_berserk"] then
+		elseif time == 10 and self.Options["timer_berserk"] and self:AntiSpam(2, 5) then
 			berserkWarning2:Show(10, DBM_CORE_SEC)
 		end
 	end

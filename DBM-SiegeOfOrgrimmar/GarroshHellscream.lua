@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11044 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11080 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetEncounterID(1623)
 mod:SetHotfixNoticeRev(10828)
@@ -117,7 +117,7 @@ mod:AddSetIconOption("SetIconOnShaman", "ej8294", false, true)
 mod:AddSetIconOption("SetIconOnMC", 145071, false)
 mod:AddSetIconOption("SetIconOnMalice", 147209, false)
 mod:AddBoolOption("InfoFrame", mod:IsHealer())
-mod:AddBoolOption("RangeFrame")
+--mod:AddBoolOption("RangeFrame")
 
 --Upvales, don't need variables
 local UnitExists, UnitDebuff = UnitExists, UnitDebuff
@@ -196,17 +196,18 @@ function mod:OnCombatStart(delay)
 end
 
 function mod:OnCombatEnd()
-	if self.Options.RangeFrame then
+--[[	if self.Options.RangeFrame then
 		DBM.RangeCheck:Hide()
-	end
+	end--]]
 	hideInfoFrame()
 end
 
+--[[
 local function hideRangeDelay()
 	if mod.Options.RangeFrame then
 		DBM.RangeCheck:Hide()
 	end
-end
+end--]]
 
 function mod:SPELL_CAST_START(args)
 	local spellId = args.spellId
@@ -246,14 +247,14 @@ function mod:SPELL_CAST_START(args)
 		timerBombardment:Start()
 		timerBombardmentCD:Start(bombardCD[self.vb.bombardCount] or 15, self.vb.bombardCount+1)
 		timerClumpCheck:Start()
-		if self.Options.RangeFrame then
+--[[		if self.Options.RangeFrame then
 			if self:IsDifficulty("heroic10") then
 				DBM.RangeCheck:Show(8, nil, nil, 3)
 			else
 				DBM.RangeCheck:Show(8, nil, nil, 7)
 			end
 			self:Schedule(13, hideRangeDelay)
-		end
+		end--]]
 	elseif spellId == 147011 then
 		warnManifestRage:Show()
 		if UnitDebuff("player", GetSpellInfo(147665)) then--Kiting an Unstable Iron Star

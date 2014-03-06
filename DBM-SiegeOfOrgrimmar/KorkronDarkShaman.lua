@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(856, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11043 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11073 $"):sub(12, -3))
 mod:SetCreatureID(71859, 71858)--haromm, Kardris
 mod:SetEncounterID(1606)
 mod:SetZone()
@@ -35,7 +35,7 @@ local warnIronTomb					= mod:NewSpellAnnounce(144328, 3)
 --Wavebinder Kardris
 local warnToxicStorm				= mod:NewTargetAnnounce(144005, 2)
 local warnFoulGeyser				= mod:NewTargetAnnounce(143990, 4)
-local warnFallingAsh				= mod:NewCastAnnounce(143973, 4, 17)
+local warnFallingAsh				= mod:NewCastAnnounce(143973, 4, 3)
 local warnIronPrison				= mod:NewTargetAnnounce(144330, 3)
 
 --Earthbreaker Haromm
@@ -261,14 +261,15 @@ end
 function mod:OnSync(msg)
 	if msg == "FallingAsh" then
 		self.vb.ashCount = self.vb.ashCount + 1
-		warnFallingAsh:Show()
 		timerFallingAsh:Start()
 		if self:IsDifficulty("heroic10", "heroic25") then--On heroic, base spell 1 second cast, not 2.
 			timerFallingAshCD:Start(16, self.vb.ashCount+1)
+			warnFallingAsh:Schedule(13)
 			specWarnFallingAsh:Schedule(13)--Give special warning 3 seconds before happens, not cast
 			countdownFallingAsh:Start(16)
 		else
 			timerFallingAshCD:Start(nil, self.vb.ashCount+1)
+			warnFallingAsh:Schedule(14)
 			specWarnFallingAsh:Schedule(14)--Give special warning 3 seconds before happens, not cast
 			countdownFallingAsh:Start(17)
 		end
