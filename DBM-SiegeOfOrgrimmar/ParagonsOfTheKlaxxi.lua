@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11034 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11100 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -136,6 +136,7 @@ local timerJumpToCenter				= mod:NewCastTimer(6.5, 143545)
 --Kil'ruk the Wind-Reaver
 local timerGouge					= mod:NewTargetTimer(10, 143939, nil, mod:IsTank())
 local timerReaveCD					= mod:NewCDTimer(33, 148676)
+local timerDFACD					= mod:NewCDTimer(34, 142232)--34-43 variation
 --Xaril the Poisoned-Mind
 local timerToxicCatalystCD			= mod:NewCDTimer(33, "ej8036")
 --Kaz'tik the Manipulator
@@ -313,6 +314,7 @@ local function CheckBosses(ignoreRTF)
 				end
 				mod:StopRepeatedScan("DFAScan")
 				mod:ScheduleMethod(23, "StartRepeatedScan", unitGUID, "DFAScan", 0.25, true)--Not a large sample size, data shows it happen 29-30 seconds after IEEU fires on two different pulls. Although 2 is a poor sample
+				--timerDFACD:Start()
 				if UnitDebuff("player", GetSpellInfo(142929)) then vulnerable = true end
 			elseif cid == 71157 then--Xaril the Poisoned-Mind
 				timerToxicCatalystCD:Start(19.5)--May need tweaking by about a sec or two. Need some transcriptors
@@ -450,6 +452,7 @@ end
 function mod:DFAScan(targetname)
 	self:StopRepeatedScan("DFAScan")
 	warnDeathFromAbove:Show(targetname)
+	timerDFACD:Start()
 	if targetname == UnitName("player") then
 		specWarnDeathFromAbove:Show()
 		yellDeathFromAbove:Yell()
@@ -657,7 +660,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 		timerToxicCatalystCD:Start(20)
 	elseif spellId == 142232 then
 		self:StopRepeatedScan("DFAScan")
-		self:ScheduleMethod(17, "StartRepeatedScan", args.sourceGUID, "DFAScan", 0.25, true)
+		self:ScheduleMethod(28, "StartRepeatedScan", args.sourceGUID, "DFAScan", 0.25, true)
 	end
 end
 
