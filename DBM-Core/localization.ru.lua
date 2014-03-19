@@ -42,8 +42,8 @@ DBM_CORE_COMBAT_STATE_RECOVERED		= "%s был атакован %s назад, в
 DBM_CORE_TRANSCRIPTOR_LOG_START		= "Логирование с помощью Transcriptor начато."
 DBM_CORE_TRANSCRIPTOR_LOG_END		= "Логирование с помощью Transcriptor окончено."
 
-DBM_CORE_WORLDBOSS_ENGAGED			= "В вашем игровом мире начался бой с %s (%s процентов здоровья, отправил %s)."
-DBM_CORE_WORLDBOSS_DEFEATED			= "%s был побежден в вашем игровом мире (отправил %s)."
+DBM_CORE_WORLDBOSS_ENGAGED			= "В вашем игровом мире возможно начался бой с %s (%s процентов здоровья, отправил %s)."
+DBM_CORE_WORLDBOSS_DEFEATED			= "%s возможно был побежден в вашем игровом мире (отправил %s)."
 
 DBM_CORE_TIMER_FORMAT_SECS			= "%d сек"
 DBM_CORE_TIMER_FORMAT_MINS			= "%d мин"
@@ -205,6 +205,7 @@ DBM_CORE_AUTO_SPEC_WARN_TEXTS.dispel 	= "%s на |3-5(>%%s<) - рассейте 
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.interrupt	= "%s - прервите"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.you 		= "%s на вас"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.target 	= "%s на |3-5(>%%s<)"
+DBM_CORE_AUTO_SPEC_WARN_TEXTS.taunt		= "%s на >%%s< - затаунти"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.close 	= "%s на |3-5(>%%s<) около вас"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.move 		= "%s - отбегите"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.moveaway	= "%s - отбегите от остальных"
@@ -226,6 +227,7 @@ DBM_CORE_AUTO_SPEC_WARN_OPTIONS.dispel 		= "Спец-предупреждени�
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.interrupt	= "Спец-предупреждение для прерывания заклинания $spell:%s"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.you 		= "Спец-предупреждение, когда на вас $spell:%s"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.target 		= "Спец-предупреждение, когда на ком-то $spell:%s"
+DBM_CORE_AUTO_SPEC_WARN_OPTIONS.taunt 		= "Спец-предупреждение \"затаунти\", когда на другом танке $spell:%s"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.close 		= "Спец-предупреждение, когда на ком-то рядом с вами $spell:%s"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.move 		= "Спец-предупреждение \"отбегите\" для $spell:%s"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.moveaway	= "Спец-предупреждение \"отбегите от остальных\" для $spell:%s"
@@ -265,6 +267,8 @@ DBM_CORE_AUTO_TIMER_OPTIONS.achievement = "Отсчет времени для %s
 
 DBM_CORE_AUTO_ICONS_OPTION_TEXT			= "Устанавливать метки на цели заклинания $spell:%s"
 DBM_CORE_AUTO_ICONS_OPTION_TEXT2		= "Устанавливать метки на $spell:%s"
+DBM_CORE_AUTO_ARROW_OPTION_TEXT			= "Показывать стрелку DBM к цели, на которой $spell:%s"
+DBM_CORE_AUTO_ARROW_OPTION_TEXT2		= "Показывать стрелку DBM от цели, на которой $spell:%s"
 DBM_CORE_AUTO_SOUND_OPTION_TEXT			= "Звуковой сигнал \"бегите\" для $spell:%s"
 DBM_CORE_AUTO_COUNTDOWN_OPTION_TEXT		= "Звуковой отсчет до восстановления $spell:%s"
 DBM_CORE_AUTO_COUNTDOWN_OPTION_TEXT2	= "Звуковой отсчет до спадения $spell:%s"
