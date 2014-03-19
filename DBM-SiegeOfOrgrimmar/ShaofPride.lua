@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(867, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11075 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11110 $"):sub(12, -3))
 mod:SetCreatureID(71734)
 mod:SetEncounterID(1604)
 mod:SetZone()
@@ -18,7 +18,7 @@ mod:RegisterEventsInCombat(
 )
 
 --Sha of Pride
-local warnGiftOfTitans			= mod:NewTargetAnnounce("OptionVersion2", 144359, 1, nil, false)
+local warnGiftOfTitans			= mod:NewTargetAnnounce("OptionVersion2", 144359, 1, nil, mod:IsHealer())
 local warnSwellingPride			= mod:NewCountAnnounce(144400, 3)
 local warnMark					= mod:NewTargetAnnounce(144351, 3, nil, mod:IsHealer())
 local warnWoundedPride			= mod:NewTargetAnnounce(144358, 4, nil, mod:IsTank() or mod:IsHealer())
@@ -38,10 +38,11 @@ local warnManifestation			= mod:NewSpellAnnounce("ej8262", 3, "Interface\\Icons\
 local warnMockingBlast			= mod:NewSpellAnnounce(144379, 3, nil, false)
 
 --Sha of Pride
-local specWarnGiftOfTitans		= mod:NewSpecialWarningYou(144359)
+local specWarnGiftOfTitans		= mod:NewSpecialWarningYou("OptionVersion2", 144359, mod:IsHealer())
 local yellGiftOfTitans			= mod:NewYell("OptionVersion2", 146594, nil, false)
 local specWarnSwellingPride		= mod:NewSpecialWarningCount(144400, nil, nil, nil, 2)
-local specWarnWoundedPride		= mod:NewSpecialWarningSpell(144358, mod:IsTank())
+local specWarnWoundedPride		= mod:NewSpecialWarningYou(144358, mod:IsTank())--Cast/personal warning
+local specWarnWoundedPrideOther	= mod:NewSpecialWarningTaunt(144358, mod:IsTank())
 local specWarnSelfReflection	= mod:NewSpecialWarningSpell(144800, nil, nil, nil, 2)
 local specWarnCorruptedPrison	= mod:NewSpecialWarningSpell(144574)
 local specWarnCorruptedPrisonYou= mod:NewSpecialWarningYou(144574, false)--Since you can't do anything about it, might as well be off by default. but an option cause someone will want it
@@ -258,7 +259,11 @@ function mod:SPELL_AURA_APPLIED(args)
 		end
 	elseif spellId == 144358 then
 		warnWoundedPride:Show(args.destName)
-		specWarnWoundedPride:Show()
+		if UnitDetailedThreatSituation("player", "boss1") then
+			specWarnWoundedPride:Show()
+		else
+			specWarnWoundedPrideOther:Show(args.destName)
+		end
 		if self.vb.woundCount < 2 and not self:IsDifficulty("lfr25") then
 			self.vb.woundCount = self.vb.woundCount + 1
 			timerWoundedPrideCD:Start()

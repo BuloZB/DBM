@@ -44,7 +44,7 @@
 
 
 
-local revision =("$Revision: 11091 $"):sub(12, -3)
+local revision =("$Revision: 11118 $"):sub(12, -3)
 local FrameTitle = "DBM_GUI_Option_"	-- all GUI frames get automatically a name FrameTitle..ID
 
 local PanelPrototype = {}
@@ -231,7 +231,7 @@ local function MixinSharedMedia3(mediatype, mediatable)
 	if not soundsRegistered then
 		local LSM = LibStub("LibSharedMedia-3.0")
 		soundsRegistered = true
-		LSM:Register("sound", "Headless Horseman Laugh", [[Sound\Creature\HeadlessHorseman\Horseman_Laugh_01.ogg]])
+		LSM:Register("sound", "Headless Horseman: Laugh", [[Sound\Creature\HeadlessHorseman\Horseman_Laugh_01.ogg]])
 		LSM:Register("sound", "Yogg Saron: Laugh", [[Sound\Creature\YoggSaron\UR_YoggSaron_Slay01.ogg]])
 		LSM:Register("sound", "Loatheb: I see you", [[Sound\Creature\Loathstare\Loa_Naxx_Aggro02.ogg]])
 		LSM:Register("sound", "Lady Malande: Flee", [[Sound\Creature\LadyMalande\BLCKTMPLE_LadyMal_Aggro01.ogg]])
@@ -1586,9 +1586,9 @@ local function CreateOptionsMenu()
 		RaidWarnSoundDropDown:SetPoint("TOPLEFT", ShowCountdownText, "BOTTOMLEFT", 10, -10)
 
 		local countSounds = {
-			{	text	= "Mosh (Male)",	value 	= "Mosh"},
+			{	text	= "Moshne (Male)",	value 	= "Mosh"},
 			{	text	= "Corsica (Female)",value 	= "Corsica"},
-			{	text	= "Kolt (Male)",value 	= "Kolt"},
+			{	text	= "Koltrane (Male)",value 	= "Kolt"},
 			{	text	= "None",value 	= "None"},
 		}
 		local CountSoundDropDown = raidwarnoptions:CreateDropdown(L.CountdownVoice, countSounds,

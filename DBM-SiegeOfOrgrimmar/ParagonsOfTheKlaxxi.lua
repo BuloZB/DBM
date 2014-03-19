@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmar", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 11100 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 11111 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -172,7 +172,7 @@ local countdownInjection			= mod:NewCountdown("Alt9.5", 143339, mod:IsTank())
 mod:AddRangeFrameOption("6/5/3")
 mod:AddSetIconOption("SetIconOnAim", 142948, false)
 mod:AddSetIconOption("SetIconOnMesmerize", 142671, false)
-mod:AddBoolOption("AimArrow", false)
+mod:AddArrowOption("AimArrow", 142948, false, true)
 
 --Upvales, don't need variables
 --Normal Only
